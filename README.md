@@ -79,7 +79,7 @@ npx prisma migrate dev
 
 # 4. Lancer le serveur en mode développement
 npm run start:dev
-L’API sera accessible sur : http://localhost:3000
+L’API sera accessible sur : http://localhost:{{PORT}}
 
 🔐 Variables d’environnement
 Crée un fichier .env à la racine du projet :
@@ -90,14 +90,13 @@ JWT_REFRESH_SECRET=votre_clé_secrète_refresh_très_longue_et_complexe
 JWT_EXPIRES_IN=15m
 JWT_REFRESH_EXPIRES_IN=7d
 
-PORT=4230
+PORT= ex: 4230
 SWAGGER_ENABLED=true
 
 📜 Scripts npm
 Bashnpm run start:dev      # Démarrage en développement (avec hot reload)
 npm run start          # Démarrage en mode production
 npm run build          # Compilation du projet
-npm run lint           # Vérification du code (ESLint)
 npm run test           # Tests unitaires
 npm run test:e2e       # Tests end-to-end
 npm run prisma:generate # Générer le client Prisma
@@ -105,7 +104,7 @@ npm run prisma:migrate  # Appliquer les migrations
 
 📚 Documentation API
 Une fois le serveur lancé, accédez à la documentation interactive Swagger :
-→ http://localhost:3000/api
+→ http://localhost:{{PORT}}/api/docs
 
 👨‍💻 Auteur
 Ndiaye Sire KANE
