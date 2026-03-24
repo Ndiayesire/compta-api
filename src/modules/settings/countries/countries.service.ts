@@ -1,4 +1,3 @@
-// src/countries/countries.service.ts
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../../../prisma/prisma.service';
 import { CreateCountryDto } from './dto/create-country.dto';
@@ -11,7 +10,7 @@ export class CountriesService {
   create(dto: CreateCountryDto) {
     return this.prisma.country.create({
       data: dto,
-      include: { region: true },
+      include: { regions: true },
     });
   }
 
@@ -19,14 +18,19 @@ export class CountriesService {
     return this.prisma.country.findMany({
       where: { isActive: true },
       orderBy: { name: 'asc' },
-      include: { region: true },
+      include: {
+        regions: {
+          where: { isActive: true },
+          orderBy: { name: 'asc' },
+        },
+      },
     });
   }
 
   async findOne(id: string) {
     const country = await this.prisma.country.findUnique({
       where: { id },
-      include: { region: true },
+      include: { regions: true },
     });
     if (!country) throw new NotFoundException(`Country ${id} not found`);
     return country;
@@ -37,7 +41,7 @@ export class CountriesService {
     return this.prisma.country.update({
       where: { id },
       data: dto,
-      include: { region: true },
+      include: { regions: true },
     });
   }
 

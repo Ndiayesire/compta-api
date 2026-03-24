@@ -1,10 +1,10 @@
-import { IsString, IsNotEmpty, IsOptional, Length } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, Length, IsUUID } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateCountryDto {
   @ApiProperty({
     description: 'Country name',
-    example: 'Senegal'
+    example: 'Senegal',
   })
   @IsString()
   @IsNotEmpty()
@@ -12,18 +12,10 @@ export class CreateCountryDto {
 
   @ApiProperty({
     description: 'Country code (2-3 characters)',
-    example: 'SN'
+    example: 'SN',
   })
   @IsString()
   @IsNotEmpty()
   @Length(2, 3)
   code: string;
-
-  @ApiPropertyOptional({
-    description: 'Region ID',
-    example: 'region-uuid-123'
-  })
-  @IsString()
-  @IsOptional()
-  regionId?: string;
 }

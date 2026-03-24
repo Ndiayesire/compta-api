@@ -4,5 +4,6 @@ export class RolePermissionEntity implements RolePermission {
   id: string;
   roleId: string;
   permissionId: string;
+  isActive: boolean;
   createdAt: Date;
 }

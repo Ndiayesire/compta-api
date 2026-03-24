@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `role_permissions` ADD COLUMN `isActive` BOOLEAN NOT NULL DEFAULT true;

@@ -31,10 +31,10 @@ export class RegionsService {
   }
 
  async remove(id: string) {
-  await this.findOne(id);
-  return this.prisma.region.update({
-    where: { id },
-    data: { isActive: false },
-  });
-}
+    await this.findOne(id);
+    return this.prisma.region.update({
+      where: { id },
+      data: { isActive: false },
+    });
+  }
 }

@@ -41,6 +41,7 @@ export class RolesService {
       orderBy: { name: 'asc' },
       include: {
         permissions: {
+          where: { isActive: true },
           include: { permission: true },
         },
       },
@@ -113,7 +114,7 @@ export class RolesService {
       ),
     );
 
-    return this.findOne(id); // retourne le rôle avec toutes ses permissions
+    return this.findOne(id);
   }
 
   async removePermissions(id: string, permissionIds: string[]) {

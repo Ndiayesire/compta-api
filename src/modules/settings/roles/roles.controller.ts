@@ -1,6 +1,7 @@
 // src/roles/roles.controller.ts
-import { Controller, Get, Post, Patch, Delete, Body, Param, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Param, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../../auth/jwt/jwt-auth.guard';
 import { RolesService } from './roles.service';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
@@ -21,6 +22,7 @@ class PermissionIdsDto {
 
 @ApiTags('roles')
 @Controller('roles')
+@UseGuards(JwtAuthGuard)
 export class RolesController {
   constructor(private readonly rolesService: RolesService) {}
 
@@ -134,7 +136,6 @@ export class RolesController {
     return { success: true, message: 'Role deactivated successfully', data };
   }
 
-  // Ajouter des permissions
   @Post(':id/permissions')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Add permissions to a role' })
@@ -161,7 +162,6 @@ export class RolesController {
     return { success: true, message: 'Permissions added to role successfully', data };
   }
 
-  // Supprimer des permissions
   @Delete(':id/permissions')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Remove permissions from a role' })

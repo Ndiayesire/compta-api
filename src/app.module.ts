@@ -1,4 +1,5 @@
-import { Module } from '@nestjs/common';
+import { Module, MiddlewareConsumer } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { CompanyModule } from './modules/company/company.module';
@@ -8,10 +9,26 @@ import { CountriesModule } from './modules/settings/countries/countries.module';
 import { PaymentMethodsModule } from './modules/settings/payment-methods/payment-methods.module';
 import { RolesModule } from './modules/settings/roles/roles.module';
 import { PermissionsModule } from './modules/settings/permissions/permissions.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { UsersModule } from './modules/users/users.module';
+import { JwtAuthGuard } from './modules/auth/jwt/jwt-auth.guard';
+import { CorsMiddleware } from './common/middleware/cors.middleware';
 
 @Module({
-  imports: [CompanyModule, PrismaModule, RegionsModule, CountriesModule, PaymentMethodsModule, RolesModule, PermissionsModule],
+  imports: [CompanyModule, PrismaModule, RegionsModule, CountriesModule, PaymentMethodsModule, RolesModule, PermissionsModule, AuthModule, UsersModule],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+  ],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(CorsMiddleware)
+      .forRoutes('*');
+  }
+}

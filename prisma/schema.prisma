@@ -49,6 +49,21 @@ enum PaymentMethodType {
 // REGION / COUNTRY
 //////////////////////////////////////////////////////
 
+model Country {
+  id        String    @id @default(uuid())
+  name      String
+  isActive  Boolean   @default(true) @map("is_active")
+  code      String    @unique // SN, FR, US
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  regions   Region[]  @relation("CountryRegions")
+  companies Company[]
+
+  @@map("countries")
+}
+
 model Region {
   id        String    @id @default(uuid())
   name      String
@@ -56,30 +71,15 @@ model Region {
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
 
-  // Relations
-  countries Country[]
-  companies Company[]
-
-  @@map("regions")
-}
-
-model Country {
-  id        String   @id @default(uuid())
-  name      String
-  isActive  Boolean   @default(true) @map("is_active")
-  code      String   @unique // SN, FR, US
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
   // FK
-  regionId  String?  @map("region_id")
+  countryId String    @map("country_id")
 
   // Relations
-  region    Region?   @relation(fields: [regionId], references: [id])
+  country   Country   @relation("CountryRegions", fields: [countryId], references: [id])
   companies Company[]
 
-  @@index([regionId])
-  @@map("countries")
+  @@index([countryId])
+  @@map("regions")
 }
 
 //////////////////////////////////////////////////////
@@ -216,6 +216,7 @@ model RolePermission {
   id           String   @id @default(uuid())
   roleId       String   @map("role_id")
   permissionId String   @map("permission_id")
+  isActive     Boolean  @default(true)
   createdAt    DateTime @default(now()) @map("created_at")
 
   role       Role       @relation(fields: [roleId], references: [id])
