@@ -1,0 +1,272 @@
+datasource db {
+  provider = "mysql"
+}
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+//////////////////////////////////////////////////////
+// ENUMS
+//////////////////////////////////////////////////////
+
+enum CompanyStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  DISSOLVED
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum LegalForm {
+  SARL
+  SAS
+  SASU
+  SA
+  SNC
+  EI
+  EIRL
+  EURL
+  OTHER
+}
+
+enum PaymentMethodType {
+  MOBILE_MONEY
+  BANK_TRANSFER
+  CARD
+  CASH
+  CRYPTO
+  OTHER
+}
+
+//////////////////////////////////////////////////////
+// REGION / COUNTRY
+//////////////////////////////////////////////////////
+
+model Region {
+  id        String    @id @default(uuid())
+  name      String
+  isActive  Boolean   @default(true) @map("is_active")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  countries Country[]
+  companies Company[]
+
+  @@map("regions")
+}
+
+model Country {
+  id        String   @id @default(uuid())
+  name      String
+  isActive  Boolean   @default(true) @map("is_active")
+  code      String   @unique // SN, FR, US
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // FK
+  regionId  String?  @map("region_id")
+
+  // Relations
+  region    Region?   @relation(fields: [regionId], references: [id])
+  companies Company[]
+
+  @@index([regionId])
+  @@map("countries")
+}
+
+//////////////////////////////////////////////////////
+// PAYMENT METHODS
+//////////////////////////////////////////////////////
+
+model PaymentMethod {
+  id        String            @id @default(uuid())
+  name      String
+  code      String            @unique
+  type      PaymentMethodType
+  isActive  Boolean           @default(true)
+  createdAt DateTime          @default(now()) @map("created_at")
+  updatedAt DateTime          @updatedAt @map("updated_at")
+
+  // Relations
+  companies CompanyPaymentMethod[]
+
+  @@map("payment_methods")
+}
+
+//////////////////////////////////////////////////////
+// COMPANY ↔ PAYMENT METHOD (join table)
+//////////////////////////////////////////////////////
+
+model CompanyPaymentMethod {
+  id              String   @id @default(uuid())
+  companyId       String   @map("company_id")
+  paymentMethodId String   @map("payment_method_id")
+  isDefault       Boolean  @default(false) @map("is_default")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  company       Company       @relation(fields: [companyId], references: [id])
+  paymentMethod PaymentMethod @relation(fields: [paymentMethodId], references: [id])
+
+  @@unique([companyId, paymentMethodId])
+  @@index([companyId])
+  @@index([paymentMethodId])
+  @@map("company_payment_methods")
+}
+
+//////////////////////////////////////////////////////
+// COMPANY
+//////////////////////////////////////////////////////
+
+model Company {
+  id          String        @id @default(uuid())
+
+  // Identité légale
+  name        String
+  siret       String?       @unique
+  vatNumber   String?       @unique @map("vat_number")
+  legalForm   LegalForm     @default(SARL) @map("legal_form")
+  status      CompanyStatus @default(PENDING)
+  nafCode     String?       @map("naf_code")
+
+  // Adresse
+  address     String?
+  addressLine2 String?      @map("address_line2")
+  city        String?
+  state       String?
+
+  // Relations géographiques
+  countryId   String?       @map("country_id")
+  regionId    String?       @map("region_id")
+
+  // Contact
+  email       String?
+  phone       String?
+  website     String?
+
+  // Fiscal
+  currencyCode    String?   @default("XOF") @map("currency_code")
+  fiscalYearStart DateTime? @map("fiscal_year_start") @db.Date
+  fiscalYearEnd   DateTime? @map("fiscal_year_end") @db.Date
+  isHolding       Boolean   @default(false) @map("is_holding")
+
+  // Métadonnées
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+  createdBy   String?   @map("created_by")
+  updatedBy   String?   @map("updated_by")
+
+  // Relations
+  country         Country?               @relation(fields: [countryId], references: [id])
+  region          Region?                @relation(fields: [regionId], references: [id])
+  users          User[] 
+  paymentMethods  CompanyPaymentMethod[]
+
+  @@index([status])
+  @@index([deletedAt])
+  @@index([name])
+  @@index([countryId])
+  @@index([regionId])
+  @@map("companies")
+}
+
+//////////////////////////////////////////////////////
+// AUTH / USERS
+//////////////////////////////////////////////////////
+
+model Permission {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  module      String
+  action      String
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  roles RolePermission[]
+
+  @@index([module])
+  @@map("permissions")
+}
+
+model Role {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  permissions RolePermission[]
+  users       UserRole[]
+
+  @@map("roles")
+}
+
+model RolePermission {
+  id           String   @id @default(uuid())
+  roleId       String   @map("role_id")
+  permissionId String   @map("permission_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  role       Role       @relation(fields: [roleId], references: [id])
+  permission Permission @relation(fields: [permissionId], references: [id])
+
+  @@unique([roleId, permissionId])
+  @@index([roleId])
+  @@index([permissionId])
+  @@map("role_permissions")
+}
+
+model User {
+  id        String     @id @default(uuid())
+  email     String     @unique
+  password  String
+  firstName String?    @map("first_name")
+  lastName  String?    @map("last_name")
+  phone     String?
+  address     String?
+  avatar    String?
+  status    UserStatus @default(ACTIVE)
+  isActive  Boolean    @default(true) @map("is_active")
+
+  companyId String? @map("company_id")
+  lastLoginAt         DateTime? @map("last_login_at")
+  refreshToken        String?   @map("refresh_token") @db.Text
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  company Company?   @relation(fields: [companyId], references: [id])
+  roles   UserRole[]
+
+  @@index([email])
+  @@index([companyId])
+  @@index([deletedAt])
+  @@map("users")
+}
+
+model UserRole {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  roleId    String   @map("role_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+  role Role @relation(fields: [roleId], references: [id])
+
+  @@unique([userId, roleId])
+  @@index([userId])
+  @@index([roleId])
+  @@map("user_roles")
+}
