@@ -45,7 +45,7 @@ Elle automatise le calcul des impôts, la génération des déclarations et la g
 
 ## 🗂️ Structure du projet
 
-```bash
+
 src/
 ├── common/              # Guards, decorators, filters, interceptors, utils
 ├── modules/
@@ -65,7 +65,10 @@ src/
 ├── prisma/                     # Schema Prisma et migrations
 └── main.ts
 
-🚀 Installation
+---
+
+## 🚀 Installation
+
 Bash# 1. Cloner le projet
 git clone <url-du-repo>
 cd <nom-du-repo>
@@ -81,7 +84,7 @@ npx prisma migrate dev
 npm run start:dev
 L’API sera accessible sur : http://localhost:{{PORT}}
 
-🔐 Variables d’environnement
+## 🔐 Variables d’environnement
 Crée un fichier .env à la racine du projet :
 envDATABASE_URL="mysql://utilisateur:motdepasse@localhost:3306/nom_de_la_base"
 
@@ -93,7 +96,7 @@ JWT_REFRESH_EXPIRES_IN=7d
 PORT= ex: 4230
 SWAGGER_ENABLED=true
 
-📜 Scripts npm
+## 📜 Scripts npm
 Bashnpm run start:dev      # Démarrage en développement (avec hot reload)
 npm run start          # Démarrage en mode production
 npm run build          # Compilation du projet
@@ -102,10 +105,10 @@ npm run test:e2e       # Tests end-to-end
 npm run prisma:generate # Générer le client Prisma
 npm run prisma:migrate  # Appliquer les migrations
 
-📚 Documentation API
+## 📚 Documentation API
 Une fois le serveur lancé, accédez à la documentation interactive Swagger :
 → http://localhost:{{PORT}}/api/docs
 
-👨‍💻 Auteur
+## 👨‍💻 Auteur
 Ndiaye Sire KANE
 Backend Developer – Spécialiste NestJS
