@@ -25,13 +25,9 @@ export class AuthService {
     const user = await this.prisma.user.findUnique({
       where: { email },
       include: {
-        roles: {
+        role: {
           include: {
-            role: {
-              include: {
-                permissions: { include: { permission: true } },
-              },
-            },
+            permissions: { include: { permission: true } },
           },
         },
         company: true,
@@ -78,13 +74,9 @@ export class AuthService {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       include: {
-        roles: {
+        role: {
           include: {
-            role: {
-              include: {
-                permissions: { include: { permission: true } },
-              },
-            },
+            permissions: { include: { permission: true } },
           },
         },
         company: true,
@@ -119,7 +111,7 @@ export class AuthService {
       sub: user.id,
       email: user.email,
       companyId: user.companyId,
-      roles: user.roles?.map(ur => ur.role.name) || [],
+      roles: user.role ? [user.role.name] : [],
     };
 
     const [accessToken, refreshToken] = await Promise.all([

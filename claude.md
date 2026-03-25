@@ -92,6 +92,15 @@ Pour la comptabilité, la pipeline est centrée sur :
 - Swagger docs pour `users` endpoints avec Responses et schemas (GET /users + GET /users/:id, plus create/update/delete)
 - Standardisation des réponses API `success/message/data` pour users
 
+### 2026-03-25
+- Refactoring modèle utilisateur : passage de many-to-many (UserRole) à one-to-many (User.roleId)
+- Suppression du modèle UserRole
+- Mise à jour des DTOs : CreateUserDto et UpdateUserDto utilisent roleId au lieu de roleIds
+- Modification des endpoints roles : PATCH /users/:id/role (set) et DELETE /users/:id/role (unset)
+- Mise à jour des services, contrôleurs, guards et types AuthUser pour supporter un seul rôle par utilisateur
+- Migration Prisma appliquée
+- Suppression de l'entité UserRoleEntity inutilisée
+
 ### 2026-xx-xx (à compléter)
 - Ajout module `clients`, `invoices`, `tax`
 - Automatisation reporting (PDF, notifications)

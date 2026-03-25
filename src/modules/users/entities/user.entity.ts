@@ -12,6 +12,7 @@ export class UserEntity implements User {
   status: UserStatus;
   isActive: boolean;
   companyId: string | null;
+  roleId: string | null;
   lastLoginAt: Date | null;
   refreshToken: string | null;
   passwordResetToken: string | null;

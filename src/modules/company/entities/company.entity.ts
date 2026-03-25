@@ -1,8 +1,9 @@
 // src/company/entities/company.entity.ts
 import { Company, CompanyStatus, LegalForm } from '@prisma/client';
-import { CountryEntity } from '../../settings/countries/entities/country.entity';
+import { CurrencyEntity } from '../../settings/currency/entities/currency.entity';
 import { RegionEntity } from '../../settings/regions/entities/region.entity';
 import { PaymentMethodEntity } from '../../settings/payment-methods/entities/payment-method.entity';
+import { CountryEntity } from '../../settings/countries/entities/country.entity';
 
 export class CompanyEntity implements Company {
   id: string;
@@ -31,7 +32,7 @@ export class CompanyEntity implements Company {
   website: string | null;
 
   // Fiscal
-  currencyCode: string | null;
+  currencyId: string | null;
   fiscalYearStart: Date | null;
   fiscalYearEnd: Date | null;
   isHolding: boolean;
@@ -46,5 +47,6 @@ export class CompanyEntity implements Company {
   // Relations
   country?: CountryEntity;
   region?: RegionEntity;
+  currency?: CurrencyEntity;
   paymentMethods?: PaymentMethodEntity[];
 }

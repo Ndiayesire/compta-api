@@ -17,19 +17,17 @@ export class RolesGuard implements CanActivate {
 
     const request = context.switchToHttp().getRequest();
     const user: AuthUser = request.user;
-    if (!user || !user.roles) return false;
+    if (!user || !user.role) return false;
 
     if (requiredRoles && requiredRoles.length > 0) {
-      const userRoles = user.roles.map(ur => ur.role.name.toLowerCase());
-      if (!requiredRoles.some(role => userRoles.includes(role.toLowerCase()))) {
+      const userRole = user.role.name.toLowerCase();
+      if (!requiredRoles.some(role => userRole === role.toLowerCase())) {
         return false;
       }
     }
 
     if (requiredPermissions && requiredPermissions.length > 0) {
-      const userPermissions = user.roles.flatMap(ur =>
-        ur.role.permissions?.map(p => p.permission.name.toLowerCase()) ?? [],
-      );
+      const userPermissions = user.role.permissions?.map(p => p.permission.name.toLowerCase()) ?? [];
       if (!requiredPermissions.every(permission => userPermissions.includes(permission.toLowerCase()))) {
         return false;
       }

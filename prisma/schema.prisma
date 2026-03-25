@@ -46,7 +46,7 @@ enum PaymentMethodType {
 }
 
 //////////////////////////////////////////////////////
-// REGION / COUNTRY
+// REGION / COUNTRY / CURRENCY
 //////////////////////////////////////////////////////
 
 model Country {
@@ -80,6 +80,23 @@ model Region {
 
   @@index([countryId])
   @@map("regions")
+}
+
+model Currency {
+  id        String   @id @default(uuid())
+  code      String   @unique // XOF, EUR, USD
+  name      String   // Franc CFA, Euro, Dollar
+  symbol    String?  // CFA, €, $
+  decimals  Int      @default(0)
+  isPrefix  Boolean  @default(false)
+  isActive  Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  companies Company[]
+
+  @@map("currencies")
 }
 
 //////////////////////////////////////////////////////
@@ -133,7 +150,7 @@ model Company {
   siret       String?       @unique
   vatNumber   String?       @unique @map("vat_number")
   legalForm   LegalForm     @default(SARL) @map("legal_form")
-  status      CompanyStatus @default(PENDING)
+  status      CompanyStatus @default(ACTIVE)
   nafCode     String?       @map("naf_code")
 
   // Adresse
@@ -152,7 +169,7 @@ model Company {
   website     String?
 
   // Fiscal
-  currencyCode    String?   @default("XOF") @map("currency_code")
+  currencyId String? @map("currency_id")
   fiscalYearStart DateTime? @map("fiscal_year_start") @db.Date
   fiscalYearEnd   DateTime? @map("fiscal_year_end") @db.Date
   isHolding       Boolean   @default(false) @map("is_holding")
@@ -167,6 +184,7 @@ model Company {
   // Relations
   country         Country?               @relation(fields: [countryId], references: [id])
   region          Region?                @relation(fields: [regionId], references: [id])
+  currency        Currency? @relation(fields: [currencyId], references: [id])
   users          User[] 
   paymentMethods  CompanyPaymentMethod[]
 
@@ -175,6 +193,7 @@ model Company {
   @@index([name])
   @@index([countryId])
   @@index([regionId])
+  @@index([currencyId])
   @@map("companies")
 }
 
@@ -207,7 +226,7 @@ model Role {
   updatedAt   DateTime @updatedAt @map("updated_at")
 
   permissions RolePermission[]
-  users       UserRole[]
+  users       User[]
 
   @@map("roles")
 }
@@ -241,6 +260,7 @@ model User {
   isActive  Boolean    @default(true) @map("is_active")
 
   companyId String? @map("company_id")
+  roleId    String? @map("role_id")
   lastLoginAt         DateTime? @map("last_login_at")
   refreshToken        String?   @map("refresh_token") @db.Text
 
@@ -249,25 +269,11 @@ model User {
   deletedAt DateTime? @map("deleted_at")
 
   company Company?   @relation(fields: [companyId], references: [id])
-  roles   UserRole[]
+  role    Role?      @relation(fields: [roleId], references: [id])
 
   @@index([email])
   @@index([companyId])
+  @@index([roleId])
   @@index([deletedAt])
   @@map("users")
-}
-
-model UserRole {
-  id        String   @id @default(uuid())
-  userId    String   @map("user_id")
-  roleId    String   @map("role_id")
-  createdAt DateTime @default(now()) @map("created_at")
-
-  user User @relation(fields: [userId], references: [id])
-  role Role @relation(fields: [roleId], references: [id])
-
-  @@unique([userId, roleId])
-  @@index([userId])
-  @@index([roleId])
-  @@map("user_roles")
 }

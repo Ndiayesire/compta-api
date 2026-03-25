@@ -20,7 +20,7 @@ export class CompanyService {
             }
           : undefined,
       },
-      include: { country: true, region: true, paymentMethods: true },
+      include: { country: true, region: true, paymentMethods: true, currency: true },
     });
   }
 
@@ -28,14 +28,14 @@ export class CompanyService {
     return this.prisma.company.findMany({
       where: { deletedAt: null },
       orderBy: { name: 'asc' },
-      include: { country: true, region: true, paymentMethods: true },
+      include: { country: true, region: true, paymentMethods: true, currency: true },
     });
   }
 
   async findOne(id: string) {
     const company = await this.prisma.company.findUnique({
       where: { id },
-      include: { country: true, region: true, paymentMethods: true },
+      include: { country: true, region: true, paymentMethods: true, currency: true },
     });
     if (!company) throw new NotFoundException(`Company ${id} not found`);
     return company;
@@ -47,7 +47,7 @@ export class CompanyService {
     return this.prisma.company.update({
       where: { id },
       data: rest,
-      include: { country: true, region: true, paymentMethods: true },
+      include: { country: true, region: true, paymentMethods: true, currency: true },
     });
   }
 

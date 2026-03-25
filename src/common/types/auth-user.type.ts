@@ -1,24 +1,16 @@
-import { User, Company, UserRole } from '@prisma/client';
+import { User, Company, Role } from '@prisma/client';
 
 export type AuthUser = Omit<User, 'password' | 'refreshToken'> & {
-  roles: (UserRole & {
-    role: {
-      id: string;
-      name: string;
-      description: string | null;
-      isActive: boolean;
-      createdAt: Date;
-      updatedAt: Date;
-      permissions: {
-        permission: {
-          id: string;
-          name: string;
-          module: string;
-          action: string;
-          description: string | null;
-        };
-      }[];
-    };
-  })[];
+  role: (Role & {
+    permissions: {
+      permission: {
+        id: string;
+        name: string;
+        module: string;
+        action: string;
+        description: string | null;
+      };
+    }[];
+  }) | null;
   company: Company | null;
 };

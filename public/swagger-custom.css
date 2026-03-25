@@ -1,0 +1,292 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap');
+
+/* ---- Base ---- */
+body,
+.swagger-ui {
+	font-family: 'Roboto', sans-serif !important;
+	background-color: #fdfcfc !important;
+}
+
+* {
+	outline: none !important;
+}
+
+/* ---- Topbar: dark blue background ---- */
+.swagger-ui .topbar {
+	background: #0f172a;
+	border-bottom: 3px solid #0ea5e9;
+	padding: 10px 24px;
+	box-shadow: 0 1px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* ---- Hide default Swagger logo image completely ---- */
+.swagger-ui .topbar-wrapper button {
+	display: none !important;
+}
+
+.swagger-ui .topbar-wrapper a {
+	display: none !important;
+}
+
+/* ---- Hide the Swagger link/text too ---- */
+.swagger-ui .topbar-wrapper a,
+.swagger-ui .topbar-wrapper .link {
+	pointer-events: none;
+}
+
+.swagger-ui .topbar-wrapper a span {
+	display: none !important;
+}
+
+/* ---- Show YOUR logo instead ---- */
+.swagger-ui .topbar-wrapper::before {
+	content: '';
+	display: block;
+	background-image: url('https://instahr.ca/Color%20logo%20-%20no%20background.png');
+	background-repeat: no-repeat;
+	background-size: contain;
+	width: 160px;
+	height: 54px;
+}
+
+/* ---- Info block ---- */
+.swagger-ui .info {
+	margin: 32px 0 20px;
+}
+
+.swagger-ui .info h2.title {
+	color: #0f172a;
+	font-size: 1.9rem;
+	font-weight: 700;
+}
+
+.swagger-ui .info .description p {
+	color: #475569;
+}
+
+.swagger-ui .info a {
+	color: #0ea5e9;
+}
+
+
+/* ---- Filter / search bar ---- */
+.swagger-ui .filter input {
+	border: 1px solid #cbd5e1 !important;
+	border-radius: 8px !important;
+	background: #fff !important;
+	color: #0f172a !important;
+	box-shadow: none !important;
+	font-size: 13px;
+}
+
+.swagger-ui .filter input:focus {
+	border-color: #0ea5e9 !important;
+	outline: none !important;
+}
+
+/* ---- Tag section headers ---- */
+.swagger-ui .opblock-tag {
+	color: #0f172a !important;
+	border-bottom: 1px solid #e2e8f0 !important;
+	font-weight: 600 !important;
+	font-size: 1rem !important;
+	text-transform: capitalize;
+}
+
+.swagger-ui .operation-tag-content {
+	padding: 8px !important;
+}
+
+.swagger-ui .opblock-tag:hover {
+	background: #f1f5f9 !important;
+	border-radius: 6px;
+}
+
+.swagger-ui .opblock-tag no-desc[data-isopen="true"] {
+	background: #f1f5f9 !important;
+	border-radius: 6px;
+}
+
+.swagger-ui .opblock-tag-section {
+	display: flex;
+	flex-direction: column;
+	background: white;
+	border-radius: 8px;
+	/* padding: 5px; */
+}
+
+/* ---- Operation blocks ---- */
+.swagger-ui .opblock {
+	border-radius: 8px !important;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06) !important;
+	margin-bottom: 6px !important;
+	background: #ffffff !important;
+}
+
+.swagger-ui .opblock.is-open {
+	box-shadow: 0 2px 8px rgba(14, 165, 233, 0.15) !important;
+}
+
+
+/* ---- Operation summary text ---- */
+.swagger-ui .opblock-summary-description {
+	color: #475569 !important;
+}
+
+.swagger-ui .opblock-summary-path {
+	color: #0f172a !important;
+	font-weight: 500 !important;
+}
+
+/* ---- Expanded body ---- */
+.swagger-ui .opblock-body,
+.swagger-ui .opblock-description-wrapper {
+	background: #f8fafc !important;
+}
+
+/* ---- Parameters ---- */
+.swagger-ui table thead tr th,
+.swagger-ui table thead tr td {
+	color: #64748b !important;
+	border-bottom: 1px solid #e2e8f0 !important;
+	font-size: 0.82rem !important;
+}
+
+.swagger-ui .parameter__name {
+	color: #0f172a !important;
+	font-weight: 500 !important;
+}
+
+.swagger-ui .parameter__type {
+	color: #0ea5e9 !important;
+}
+
+/* ---- Input fields ---- */
+.swagger-ui input,
+.swagger-ui textarea,
+.swagger-ui select {
+	background: #ffffff !important;
+	border: 1px solid #cbd5e1 !important;
+	border-radius: 6px !important;
+	color: #0f172a !important;
+}
+
+/* ---- Test Execution Button ---- */
+.swagger-ui .btn-group {
+	margin: 8px;
+	gap: 6px;
+}
+
+.swagger-ui .btn.execute {
+	background: #0ea5e9 !important;
+	border-color: #0ea5e9 !important;
+	border-radius: 6px !important;
+	font-weight: 600 !important;
+	color: #fff !important;
+}
+
+.swagger-ui .btn.execute:hover {
+	background: #0284c7 !important;
+	border-color: #0284c7 !important;
+}
+
+.swagger-ui .btn.btn-clear {
+	background: #f14949 !important;
+	border-color: #f14949 !important;
+	border-radius: 6px !important;
+	font-weight: 600 !important;
+	color: #fff !important;
+}
+
+.swagger-ui .btn.btn-clear:hover {
+	background: #9b0b0b !important;
+	border-color: #9b0b0b !important;
+}
+
+.swagger-ui .btn.try-out__btn {
+	display: none !important;
+}
+
+/* ---- Response section ---- */
+.swagger-ui .response-col_status {
+	color: #22c55e !important;
+	font-weight: 600 !important;
+}
+
+/* ---- Models / schemas ---- */
+.swagger-ui section.models {
+	background: #ffffff !important;
+	border: 1px solid #e2e8f0 !important;
+	border-radius: 8px !important;
+}
+
+.swagger-ui section.models h4 {
+	color: #0f172a !important;
+}
+
+.swagger-ui .prop-type {
+	color: #0ea5e9 !important;
+}
+
+.swagger-ui section.models .model-container {
+	background: rgb(153 133 133 / 5%);
+	border-radius: 4px;
+	margin: 0 20px 15px;
+	position: relative;
+	transition: all .5s;
+}
+
+.swagger-ui .opblock.opblock-post .opblock-summary {
+	border: none;
+}
+
+.swagger-ui .opblock .opblock-post {
+	border: 2px solid #49cc90;
+	border-radius: 4px;
+}
+
+.swagger-ui .opblock.opblock-patch .opblock-summary-method {
+	background: #d487ce;
+}
+
+.swagger-ui .opblock {
+	border-radius: 8px !important;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06) !important;
+	margin-bottom: 6px !important;
+	background: #ffffff !important;
+	border: 2px solid;
+}
+
+.swagger-ui .opblock.opblock-patch {
+	background: rgba(80, 227, 194, .1);
+	border-color: #d487ce;
+}
+
+.swagger-ui .opblock-summary-path a span {
+	font-weight: 600;
+	color: #494a4d;
+}
+
+.swagger-ui .version-stamp{
+    display: none !important;
+}
+
+/* ---- Scrollbar ---- */
+::-webkit-scrollbar {
+	width: 6px;
+	height: 6px;
+}
+
+::-webkit-scrollbar-track {
+	background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+	background: #cbd5e1;
+	border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: #0ea5e9;
+}
+

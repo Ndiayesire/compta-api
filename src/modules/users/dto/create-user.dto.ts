@@ -39,8 +39,7 @@ export class CreateUserDto {
   @IsOptional()
   companyId?: string;
 
-  @IsArray()
-  @IsString({ each: true })
+  @IsString()
   @IsOptional()
-  roleIds?: string[];
+  roleId?: string;
 }

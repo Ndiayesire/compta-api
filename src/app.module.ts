@@ -13,9 +13,10 @@ import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { JwtAuthGuard } from './modules/auth/jwt/jwt-auth.guard';
 import { CorsMiddleware } from './common/middleware/cors.middleware';
+import { CurrencyModule } from './modules/settings/currency/currency.module';
 
 @Module({
-  imports: [CompanyModule, PrismaModule, RegionsModule, CountriesModule, PaymentMethodsModule, RolesModule, PermissionsModule, AuthModule, UsersModule],
+  imports: [CompanyModule, PrismaModule, RegionsModule, CountriesModule, PaymentMethodsModule, RolesModule, PermissionsModule, AuthModule, UsersModule, CurrencyModule],
   controllers: [AppController],
   providers: [
     AppService,

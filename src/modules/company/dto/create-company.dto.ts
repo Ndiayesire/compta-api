@@ -132,11 +132,11 @@ export class CreateCompanyDto {
   // Fiscal
   @ApiPropertyOptional({
     description: 'Currency code',
-    example: 'XOF'
+    example: 'currency-uuid-123'
   })
   @IsString()
   @IsOptional()
-  currencyCode?: string;
+  currencyId?: string;
 
   @ApiPropertyOptional({
     description: 'Fiscal year start date',

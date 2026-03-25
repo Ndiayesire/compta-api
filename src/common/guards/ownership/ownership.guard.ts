@@ -21,10 +21,8 @@ export class OwnershipGuard extends RolesGuard implements CanActivate {
 
     if (resourceId && user.id !== resourceId) {
       // Check if user is admin or has permission to access other users
-      const userRoles = user.roles?.map(ur => ur.role.name) || [];
-      const hasAdminRole = userRoles.some(role =>
-        ['admin', 'super_admin', 'manager'].includes(role.toLowerCase())
-      );
+      const userRole = user.role?.name || '';
+      const hasAdminRole = ['admin', 'super_admin', 'manager'].includes(userRole.toLowerCase());
 
       if (!hasAdminRole) {
         // Check if user owns the company

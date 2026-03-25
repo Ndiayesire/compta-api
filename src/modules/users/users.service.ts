@@ -16,7 +16,7 @@ export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(dto: CreateUserDto) {
-    const { roleIds, password, ...rest } = dto;
+    const { roleId, password, ...rest } = dto;
 
     const existing = await this.prisma.user.findUnique({
       where: { email: rest.email },
@@ -25,20 +25,16 @@ export class UsersService {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    const data: any = {
+      ...rest,
+      password: hashedPassword,
+    };
+    if (roleId) data.role = { connect: { id: roleId } };
+
     return this.prisma.user.create({
-      data: {
-        ...rest,
-        password: hashedPassword,
-        roles: roleIds?.length
-          ? {
-              create: roleIds.map((roleId) => ({
-                role: { connect: { id: roleId } },
-              })),
-            }
-          : undefined,
-      },
+      data,
       include: {
-        roles: { include: { role: { include: { permissions: { include: { permission: true } } } } } },
+        role: { include: { permissions: { include: { permission: true } } } },
         company: true,
       },
     });
@@ -53,7 +49,7 @@ export class UsersService {
       },
       orderBy: { createdAt: 'desc' },
       include: {
-        roles: { include: { role: { include: { permissions: { include: { permission: true } } } } } },
+        role: { include: { permissions: { include: { permission: true } } } },
         company: true,
       },
       omit: { password: true, refreshToken: true },
@@ -64,13 +60,9 @@ export class UsersService {
     const user = await this.prisma.user.findUnique({
       where: { id },
       include: {
-        roles: {
+        role: {
           include: {
-            role: {
-              include: {
-                permissions: { include: { permission: true } },
-              },
-            },
+            permissions: { include: { permission: true } },
           },
         },
         company: true,
@@ -85,13 +77,9 @@ export class UsersService {
     return this.prisma.user.findUnique({
       where: { email },
       include: {
-        roles: {
+        role: {
           include: {
-            role: {
-              include: {
-                permissions: { include: { permission: true } },
-              },
-            },
+            permissions: { include: { permission: true } },
           },
         },
       },
@@ -100,18 +88,21 @@ export class UsersService {
 
   async update(id: string, dto: UpdateUserDto) {
     await this.findOne(id);
-    const { roleIds, password, ...rest } = dto;
+    const { roleId, password, ...rest } = dto;
 
     const data: any = { ...rest };
     if (password) {
       data.password = await bcrypt.hash(password, 10);
+    }
+    if (roleId !== undefined) {
+      data.role = roleId ? { connect: { id: roleId } } : { disconnect: true };
     }
 
     return this.prisma.user.update({
       where: { id },
       data,
       include: {
-        roles: { include: { role: true } },
+        role: { include: { permissions: { include: { permission: true } } } },
         company: true,
       },
       omit: { password: true, refreshToken: true },
@@ -138,30 +129,32 @@ export class UsersService {
     return { message: 'Password changed successfully' };
   }
 
-  async addRoles(id: string, roleIds: string[]) {
+  async setRole(id: string, roleId: string) {
     await this.findOne(id);
 
-    await Promise.all(
-      roleIds.map((roleId) =>
-        this.prisma.userRole.upsert({
-          where: { userId_roleId: { userId: id, roleId } },
-          update: {},
-          create: { userId: id, roleId },
-        }),
-      ),
-    );
-
-    return this.findOne(id);
+    return this.prisma.user.update({
+      where: { id },
+      data: { role: { connect: { id: roleId } } },
+      include: {
+        role: { include: { permissions: { include: { permission: true } } } },
+        company: true,
+      },
+      omit: { password: true, refreshToken: true },
+    });
   }
 
-  async removeRoles(id: string, roleIds: string[]) {
+  async unsetRole(id: string) {
     await this.findOne(id);
 
-    await this.prisma.userRole.deleteMany({
-      where: { userId: id, roleId: { in: roleIds } },
+    return this.prisma.user.update({
+      where: { id },
+      data: { role: { disconnect: true } },
+      include: {
+        role: { include: { permissions: { include: { permission: true } } } },
+        company: true,
+      },
+      omit: { password: true, refreshToken: true },
     });
-
-    return this.findOne(id);
   }
 
   async remove(id: string) {
