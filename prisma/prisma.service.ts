@@ -10,6 +10,11 @@ function parseDatabaseUrl(url: string) {
     user:     parsed.username,
     password: parsed.password,
     database: parsed.pathname.replace('/', ''),
+
+    connectionLimit: 5,
+    idleTimeout: 60,
+    connectTimeout: 10, 
+
   };
 }
 
