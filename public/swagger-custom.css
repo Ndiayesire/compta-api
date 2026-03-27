@@ -1,5 +1,20 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap');
 
+/* 🚫 Disable system dark mode */
+:root {
+  color-scheme: light !important;
+}
+
+/* Force light even if OS is dark */
+@media (prefers-color-scheme: dark) {
+  html,
+  body,
+  .swagger-ui {
+    background-color: #fdfcfc !important;
+    color: #0f172a !important;
+  }
+}
+
 /* ---- Base ---- */
 body,
 .swagger-ui {
