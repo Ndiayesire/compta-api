@@ -34,6 +34,7 @@ async function bootstrap() {
     customSiteTitle: 'Insta Compta · API Docs',
     customfavIcon: '/public/favicon.ico',
     customCssUrl: '/public/swagger-custom.css',
+    customJs: ['/public/swagger-dark.js'],
     swaggerOptions: {
       // persistAuthorization: true,
       // displayRequestDuration: true,
