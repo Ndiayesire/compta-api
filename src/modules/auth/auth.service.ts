@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { UsersService } from '../users/users.service';
@@ -43,7 +43,6 @@ export class AuthService {
       return null;
     }
 
-    // Update last login
     await this.prisma.user.update({
       where: { id: user.id },
       data: { lastLoginAt: new Date() },
@@ -117,11 +116,11 @@ export class AuthService {
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
         secret: process.env.JWT_SECRET,
-        expiresIn: '15m',
+        expiresIn: (process.env.JWT_EXPIRES_IN || '15m') as any,
       }),
       this.jwtService.signAsync(payload, {
         secret: process.env.JWT_REFRESH_SECRET,
-        expiresIn: '7d',
+        expiresIn: (process.env.JWT_REFRESH_EXPIRES_IN || '7d') as any,
       }),
     ]);
 

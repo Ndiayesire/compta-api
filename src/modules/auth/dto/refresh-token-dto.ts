@@ -1,5 +1,5 @@
 
-import { IsEmail, IsNotEmpty, IsString, IsOptional, MinLength, IsArray } from 'class-validator';
+import { IsString } from 'class-validator';
 
 export class RefreshTokenDto {
   @IsString()

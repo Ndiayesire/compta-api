@@ -12,11 +12,13 @@ import { PermissionsModule } from './modules/settings/permissions/permissions.mo
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { JwtAuthGuard } from './modules/auth/jwt/jwt-auth.guard';
-import { CorsMiddleware } from './common/middleware/cors.middleware';
+import { CorsMiddleware } from './common/middleware/cors/cors.middleware';
 import { CurrencyModule } from './modules/settings/currency/currency.module';
+import { LegalFormsModule } from './modules/settings/legal-forms/legal-forms.module';
+import { MorganMiddleware } from './common/middleware/logger/logger.middleware';
 
 @Module({
-  imports: [CompanyModule, PrismaModule, RegionsModule, CountriesModule, PaymentMethodsModule, RolesModule, PermissionsModule, AuthModule, UsersModule, CurrencyModule],
+  imports: [CompanyModule, PrismaModule, RegionsModule, CountriesModule, PaymentMethodsModule, RolesModule, PermissionsModule, AuthModule, UsersModule, CurrencyModule, LegalFormsModule],
   controllers: [AppController],
   providers: [
     AppService,
@@ -29,7 +31,7 @@ import { CurrencyModule } from './modules/settings/currency/currency.module';
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
-      .apply(CorsMiddleware)
+      .apply(CorsMiddleware, MorganMiddleware)
       .forRoutes('*');
   }
 }

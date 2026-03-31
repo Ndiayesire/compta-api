@@ -1,4 +1,3 @@
-// src/main.ts
 import * as dotenv from 'dotenv';
 dotenv.config();
 
@@ -20,6 +19,7 @@ async function bootstrap() {
     .addTag('auth', 'Authentication and authorization')
     .addTag('users', 'User management')
     .addTag('companies', 'Company management')
+    .addTag('legal-forms', 'Company Legal Form Settings')
     .addTag('countries', 'Country settings')
     .addTag('regions', 'Region settings')
     .addTag('currencies', 'Currency settings')

@@ -24,18 +24,6 @@ enum UserStatus {
   SUSPENDED
 }
 
-enum LegalForm {
-  SARL
-  SAS
-  SASU
-  SA
-  SNC
-  EI
-  EIRL
-  EURL
-  OTHER
-}
-
 enum PaymentMethodType {
   MOBILE_MONEY
   BANK_TRANSFER
@@ -139,7 +127,7 @@ model CompanyPaymentMethod {
 }
 
 //////////////////////////////////////////////////////
-// COMPANY
+// COMPANY / LEGALFORM
 //////////////////////////////////////////////////////
 
 model Company {
@@ -149,7 +137,7 @@ model Company {
   name        String
   siret       String?       @unique
   vatNumber   String?       @unique @map("vat_number")
-  legalForm   LegalForm     @default(SARL) @map("legal_form")
+  legalFormId  String?      @map("legal_form_id")
   status      CompanyStatus @default(ACTIVE)
   nafCode     String?       @map("naf_code")
 
@@ -182,6 +170,7 @@ model Company {
   updatedBy   String?   @map("updated_by")
 
   // Relations
+  legalForm       LegalForm?  @relation(fields: [legalFormId], references: [id])
   country         Country?               @relation(fields: [countryId], references: [id])
   region          Region?                @relation(fields: [regionId], references: [id])
   currency        Currency? @relation(fields: [currencyId], references: [id])
@@ -194,7 +183,22 @@ model Company {
   @@index([countryId])
   @@index([regionId])
   @@index([currencyId])
+  @@index([legalFormId])
   @@map("companies")
+}
+
+model LegalForm {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  description String?
+  isActive    Boolean   @default(true) @map("is_active")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+  companies   Company[]
+
+  @@map("legal_forms")
 }
 
 //////////////////////////////////////////////////////
