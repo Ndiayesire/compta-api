@@ -20,7 +20,7 @@ export class CompanyService {
             }
           : undefined,
       },
-      include: { country: true, region: true, paymentMethods: true, currency: true },
+      include: { country: true, region: true, paymentMethods: true, currency: true, legalForm: true },
     });
   }
 

@@ -57,7 +57,7 @@ export class AuthController {
   }
 
   @Post('register')
-//   @Public()
+  @Public()
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Register a new user and return tokens' })

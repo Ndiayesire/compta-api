@@ -26,6 +26,9 @@ async function bootstrap() {
     .addTag('payment-methods', 'Payment method settings')
     .addTag('permissions', 'Permission management')
     .addTag('roles', 'Role management')
+    .addTag('client-types', 'Client type management')
+    .addTag('client-flags', 'Client flag management')
+    .addTag('clients', 'Client management')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

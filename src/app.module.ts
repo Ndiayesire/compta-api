@@ -16,9 +16,12 @@ import { CorsMiddleware } from './common/middleware/cors/cors.middleware';
 import { CurrencyModule } from './modules/settings/currency/currency.module';
 import { LegalFormsModule } from './modules/settings/legal-forms/legal-forms.module';
 import { MorganMiddleware } from './common/middleware/logger/logger.middleware';
+import { ClientTypesModule } from './modules/settings/client-types/client-types.module';
+import { ClientFlagModule } from './modules/settings/client-flags/client-flag.module';
+import { ClientsModule } from './modules/clients/clients.module';
 
 @Module({
-  imports: [CompanyModule, PrismaModule, RegionsModule, CountriesModule, PaymentMethodsModule, RolesModule, PermissionsModule, AuthModule, UsersModule, CurrencyModule, LegalFormsModule],
+  imports: [CompanyModule, PrismaModule, RegionsModule, CountriesModule, PaymentMethodsModule, RolesModule, PermissionsModule, AuthModule, UsersModule, CurrencyModule, LegalFormsModule, ClientTypesModule, ClientFlagModule, ClientsModule],
   controllers: [AppController],
   providers: [
     AppService,

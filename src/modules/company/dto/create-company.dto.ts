@@ -36,26 +36,10 @@ export class CreateCompanyDto {
   @IsOptional()
   nafCode?: string;
 
-  // Adresse
   @ApiPropertyOptional({ description: 'Street address', example: 'Avenue Cheikh Anta Diop' })
   @IsString()
   @IsOptional()
   address?: string;
-
-  @ApiPropertyOptional({ description: 'Address line 2', example: 'Suite 456' })
-  @IsString()
-  @IsOptional()
-  addressLine2?: string;
-
-  @ApiPropertyOptional({ description: 'City', example: 'Dakar' })
-  @IsString()
-  @IsOptional()
-  city?: string;
-
-  @ApiPropertyOptional({ description: 'State/Province', example: 'Dakar Region' })
-  @IsString()
-  @IsOptional()
-  state?: string;
 
   @ApiPropertyOptional({ description: 'Country ID', example: 'country-uuid-123' })
   @IsString()
@@ -88,16 +72,6 @@ export class CreateCompanyDto {
   @IsString()
   @IsOptional()
   currencyId?: string;
-
-  @ApiPropertyOptional({ description: 'Fiscal year start date', example: '2024-01-01' })
-  @IsDateString()
-  @IsOptional()
-  fiscalYearStart?: string;
-
-  @ApiPropertyOptional({ description: 'Fiscal year end date', example: '2024-12-31' })
-  @IsDateString()
-  @IsOptional()
-  fiscalYearEnd?: string;
 
   @ApiPropertyOptional({ description: 'Is this a holding company?', example: false })
   @IsBoolean()

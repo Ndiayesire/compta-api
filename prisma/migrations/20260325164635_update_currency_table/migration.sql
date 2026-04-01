@@ -1,5 +1,0 @@
--- AlterTable
-ALTER TABLE `companies` MODIFY `status` ENUM('PENDING', 'ACTIVE', 'SUSPENDED', 'DISSOLVED') NOT NULL DEFAULT 'ACTIVE';
-
--- AlterTable
-ALTER TABLE `currencies` MODIFY `decimals` INTEGER NOT NULL DEFAULT 0;

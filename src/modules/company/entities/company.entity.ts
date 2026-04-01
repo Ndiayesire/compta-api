@@ -33,8 +33,6 @@ export class CompanyEntity implements Company {
 
   // Fiscal
   currencyId: string | null;
-  fiscalYearStart: Date | null;
-  fiscalYearEnd: Date | null;
   isHolding: boolean;
 
   // Métadonnées
