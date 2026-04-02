@@ -12,7 +12,7 @@ import { PermissionsModule } from './modules/settings/permissions/permissions.mo
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { JwtAuthGuard } from './modules/auth/jwt/jwt-auth.guard';
-import { CorsMiddleware } from './common/middleware/cors/cors.middleware';
+// import { CorsMiddleware } from './common/middleware/cors/cors.middleware';
 import { CurrencyModule } from './modules/settings/currency/currency.module';
 import { LegalFormsModule } from './modules/settings/legal-forms/legal-forms.module';
 import { MorganMiddleware } from './common/middleware/logger/logger.middleware';
@@ -34,7 +34,7 @@ import { ClientsModule } from './modules/clients/clients.module';
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
-      .apply(CorsMiddleware, MorganMiddleware)
+      .apply(/*CorsMiddleware, */MorganMiddleware)
       .forRoutes('*');
   }
 }
