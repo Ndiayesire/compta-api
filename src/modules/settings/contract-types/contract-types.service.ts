@@ -1,26 +1,107 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { PrismaService } from '../../../../prisma/prisma.service';
 import { CreateContractTypeDto } from './dto/create-contract-type.dto';
 import { UpdateContractTypeDto } from './dto/update-contract-type.dto';
 
 @Injectable()
 export class ContractTypesService {
-  create(createContractTypeDto: CreateContractTypeDto) {
-    return 'This action adds a new contractType';
+  constructor(private prisma: PrismaService) {}
+
+  async create(dto: CreateContractTypeDto) {
+    const existing = await this.prisma.contractType.findFirst({
+      where: {
+        OR: [{ code: dto.code }, { name: dto.name }],
+      },
+    });
+
+    if (existing) {
+      throw new BadRequestException(
+        'Contract type with same name or code already exists',
+      );
+    }
+
+    return this.prisma.contractType.create({ data: dto });
   }
 
-  findAll() {
-    return `This action returns all contractTypes`;
+  async findAll() {
+    return this.prisma.contractType.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} contractType`;
+  async findOne(id: string) {
+    const contractType = await this.prisma.contractType.findUnique({
+      where: { id },
+    });
+
+    if (!contractType) {
+      throw new NotFoundException('Contract type not found');
+    }
+
+    return contractType;
   }
 
-  update(id: number, updateContractTypeDto: UpdateContractTypeDto) {
-    return `This action updates a #${id} contractType`;
+
+  async update(id: string, dto: UpdateContractTypeDto) {
+    const existing = await this.prisma.contractType.findUnique({
+      where: { id },
+    });
+
+    if (!existing) {
+      throw new NotFoundException('Contract type not found');
+    }
+
+    if (dto.code || dto.name) {
+      const duplicate = await this.prisma.contractType.findFirst({
+        where: {
+          AND: [
+            { id: { not: id } },
+            {
+              OR: [
+                dto.code ? { code: dto.code } : {},
+                dto.name ? { name: dto.name } : {},
+              ],
+            },
+          ],
+        },
+      });
+
+      if (duplicate) {
+        throw new BadRequestException(
+          'Another contract type with same name or code already exists',
+        );
+      }
+    }
+
+    return this.prisma.contractType.update({
+      where: { id },
+      data: dto,
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} contractType`;
+
+  async remove(id: string) {
+    const existing = await this.prisma.contractType.findUnique({
+      where: { id },
+    });
+
+    if (!existing) {
+      throw new NotFoundException('Contract type not found');
+    }
+
+    const used = await this.prisma.employee.count({
+      where: { contractTypeId: id },
+    });
+
+    if (used > 0) {
+      throw new BadRequestException(
+        'Cannot delete contract type because it is used by employees',
+      );
+    }
+
+    return this.prisma.contractType.update({
+      where: { id },
+      data: { isActive: false },
+    });
   }
 }

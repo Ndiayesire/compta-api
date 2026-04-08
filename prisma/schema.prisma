@@ -33,13 +33,6 @@ enum PaymentMethodType {
   OTHER
 }
 
-enum ContractType {
-  CDI
-  CDD
-  STAGE
-  FREELANCE
-}
-
 //////////////////////////////////////////////////////
 // REGION / COUNTRY / CURRENCY
 //////////////////////////////////////////////////////
@@ -275,9 +268,9 @@ model User {
   @@map("users")
 }
 
-//////////////////////////////////////////////////////
-// CLIENTS / CLIENT TYPES / CLIENT FLAGS / EMPLOYEES
-//////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////
+// CLIENTS / CLIENT TYPES / CLIENT FLAGS / EMPLOYEES / CONTRACT TYPES
+/////////////////////////////////////////////////////////////////////
 
 model ClientType {
   id        String    @id @default(uuid())
@@ -352,12 +345,12 @@ model Employee {
   id           String   @id @default(uuid())
 
   clientId     String   @map("client_id")
+  contractTypeId String   @map("contract_type_id")
 
   firstName    String   @map("first_name")
   lastName     String   @map("last_name")
 
   jobTitle     String   @map("job_title")
-  contractType ContractType @map("contract_type")
 
   department   String?
 
@@ -376,10 +369,27 @@ model Employee {
 
   // Relations
   client       Client   @relation(fields: [clientId], references: [id])
+  contractType   ContractType  @relation(fields: [contractTypeId], references: [id])
 
   @@index([clientId])
+  @@index([contractTypeId])
   @@index([isActive])
   @@index([deletedAt])
 
   @@map("employees")
+}
+
+model ContractType {
+  id        String     @id @default(uuid())
+  name      String     @unique
+  code      String     @unique // e.g. CDI, CDD, STAGE
+  isActive  Boolean    @default(true) @map("is_active")
+
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
+
+  // relation
+  employees Employee[]
+
+  @@map("contract_types")
 }

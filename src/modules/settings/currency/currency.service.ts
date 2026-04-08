@@ -14,7 +14,7 @@ export class CurrencyService {
           code: dto.code.toUpperCase(),
           name: dto.name,
           symbol: dto.symbol,
-          decimals: dto.decimals ?? 2,
+          decimals: dto.decimals ?? 0,
           isPrefix: dto.isPrefix ?? false,
         },
       });

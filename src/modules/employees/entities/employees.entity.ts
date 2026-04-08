@@ -1,15 +1,16 @@
-import { Employee, ContractType } from '@prisma/client';
+import { Employee } from '@prisma/client';
+import { ContractTypeEntity } from '../../settings/contract-types/entities/contract-type.entity';
 
 export class EmployeeEntity implements Employee {
   id: string;
 
   clientId: string;
+  contractTypeId: string;
 
   firstName: string;
   lastName: string;
 
   jobTitle: string;
-  contractType: ContractType;
 
   department: string | null;
 
@@ -25,4 +26,6 @@ export class EmployeeEntity implements Employee {
 
   createdAt: Date;
   updatedAt: Date;
+
+  contractType?: ContractTypeEntity;
 }

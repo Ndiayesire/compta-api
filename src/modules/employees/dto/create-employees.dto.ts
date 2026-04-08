@@ -1,11 +1,14 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsEmail, IsOptional, IsEnum, IsDateString, IsBoolean, IsUUID } from 'class-validator';
-import { ContractType } from '@prisma/client';
+import { IsString, IsEmail, IsOptional, IsDateString, IsBoolean, IsUUID } from 'class-validator';
 
 export class CreateEmployeeDto {
   @ApiProperty({ example: 'client-uuid-123' })
   @IsUUID()
   clientId: string;
+
+  @ApiProperty({ example: 'contract-type-uuid-123' })
+  @IsUUID()
+  contractTypeId: string;
 
   @ApiProperty({ example: 'Mamadou' })
   @IsString()
@@ -19,13 +22,10 @@ export class CreateEmployeeDto {
   @IsString()
   jobTitle: string;
 
-  @ApiProperty({ enum: ContractType, example: ContractType.STAGE })
-  @IsEnum(ContractType)
-  contractType: ContractType;
-
-  @ApiProperty({ example: 'Marketing' })
+  @ApiPropertyOptional({ example: 'Marketing' })
+  @IsOptional()
   @IsString()
-  department: string;
+  department?: string;
 
   @ApiProperty({ example: 'mamadou.ndiaye@entreprise.sn' })
   @IsEmail()
@@ -45,7 +45,7 @@ export class CreateEmployeeDto {
   @IsDateString()
   endDate?: string;
 
-  @ApiPropertyOptional({ example: true, default: true }) // ← `default` renders correctly only on Optional
+  @ApiPropertyOptional({ example: true, default: true })
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;

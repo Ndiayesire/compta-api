@@ -38,7 +38,7 @@ export class EmployeeService {
   async findOne(id: string) {
     const employee = await this.prisma.employee.findFirst({
       where: { id, deletedAt: null },
-      include: { client: true },
+      include: { client: true, contractType: true },
     });
 
     if (!employee) {
@@ -77,6 +77,7 @@ export class EmployeeService {
         deletedAt: null,
       },
       orderBy: { createdAt: 'desc' },
+      include: { contractType: true },
     });
   }
 }
