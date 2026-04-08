@@ -18,7 +18,7 @@ export class CurrencyService {
           isPrefix: dto.isPrefix ?? false,
         },
       });
-    } catch (error) {
+    } catch (error : any) {
       if (error.code === 'P2002') {
         throw new ConflictException('Currency code already exists');
       }
@@ -26,10 +26,9 @@ export class CurrencyService {
     }
   }
 
-  async findAll(includeInactive = false) {
+  async findAll() {
     return this.prisma.currency.findMany({
-      where: includeInactive ? {} : { isActive: true },
-      orderBy: { code: 'asc' },
+      orderBy: { createdAt: 'desc' },
     });
   }
 
@@ -74,7 +73,7 @@ export class CurrencyService {
           ...(dto.isActive !== undefined && { isActive: dto.isActive }),
         },
       });
-    } catch (error) {
+    } catch (error : any) {
       if (error.code === 'P2002') {
         throw new ConflictException('Currency code already exists');
       }

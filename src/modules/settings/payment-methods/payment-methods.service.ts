@@ -13,8 +13,7 @@ export class PaymentMethodsService {
 
   async findAll() {
     return this.prisma.paymentMethod.findMany({
-      where: { isActive: true },
-      orderBy: { name: 'asc' },
+      orderBy: { createdAt: 'desc' },
     });
   }
 

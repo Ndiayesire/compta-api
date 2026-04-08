@@ -16,11 +16,9 @@ export class CountriesService {
 
   findAll() {
     return this.prisma.country.findMany({
-      where: { isActive: true },
-      orderBy: { name: 'asc' },
+      orderBy: { createdAt: 'desc' },
       include: {
         regions: {
-          where: { isActive: true },
           orderBy: { name: 'asc' },
         },
       },

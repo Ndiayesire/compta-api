@@ -44,7 +44,6 @@ export class UsersService {
     return this.prisma.user.findMany({
       where: {
         deletedAt: null,
-        isActive: true,
         ...(companyId && { companyId }),
       },
       orderBy: { createdAt: 'desc' },

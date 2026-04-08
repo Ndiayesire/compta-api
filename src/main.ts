@@ -35,6 +35,7 @@ async function bootstrap() {
     .addTag('client-types', 'Client type management')
     .addTag('client-flags', 'Client flag management')
     .addTag('clients', 'Client management')
+    .addTag('employees', 'Employee management')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

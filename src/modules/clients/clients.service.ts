@@ -23,7 +23,7 @@ export class ClientsService {
 
   async findAll(companyId: string) {
     return this.prisma.client.findMany({
-      where: { companyId, isActive: true, deletedAt: null },
+      where: { companyId },
       include: {
         clientType: true,
         clientFlag: true,
@@ -32,7 +32,7 @@ export class ClientsService {
         currency: true,
         legalForm: true,
       },
-      orderBy: { name: 'asc' },
+      orderBy: { createdAt: 'desc' },
     });
   }
 

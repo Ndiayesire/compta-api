@@ -18,8 +18,7 @@ export class LegalFormsService {
 
   async findAll() {
     return this.prisma.legalForm.findMany({
-      where: { isActive: true, deletedAt: null },
-      orderBy: { name: 'asc' },
+      orderBy: { createdAt: 'desc' },
     });
   }
 

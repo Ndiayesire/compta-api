@@ -19,14 +19,13 @@ export class PermissionsService {
 
   async findAll() {
     return this.prisma.permission.findMany({
-      where: { isActive: true },
       orderBy: [{ module: 'asc' }, { action: 'asc' }],
     });
   }
 
   async findByModule(module: string) {
     return this.prisma.permission.findMany({
-      where: { module, isActive: true },
+      where: { module },
       orderBy: { action: 'asc' },
     });
   }

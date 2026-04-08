@@ -14,8 +14,7 @@ export class RegionsService {
 
   findAll() {
     return this.prisma.region.findMany({
-      where: { isActive: true },
-      orderBy: { name: 'asc' },
+      orderBy: { createdAt: 'desc' },
     });
   }
 

@@ -15,8 +15,7 @@ export class ClientTypesService {
 
   findAll() {
     return this.prisma.clientType.findMany({
-        where: { isActive: true },
-        orderBy: { name: 'asc' },
+        orderBy: { createdAt: 'desc' },
     });
     
   }

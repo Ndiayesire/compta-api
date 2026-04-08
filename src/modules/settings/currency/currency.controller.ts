@@ -46,10 +46,7 @@ export class CurrencyController {
   async findAll(
     @Query('includeInactive') includeInactive?: string,
   ) {
-    const data = await this.currencyService.findAll(
-      includeInactive === 'true',
-    );
-
+    const data = await this.currencyService.findAll();
     return {
       success: true,
       message: 'Currencies fetched successfully',

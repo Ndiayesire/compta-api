@@ -26,8 +26,7 @@ export class CompanyService {
 
   async findAll() {
     return this.prisma.company.findMany({
-      where: { deletedAt: null },
-      orderBy: { name: 'asc' },
+      orderBy: { createdAt: 'desc' },
       include: { country: true, region: true, paymentMethods: true, currency: true },
     });
   }

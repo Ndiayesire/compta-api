@@ -12,7 +12,7 @@ export class ClientFlagService {
   }
 
   findAll() {
-    return this.prisma.clientFlag.findMany({ where: { isActive: true }, orderBy: { name: 'asc' } });
+    return this.prisma.clientFlag.findMany({ orderBy: { createdAt: 'desc' } });
   }
 
   findOne(id: string) {
