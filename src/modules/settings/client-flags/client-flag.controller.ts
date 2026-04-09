@@ -1,11 +1,11 @@
 import { Controller, Get, Post, Patch, Delete, Body, Param, HttpCode, HttpStatus } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { ClientFlagService } from './client-flag.service';
 import { CreateFlagClientDto } from './dto/create-flag-client.dto';
 import { UpdateFlagClientDto } from './dto/update-flag-client.dto';
-import { Public } from 'src/common/decorators/public.decorator';
 
 @ApiTags('client-flags')
+@ApiBearerAuth('JWT')
 @Controller('client-flags')
 export class ClientFlagController {
   constructor(private readonly flagService: ClientFlagService) {}

@@ -24,9 +24,9 @@ export class ClientEntity implements Client {
 
   // Legal
   legalFormId: string | null;
-  siret: string | null;
-  vatNumber: string | null;
-  nafCode: string | null;
+  ninea: string | null;
+  tva: string | null;
+  reference: string | null;
 
   // Identity
   name: string;
@@ -50,4 +50,6 @@ export class ClientEntity implements Client {
   region?: RegionEntity;
   currency?: CurrencyEntity;
   legalForm?: LegalFormEntity;
+  /** Junction rows; use `include: { paymentMethod: true }` for full payment method rows */
+  paymentMethods?: unknown[];
 }

@@ -1,10 +1,11 @@
 import { Controller, Get, Post, Patch, Delete, Body, Param, HttpCode, HttpStatus } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { ClientTypesService } from './client-types.service';
 import { CreateClientTypeDto } from './dto/create-client-type.dto';
 import { UpdateClientTypeDto } from './dto/update-client-type.dto';
 
 @ApiTags('client-types')
+@ApiBearerAuth('JWT')
 @Controller('client-types')
 export class ClientTypesController {
   constructor(private readonly service: ClientTypesService) {}

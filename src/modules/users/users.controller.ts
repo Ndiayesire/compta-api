@@ -5,7 +5,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { IsArray, IsString } from 'class-validator';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
 
 class RoleIdDto {
   @IsString()
@@ -13,6 +13,7 @@ class RoleIdDto {
 }
 
 @ApiTags('users')
+@ApiBearerAuth('JWT')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}

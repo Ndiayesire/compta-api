@@ -1,16 +1,18 @@
-import { Body, Controller, Post, Get, Patch, Delete, Param, HttpCode, HttpStatus } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
+import { Body, Controller, Post, Get, Patch, Delete, Param, HttpCode, HttpStatus, UsePipes, ValidationPipe } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { CompanyService } from './company.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 
 @ApiTags('companies')
+@ApiBearerAuth('JWT')
 @Controller('company')
 export class CompanyController {
   constructor(private readonly companyService: CompanyService) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   @ApiOperation({ summary: 'Create a new company' })
   @ApiBody({ type: CreateCompanyDto })
   @ApiResponse({
@@ -26,6 +28,7 @@ export class CompanyController {
     }
   })
   @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 409, description: 'User email already exists' })
   async create(@Body() createCompanyDto: CreateCompanyDto) {
     const data = await this.companyService.create(createCompanyDto);
     return { success: true, message: 'Company created successfully', data };

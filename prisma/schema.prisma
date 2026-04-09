@@ -24,15 +24,6 @@ enum UserStatus {
   SUSPENDED
 }
 
-enum PaymentMethodType {
-  MOBILE_MONEY
-  BANK_TRANSFER
-  CARD
-  CASH
-  CRYPTO
-  OTHER
-}
-
 //////////////////////////////////////////////////////
 // REGION / COUNTRY / CURRENCY
 //////////////////////////////////////////////////////
@@ -92,16 +83,16 @@ model Currency {
 //////////////////////////////////////////////////////
 
 model PaymentMethod {
-  id        String            @id @default(uuid())
+  id        String   @id @default(uuid())
   name      String
-  code      String            @unique
-  type      PaymentMethodType
-  isActive  Boolean   @default(true) @map("is_active")
+  code      String   @default("")
+  isActive  Boolean  @default(true) @map("is_active")
 
-  createdAt DateTime          @default(now()) @map("created_at")
-  updatedAt DateTime          @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   companies CompanyPaymentMethod[]
+  clients   ClientPaymentMethod[]
 
   @@map("payment_methods")
 }
@@ -122,6 +113,22 @@ model CompanyPaymentMethod {
   @@map("company_payment_methods")
 }
 
+model ClientPaymentMethod {
+  id              String        @id @default(uuid())
+  clientId        String        @map("client_id")
+  paymentMethodId String        @map("payment_method_id")
+  isDefault       Boolean       @default(false) @map("is_default")
+  createdAt       DateTime      @default(now()) @map("created_at")
+
+  client          Client        @relation(fields: [clientId], references: [id])
+  paymentMethod   PaymentMethod @relation(fields: [paymentMethodId], references: [id])
+
+  @@unique([clientId, paymentMethodId])
+  @@index([clientId])
+  @@index([paymentMethodId])
+  @@map("client_payment_methods")
+}
+
 //////////////////////////////////////////////////////
 // COMPANY / LEGALFORM
 //////////////////////////////////////////////////////
@@ -129,11 +136,11 @@ model CompanyPaymentMethod {
 model Company {
   id          String        @id @default(uuid())
   name        String
-  siret       String?       @unique
-  vatNumber   String?       @unique @map("vat_number")
+  ninea       String?       @unique @map("ninea")
+  tva         String?       @unique @map("tva")
   legalFormId String?       @map("legal_form_id")
   status      CompanyStatus @default(ACTIVE)
-  nafCode     String?       @map("naf_code")
+  reference   String?       @map("reference")
 
   address      String?
 
@@ -305,9 +312,9 @@ model Client {
   currencyId   String?      @map("currency_id")
   legalFormId  String?      @map("legal_form_id")
 
-  siret       String?      @unique
-  vatNumber   String?      @unique @map("vat_number")
-  nafCode     String?      @map("naf_code")
+  ninea       String?      @unique @map("ninea")
+  tva         String?      @unique @map("tva")
+  reference   String?      @map("reference")
 
   name        String
   email       String?      @unique
@@ -328,7 +335,8 @@ model Client {
   currency    Currency?    @relation(fields: [currencyId], references: [id])
   legalForm   LegalForm?   @relation(fields: [legalFormId], references: [id])
 
-  employees    Employee[]
+  employees       Employee[]
+  paymentMethods  ClientPaymentMethod[]
 
   @@index([companyId])
   @@index([clientTypeId])

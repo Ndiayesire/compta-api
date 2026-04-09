@@ -1,35 +1,26 @@
-import { IsString, IsNotEmpty, IsEnum, IsOptional, IsBoolean } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsBoolean } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { PaymentMethodType } from '@prisma/client';
 
 export class CreatePaymentMethodDto {
   @ApiProperty({
     description: 'Payment method name',
-    example: 'Orange Money'
+    example: 'Orange Money',
   })
   @IsString()
   @IsNotEmpty()
   name: string;
 
-  @ApiProperty({
-    description: 'Payment method code',
-    example: 'OM'
+  @ApiPropertyOptional({
+    description: 'Code; may be empty',
+    example: '',
   })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  code: string;
-
-  @ApiProperty({
-    description: 'Payment method type',
-    enum: PaymentMethodType,
-    example: PaymentMethodType.MOBILE_MONEY
-  })
-  @IsEnum(PaymentMethodType)
-  type: PaymentMethodType;
+  code?: string;
 
   @ApiPropertyOptional({
     description: 'Is this payment method active?',
-    example: true
+    example: true,
   })
   @IsBoolean()
   @IsOptional()

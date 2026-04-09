@@ -1,11 +1,12 @@
 import { Controller, Get, Post, Patch, Body, Param, HttpCode, HttpStatus, UseGuards, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiQuery } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../auth/jwt/jwt-auth.guard';
 import { CurrencyService } from './currency.service';
 import { CreateCurrencyDto } from './dto/create-currency.dto';
 import { UpdateCurrencyDto } from './dto/update-currency.dto';
 
 @ApiTags('currencies')
+@ApiBearerAuth('JWT')
 @Controller('currencies')
 @UseGuards(JwtAuthGuard)
 export class CurrencyController {

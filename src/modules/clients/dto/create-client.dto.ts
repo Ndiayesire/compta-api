@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsBoolean, IsEmail } from 'class-validator';
+import { IsString, IsOptional, IsBoolean, IsEmail, IsArray } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateClientDto {
@@ -50,20 +50,30 @@ export class CreateClientDto {
   @IsOptional()
   legalFormId?: string;
 
-  @ApiPropertyOptional({ description: 'SIRET number', example: '123 456 789 00010' })
-  @IsString()
+  @ApiPropertyOptional({
+    description: 'Payment method IDs (from company catalog)',
+    type: [String],
+    example: ['payment-method-uuid-1'],
+  })
+  @IsArray()
+  @IsString({ each: true })
   @IsOptional()
-  siret?: string;
+  paymentMethodIds?: string[];
 
-  @ApiPropertyOptional({ description: 'VAT number', example: 'SN123456789' })
+  @ApiPropertyOptional({ description: 'NINEA', example: '123 456 789 00010' })
   @IsString()
   @IsOptional()
-  vatNumber?: string;
+  ninea?: string;
 
-  @ApiPropertyOptional({ description: 'NAF code', example: '6201Z' })
+  @ApiPropertyOptional({ description: 'TVA', example: 'SN123456789' })
   @IsString()
   @IsOptional()
-  nafCode?: string;
+  tva?: string;
+
+  @ApiPropertyOptional({ description: 'Reference', example: '6201Z' })
+  @IsString()
+  @IsOptional()
+  reference?: string;
 
   @ApiPropertyOptional({ description: 'Is active', example: true })
   @IsBoolean()

@@ -2,9 +2,10 @@ import { Controller, Get, Post, Body, Param, Patch, Delete } from '@nestjs/commo
 import { EmployeeService } from './employees.service';
 import { CreateEmployeeDto } from './dto/create-employees.dto';
 import { UpdateEmployeeDto } from './dto/update-employees.dto';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
 
 @ApiTags('employees')
+@ApiBearerAuth('JWT')
 @Controller('employees')
 export class EmployeeController {
   constructor(private readonly employeeService: EmployeeService) {}

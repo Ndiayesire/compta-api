@@ -1,10 +1,11 @@
 import { Controller, Get, Post, Patch, Delete, Body, Param, HttpCode, HttpStatus } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { RegionsService } from './region.service';
 import { CreateRegionDto } from './dto/create-dto.region';
 import { UpdateRegionDto } from './dto/update-region.dto';
 
 @ApiTags('regions')
+@ApiBearerAuth('JWT')
 @Controller('regions')
 export class RegionsController {
   constructor(private readonly regionsService: RegionsService) {}

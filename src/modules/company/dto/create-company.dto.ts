@@ -1,8 +1,11 @@
 import {
-  IsString, IsOptional, IsNotEmpty, IsEnum, IsBoolean, IsEmail, IsUrl, IsDateString, IsArray,
+  IsString, IsOptional, IsNotEmpty, IsEnum, IsBoolean, IsEmail, IsUrl, IsArray,
+  ValidateNested,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { CompanyStatus } from '@prisma/client';
+import { CreateCompanyUserDto } from './create-company-user.dto';
 
 export class CreateCompanyDto {
   // Identité légale
@@ -11,15 +14,15 @@ export class CreateCompanyDto {
   @IsNotEmpty()
   name: string;
 
-  @ApiPropertyOptional({ description: 'SIRET number', example: 'SN123456789' })
+  @ApiPropertyOptional({ description: 'NINEA', example: 'SN123456789' })
   @IsString()
   @IsOptional()
-  siret?: string;
+  ninea?: string;
 
-  @ApiPropertyOptional({ description: 'VAT number', example: 'SN12345678901' })
+  @ApiPropertyOptional({ description: 'TVA', example: 'SN12345678901' })
   @IsString()
   @IsOptional()
-  vatNumber?: string;
+  tva?: string;
 
   @ApiPropertyOptional({ description: 'Legal form ID', example: 'legal-form-uuid-123' })
   @IsString()
@@ -31,10 +34,10 @@ export class CreateCompanyDto {
   @IsOptional()
   status?: CompanyStatus;
 
-  @ApiPropertyOptional({ description: 'NAF code', example: '6201Z' })
+  @ApiPropertyOptional({ description: 'Reference', example: '6201Z' })
   @IsString()
   @IsOptional()
-  nafCode?: string;
+  reference?: string;
 
   @ApiPropertyOptional({ description: 'Street address', example: 'Avenue Cheikh Anta Diop' })
   @IsString()
@@ -84,4 +87,12 @@ export class CreateCompanyDto {
   @IsString({ each: true })
   @IsOptional()
   paymentMethodIds?: string[];
+
+  @ApiProperty({
+    description: 'Initial user for this company; receives companyId of the new company',
+    type: CreateCompanyUserDto,
+  })
+  @ValidateNested()
+  @Type(() => CreateCompanyUserDto)
+  user: CreateCompanyUserDto;
 }

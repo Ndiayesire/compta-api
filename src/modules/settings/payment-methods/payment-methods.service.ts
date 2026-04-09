@@ -8,7 +8,13 @@ export class PaymentMethodsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(dto: CreatePaymentMethodDto) {
-    return this.prisma.paymentMethod.create({ data: dto });
+    return this.prisma.paymentMethod.create({
+      data: {
+        name: dto.name,
+        code: dto.code ?? '',
+        ...(dto.isActive !== undefined ? { isActive: dto.isActive } : {}),
+      },
+    });
   }
 
   async findAll() {
@@ -25,7 +31,14 @@ export class PaymentMethodsService {
 
   async update(id: string, dto: UpdatePaymentMethodDto) {
     await this.findOne(id);
-    return this.prisma.paymentMethod.update({ where: { id }, data: dto });
+    const { code, ...rest } = dto;
+    return this.prisma.paymentMethod.update({
+      where: { id },
+      data: {
+        ...rest,
+        ...(code !== undefined ? { code: code ?? '' } : {}),
+      },
+    });
   }
 
   async remove(id: string) {

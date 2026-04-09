@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "@nestjs/common": "^11.1.17",
+    "@nestjs/config": "^4.0.4",
     "@nestjs/core": "^11.1.17",
     "@nestjs/jwt": "^11.0.2",
     "@nestjs/mapped-types": "^2.1.0",
@@ -38,6 +39,7 @@
     "class-validator": "^0.14.4",
     "dotenv": "^17.3.1",
     "morgan": "^1.10.1",
+    "nodemailer": "^8.0.5",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "reflect-metadata": "^0.2.2",

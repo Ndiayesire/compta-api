@@ -22,6 +22,16 @@ async function bootstrap() {
     .setTitle('Insta Compta API')
     .setDescription('Comptabilité InstaHR API documentation')
     .setVersion('1.0.0')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        description: 'JWT access token from POST /auth/login',
+      },
+      'JWT',
+    )
+    .addTag('App', 'Health and API status')
     .addTag('auth', 'Authentication and authorization')
     .addTag('users', 'User management')
     .addTag('companies', 'Company management')
@@ -47,14 +57,14 @@ async function bootstrap() {
     customCssUrl: '/public/swagger-custom.css',
     customJs: ['/public/swagger-dark.js'],
     swaggerOptions: {
-      // persistAuthorization: true,
+      persistAuthorization: true,
       // displayRequestDuration: true,
       filter: true,
       // deepLinking: true,
       docExpansion: 'none',
       // defaultModelsExpandDepth: 1,
       tagsSorter: 'alpha',
-      tryItOutEnabled: false
+      // tryItOutEnabled: false
     },
   });
 

@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Patch, Delete, Body, Param, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../auth/jwt/jwt-auth.guard';
 import { RolesService } from './roles.service';
 import { CreateRoleDto } from './dto/create-role.dto';
@@ -20,6 +20,7 @@ class PermissionIdsDto {
 }
 
 @ApiTags('roles')
+@ApiBearerAuth('JWT')
 @Controller('roles')
 @UseGuards(JwtAuthGuard)
 export class RolesController {

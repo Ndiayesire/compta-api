@@ -196,9 +196,9 @@ body,
 	border-color: #9b0b0b !important;
 }
 
-.swagger-ui .btn.try-out__btn {
+/* .swagger-ui .btn.try-out__btn {
 	display: none !important;
-}
+} */
 
 /* ---- Response section ---- */
 .swagger-ui .response-col_status {

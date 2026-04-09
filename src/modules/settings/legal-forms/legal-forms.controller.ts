@@ -6,7 +6,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth } from '@ne
 
 
 @ApiTags('legal-forms')
-// @ApiBearerAuth()
+@ApiBearerAuth('JWT')
 @Controller('legal-forms')
 export class LegalFormsController {
   constructor(

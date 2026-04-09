@@ -10,11 +10,11 @@ export class CompanyEntity implements Company {
 
   // Identité légale
   name: string;
-  siret: string | null;
-  vatNumber: string | null;
+  ninea: string | null;
+  tva: string | null;
   legalFormId: string | null;
   status: CompanyStatus;
-  nafCode: string | null;
+  reference: string | null;
 
   // Adresse
   address: string | null;

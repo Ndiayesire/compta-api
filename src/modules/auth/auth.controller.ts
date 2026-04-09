@@ -1,5 +1,5 @@
 import {Controller, Post, Body, HttpCode, HttpStatus, UseGuards, Get } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -57,9 +57,9 @@ export class AuthController {
   }
 
   @Post('register')
-  @Public()
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.CREATED)
+  @ApiBearerAuth('JWT')
   @ApiOperation({ summary: 'Register a new user and return tokens' })
   @ApiBody({
     schema: {
@@ -99,6 +99,7 @@ export class AuthController {
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT')
   @ApiOperation({ summary: 'Refresh access and refresh tokens' })
   @ApiBody({
     schema: {
@@ -142,6 +143,7 @@ export class AuthController {
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT')
   @ApiOperation({ summary: 'Logout the user (invalidate refresh token)' })
   @ApiResponse({
     status: 200,
@@ -166,6 +168,7 @@ export class AuthController {
 
   @Get('me')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT')
   @ApiOperation({ summary: 'Returns current authenticated user profile' })
   @ApiResponse({
     status: 200,

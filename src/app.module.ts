@@ -21,6 +21,7 @@ import { ClientFlagModule } from './modules/settings/client-flags/client-flag.mo
 import { ClientsModule } from './modules/clients/clients.module';
 import { EmployeeModule } from './modules/employees/employees.module';
 import { ContractTypesModule } from './modules/settings/contract-types/contract-types.module';
+// import { MailerModule } from './shared-service/mailer/mailer.module';
 
 @Module({
   imports: [CompanyModule, PrismaModule, RegionsModule, CountriesModule, PaymentMethodsModule, RolesModule, PermissionsModule, AuthModule, UsersModule, CurrencyModule, LegalFormsModule, ClientTypesModule, ClientFlagModule, ClientsModule, EmployeeModule, ContractTypesModule],
