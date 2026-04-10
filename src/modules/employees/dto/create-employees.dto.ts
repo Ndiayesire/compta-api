@@ -22,28 +22,25 @@ export class CreateEmployeeDto {
   @IsString()
   jobTitle: string;
 
-  @ApiPropertyOptional({ example: 'Marketing' })
-  @IsOptional()
-  @IsString()
-  department?: string;
-
   @ApiProperty({ example: 'mamadou.ndiaye@entreprise.sn' })
   @IsEmail()
   email: string;
 
-  @ApiPropertyOptional({ example: '+221771234567' })
-  @IsOptional()
+  @ApiProperty({ example: '+221771234567' })
   @IsString()
-  phone?: string;
+  phone: string;
+
+  @ApiProperty({ example: 'Dakar, Plateau' })
+  @IsString()
+  address: string;
 
   @ApiProperty({ example: '2024-01-15T00:00:00.000Z' })
   @IsDateString()
   startDate: string;
 
-  @ApiPropertyOptional({ example: '2024-07-15T00:00:00.000Z' })
-  @IsOptional()
+  @ApiProperty({ example: '2024-07-15T00:00:00.000Z' })
   @IsDateString()
-  endDate?: string;
+  endDate: string;
 
   @ApiPropertyOptional({ example: true, default: true })
   @IsOptional()

@@ -1,11 +1,11 @@
-import { IsString, IsOptional, IsInt, IsBoolean, Length, Min } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { IsString, IsOptional, IsBoolean, Length } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateCurrencyDto {
   @IsString()
-  @Length(3, 3)
+  @Length(2, 8)
   @ApiProperty({
-    description: 'Currency code (ISO 4217)',
+    description: 'Currency code (e.g. ISO 4217)',
     example: 'XOF',
   })
   code: string;
@@ -18,30 +18,10 @@ export class CreateCurrencyDto {
   name: string;
 
   @IsOptional()
-  @IsString()
-  @ApiProperty({
-    description: 'Currency symbol',
-    example: 'CFA',
-    required: false,
-  })
-  symbol?: string;
-
-  @IsOptional()
-  @IsInt()
-  @Min(0)
-  @ApiProperty({
-    description: 'Number of decimals',
-    example: 2,
-    required: false,
-  })
-  decimals?: number;
-
-  @IsOptional()
   @IsBoolean()
-  @ApiProperty({
-    description: 'Whether symbol is prefix',
-    example: false,
-    required: false,
+  @ApiPropertyOptional({
+    description: 'Whether the currency is active',
+    example: true,
   })
-  isPrefix?: boolean;
+  isActive?: boolean;
 }

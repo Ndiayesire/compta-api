@@ -1,55 +1,27 @@
 import { Client } from '@prisma/client';
 import { CompanyEntity } from '../../company/entities/company.entity';
-import { ClientTypeEntity } from '../../settings/client-types/entities/client-type.entity';
-import { ClientFlagEntity } from '../../settings/client-flags/entities/client-flag.entity';
 import { CountryEntity } from '../../settings/countries/entities/country.entity';
 import { RegionEntity } from '../../settings/regions/entities/region.entity';
-import { CurrencyEntity } from '../../settings/currency/entities/currency.entity';
 import { LegalFormEntity } from '../../settings/legal-forms/entities/legal-form.entity';
 
 export class ClientEntity implements Client {
   id: string;
-
-  // Company association
+  userId: string;
   companyId: string;
-
-  // Types and flags
-  clientTypeId: string | null;
-  clientFlagId: string | null;
-
-  // Geographical
-  countryId: string | null;
-  regionId: string | null;
-  currencyId: string | null;
-
-  // Legal
-  legalFormId: string | null;
-  ninea: string | null;
-  tva: string | null;
-  reference: string | null;
-
-  // Identity
+  countryId: string;
+  regionId: string;
+  legalFormId: string;
   name: string;
-  email: string | null;
-  phone: string | null;
-  address: string | null;
-
-  // Status
-  isActive: boolean;
-  deletedAt: Date | null;
-
-  // Metadata
+  address: string;
+  ninea: string;
+  useTva: boolean;
+  meta: Client['meta'];
   createdAt: Date;
   updatedAt: Date;
+  deletedAt: Date | null;
 
-  // Relations
   company?: CompanyEntity;
-  clientType?: ClientTypeEntity;
-  clientFlag?: ClientFlagEntity;
   country?: CountryEntity;
   region?: RegionEntity;
-  currency?: CurrencyEntity;
   legalForm?: LegalFormEntity;
-  /** Junction rows; use `include: { paymentMethod: true }` for full payment method rows */
-  paymentMethods?: unknown[];
 }

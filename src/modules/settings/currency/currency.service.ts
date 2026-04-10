@@ -13,12 +13,10 @@ export class CurrencyService {
         data: {
           code: dto.code.toUpperCase(),
           name: dto.name,
-          symbol: dto.symbol,
-          decimals: dto.decimals ?? 0,
-          isPrefix: dto.isPrefix ?? false,
+          ...(dto.isActive !== undefined ? { isActive: dto.isActive } : {}),
         },
       });
-    } catch (error : any) {
+    } catch (error: any) {
       if (error.code === 'P2002') {
         throw new ConflictException('Currency code already exists');
       }
@@ -28,7 +26,7 @@ export class CurrencyService {
 
   async findAll() {
     return this.prisma.currency.findMany({
-      orderBy: { createdAt: 'desc' },
+      orderBy: { code: 'asc' },
     });
   }
 
@@ -45,7 +43,7 @@ export class CurrencyService {
   }
 
   async findByCode(code: string) {
-    const currency = await this.prisma.currency.findUnique({
+    const currency = await this.prisma.currency.findFirst({
       where: {
         code: code.toUpperCase(),
       },
@@ -67,13 +65,10 @@ export class CurrencyService {
         data: {
           ...(dto.code && { code: dto.code.toUpperCase() }),
           ...(dto.name && { name: dto.name }),
-          ...(dto.symbol !== undefined && { symbol: dto.symbol }),
-          ...(dto.decimals !== undefined && { decimals: dto.decimals }),
-          ...(dto.isPrefix !== undefined && { isPrefix: dto.isPrefix }),
           ...(dto.isActive !== undefined && { isActive: dto.isActive }),
         },
       });
-    } catch (error : any) {
+    } catch (error: any) {
       if (error.code === 'P2002') {
         throw new ConflictException('Currency code already exists');
       }

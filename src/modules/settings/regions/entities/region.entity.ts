@@ -4,7 +4,6 @@ export class RegionEntity implements Region {
   id: string;
   name: string;
   countryId: string;
+  code: string;
   isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
 }

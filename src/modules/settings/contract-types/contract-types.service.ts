@@ -25,7 +25,7 @@ export class ContractTypesService {
 
   async findAll() {
     return this.prisma.contractType.findMany({
-      orderBy: { createdAt: 'desc' },
+      orderBy: { code: 'asc' },
     });
   }
 
@@ -40,7 +40,6 @@ export class ContractTypesService {
 
     return contractType;
   }
-
 
   async update(id: string, dto: UpdateContractTypeDto) {
     const existing = await this.prisma.contractType.findUnique({
@@ -79,7 +78,6 @@ export class ContractTypesService {
     });
   }
 
-
   async remove(id: string) {
     const existing = await this.prisma.contractType.findUnique({
       where: { id },
@@ -89,8 +87,8 @@ export class ContractTypesService {
       throw new NotFoundException('Contract type not found');
     }
 
-    const used = await this.prisma.employee.count({
-      where: { contractTypeId: id },
+    const used = await this.prisma.employeeContractType.count({
+      where: { contractTypeId: id, deletedAt: null },
     });
 
     if (used > 0) {

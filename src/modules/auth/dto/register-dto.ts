@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsString, IsOptional, MinLength, IsArray } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, IsOptional, MinLength } from 'class-validator';
 
 export class RegisterDtoValidation {
   @IsEmail()
@@ -9,6 +9,26 @@ export class RegisterDtoValidation {
   @IsNotEmpty()
   @MinLength(8)
   password: string;
+
+  @IsString()
+  @IsNotEmpty()
+  roleId: string;
+
+  @IsString()
+  @IsNotEmpty()
+  countryId: string;
+
+  @IsString()
+  @IsNotEmpty()
+  regionId: string;
+
+  @IsString()
+  @IsNotEmpty()
+  languageId: string;
+
+  @IsString()
+  @IsNotEmpty()
+  genderId: string;
 
   @IsString()
   @IsOptional()
@@ -24,10 +44,9 @@ export class RegisterDtoValidation {
 
   @IsString()
   @IsOptional()
-  companyId?: string;
+  address?: string;
 
-  @IsArray()
-  @IsString({ each: true })
+  @IsString()
   @IsOptional()
-  roleIds?: string[];
+  avatar?: string;
 }

@@ -30,7 +30,7 @@ export class AuthService {
             permissions: { include: { permission: true } },
           },
         },
-        company: true,
+        companies: true,
       },
     });
 
@@ -48,8 +48,9 @@ export class AuthService {
       data: { lastLoginAt: new Date() },
     });
 
-    const { password: _, refreshToken: __, ...userWithoutSensitive } = user;
-    return userWithoutSensitive as AuthUser;
+    const { password: _, refreshToken: __, companies, ...userWithoutSensitive } = user;
+    const company = companies?.[0] ?? null;
+    return { ...userWithoutSensitive, company, companyId: company?.id } as AuthUser;
   }
 
   async login(loginDto: LoginDtoValidation): Promise<Tokens> {
@@ -67,7 +68,7 @@ export class AuthService {
   async register(registerDto: RegisterDtoValidation) {
     const user = await this.usersService.create(registerDto);
     return user;
- }
+  }
 
   async refreshTokens(userId: string, refreshToken: string): Promise<Tokens> {
     const user = await this.prisma.user.findUnique({
@@ -78,7 +79,7 @@ export class AuthService {
             permissions: { include: { permission: true } },
           },
         },
-        company: true,
+        companies: true,
       },
     });
 
@@ -91,8 +92,10 @@ export class AuthService {
       throw new UnauthorizedException('Invalid refresh token');
     }
 
-    const { password: _, refreshToken: __, ...userWithoutSensitive } = user;
-    const tokens = await this.generateTokens(userWithoutSensitive as AuthUser);
+    const { password: _, refreshToken: __, companies, ...rest } = user;
+    const company = companies?.[0] ?? null;
+    const userWithoutSensitive = { ...rest, company, companyId: company?.id } as AuthUser;
+    const tokens = await this.generateTokens(userWithoutSensitive);
     await this.updateRefreshToken(user.id, tokens.refreshToken);
 
     return tokens;
@@ -109,7 +112,7 @@ export class AuthService {
     const payload = {
       sub: user.id,
       email: user.email,
-      companyId: user.companyId,
+      companyId: user.company?.id,
       roles: user.role ? [user.role.name] : [],
     };
 

@@ -38,6 +38,8 @@ async function bootstrap() {
     .addTag('legal-forms', 'Company Legal Form Settings')
     .addTag('countries', 'Country settings')
     .addTag('regions', 'Region settings')
+    .addTag('genders', 'Gender settings')
+    .addTag('languages', 'Language settings')
     .addTag('currencies', 'Currency settings')
     .addTag('payment-methods', 'Payment method settings')
     .addTag('permissions', 'Permission management')

@@ -10,14 +10,16 @@ export class RolesService {
   async create(dto: CreateRoleDto) {
     const { permissionIds, ...rest } = dto;
 
-    const existing = await this.prisma.role.findUnique({
+    const existing = await this.prisma.role.findFirst({
       where: { name: rest.name },
     });
     if (existing) throw new ConflictException(`Role "${rest.name}" already exists`);
 
     return this.prisma.role.create({
       data: {
-        ...rest,
+        name: rest.name,
+        code: rest.code,
+        isActive: rest.isActive ?? true,
         permissions: permissionIds?.length
           ? {
               create: permissionIds.map((permissionId) => ({
@@ -62,7 +64,6 @@ export class RolesService {
     await this.findOne(id);
     const { permissionIds, ...rest } = dto;
 
-    // Sync permissions si fournis
     if (permissionIds) {
       await this.prisma.rolePermission.deleteMany({ where: { roleId: id } });
     }
@@ -95,11 +96,10 @@ export class RolesService {
     });
   }
 
-  
   async addPermissions(id: string, permissionIds: string[]) {
     await this.findOne(id);
 
-    const data = await Promise.all(
+    await Promise.all(
       permissionIds.map((permissionId) =>
         this.prisma.rolePermission.upsert({
           where: {
@@ -130,10 +130,8 @@ export class RolesService {
   async syncPermissions(id: string, permissionIds: string[]) {
     await this.findOne(id);
 
-    // Supprime toutes les permissions existantes
     await this.prisma.rolePermission.deleteMany({ where: { roleId: id } });
 
-    // Recrée avec les nouvelles
     await Promise.all(
       permissionIds.map((permissionId) =>
         this.prisma.rolePermission.create({

@@ -5,11 +5,22 @@ import {
   ConflictException,
   BadRequestException,
 } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import * as bcrypt from 'bcrypt';
+
+const userInclude = {
+  role: { include: { permissions: { include: { permission: true } } } },
+  companies: true,
+} as const;
+
+function withCompany<T extends { companies: { id: string }[] }>(user: T) {
+  const { companies, ...rest } = user;
+  return { ...rest, company: companies[0] ?? null };
+}
 
 @Injectable()
 export class UsersService {
@@ -23,53 +34,55 @@ export class UsersService {
     });
     if (existing) throw new ConflictException(`Email "${rest.email}" already exists`);
 
+    if (!roleId) {
+      throw new BadRequestException('roleId is required');
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const data: any = {
-      ...rest,
-      password: hashedPassword,
-    };
-    if (roleId) data.role = { connect: { id: roleId } };
-
-    return this.prisma.user.create({
-      data,
-      include: {
-        role: { include: { permissions: { include: { permission: true } } } },
-        company: true,
+    const created = await this.prisma.user.create({
+      data: {
+        email: rest.email,
+        password: hashedPassword,
+        firstName: rest.firstName ?? '',
+        lastName: rest.lastName ?? '',
+        phone: rest.phone ?? '',
+        address: rest.address ?? '',
+        avatar: rest.avatar ?? '',
+        countryId: rest.countryId,
+        regionId: rest.regionId,
+        languageId: rest.languageId,
+        genderId: rest.genderId,
+        isActive: rest.isActive ?? true,
+        roleId,
       },
+      include: userInclude,
     });
+
+    return withCompany(created);
   }
 
   async findAll(companyId?: string) {
-    return this.prisma.user.findMany({
+    const rows = await this.prisma.user.findMany({
       where: {
         deletedAt: null,
-        ...(companyId && { companyId }),
+        ...(companyId && { companies: { some: { id: companyId } } }),
       },
       orderBy: { createdAt: 'desc' },
-      include: {
-        role: { include: { permissions: { include: { permission: true } } } },
-        company: true,
-      },
+      include: userInclude,
       omit: { password: true, refreshToken: true },
     });
+    return rows.map(withCompany);
   }
 
   async findOne(id: string) {
     const user = await this.prisma.user.findUnique({
       where: { id },
-      include: {
-        role: {
-          include: {
-            permissions: { include: { permission: true } },
-          },
-        },
-        company: true,
-      },
+      include: userInclude,
       omit: { password: true, refreshToken: true },
     });
     if (!user) throw new NotFoundException(`User ${id} not found`);
-    return user;
+    return withCompany(user);
   }
 
   async findByEmail(email: string) {
@@ -89,23 +102,24 @@ export class UsersService {
     await this.findOne(id);
     const { roleId, password, ...rest } = dto;
 
-    const data: any = { ...rest };
+    const data: Prisma.UserUncheckedUpdateInput = { ...rest };
     if (password) {
       data.password = await bcrypt.hash(password, 10);
     }
     if (roleId !== undefined) {
-      data.role = roleId ? { connect: { id: roleId } } : { disconnect: true };
+      if (!roleId) {
+        throw new BadRequestException('roleId cannot be cleared; assign another role instead');
+      }
+      data.roleId = roleId;
     }
 
-    return this.prisma.user.update({
+    const updated = await this.prisma.user.update({
       where: { id },
       data,
-      include: {
-        role: { include: { permissions: { include: { permission: true } } } },
-        company: true,
-      },
+      include: userInclude,
       omit: { password: true, refreshToken: true },
     });
+    return withCompany(updated);
   }
 
   async changePassword(id: string, dto: ChangePasswordDto) {
@@ -131,29 +145,17 @@ export class UsersService {
   async setRole(id: string, roleId: string) {
     await this.findOne(id);
 
-    return this.prisma.user.update({
+    const updated = await this.prisma.user.update({
       where: { id },
-      data: { role: { connect: { id: roleId } } },
-      include: {
-        role: { include: { permissions: { include: { permission: true } } } },
-        company: true,
-      },
+      data: { roleId },
+      include: userInclude,
       omit: { password: true, refreshToken: true },
     });
+    return withCompany(updated);
   }
 
-  async unsetRole(id: string) {
-    await this.findOne(id);
-
-    return this.prisma.user.update({
-      where: { id },
-      data: { role: { disconnect: true } },
-      include: {
-        role: { include: { permissions: { include: { permission: true } } } },
-        company: true,
-      },
-      omit: { password: true, refreshToken: true },
-    });
+  async unsetRole(_id: string) {
+    throw new BadRequestException('A role is required for every user');
   }
 
   async remove(id: string) {

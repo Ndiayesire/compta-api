@@ -5,5 +5,4 @@ export class RolePermissionEntity implements RolePermission {
   roleId: string;
   permissionId: string;
   isActive: boolean;
-  createdAt: Date;
 }

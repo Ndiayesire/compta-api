@@ -17,4 +17,12 @@ export class CreateRegionDto {
   @IsUUID()
   @IsNotEmpty()
   countryId: string;
+
+  @ApiProperty({
+    description: 'Region code',
+    example: 'DK',
+  })
+  @IsString()
+  @IsNotEmpty()
+  code: string;
 }

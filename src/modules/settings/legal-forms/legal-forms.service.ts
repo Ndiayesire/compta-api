@@ -8,17 +8,23 @@ export class LegalFormsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(dto: CreateLegalFormDto) {
-    const existing = await this.prisma.legalForm.findUnique({
+    const existing = await this.prisma.legalForm.findFirst({
       where: { name: dto.name },
     });
     if (existing) throw new ConflictException(`Legal form "${dto.name}" already exists`);
 
-    return this.prisma.legalForm.create({ data: dto });
+    return this.prisma.legalForm.create({
+      data: {
+        name: dto.name,
+        code: dto.code,
+        ...(dto.isActive !== undefined ? { isActive: dto.isActive } : {}),
+      },
+    });
   }
 
   async findAll() {
     return this.prisma.legalForm.findMany({
-      orderBy: { createdAt: 'desc' },
+      orderBy: { name: 'asc' },
     });
   }
 
@@ -37,36 +43,7 @@ export class LegalFormsService {
     await this.findOne(id);
     return this.prisma.legalForm.update({
       where: { id },
-      data: { isActive: false, deletedAt: new Date() },
+      data: { isActive: false },
     });
   }
-
-  // async seed() {
-  //   const legalForms = [
-  //     { name: 'SARL', description: 'Société à Responsabilité Limitée' },
-  //     { name: 'SAS', description: 'Société par Actions Simplifiée' },
-  //     { name: 'SASU', description: 'Société par Actions Simplifiée Unipersonnelle' },
-  //     { name: 'SA', description: 'Société Anonyme' },
-  //     { name: 'SNC', description: 'Société en Nom Collectif' },
-  //     { name: 'EI', description: 'Entreprise Individuelle' },
-  //     { name: 'EIRL', description: 'Entreprise Individuelle à Responsabilité Limitée' },
-  //     { name: 'EURL', description: 'Entreprise Unipersonnelle à Responsabilité Limitée' },
-  //     { name: 'GIE', description: 'Groupement d\'Intérêt Économique' },
-  //     { name: 'ASSO', description: 'Association' },
-  //     { name: 'ONG', description: 'Organisation Non Gouvernementale' },
-  //     { name: 'OTHER', description: 'Autre forme juridique' },
-  //   ];
-
-  //   const data = await Promise.all(
-  //     legalForms.map((lf) =>
-  //       this.prisma.legalForm.upsert({
-  //         where: { name: lf.name },
-  //         update: {},
-  //         create: lf,
-  //       }),
-  //     ),
-  //   );
-
-  //   return data;
-  // }
 }

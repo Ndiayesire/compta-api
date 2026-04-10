@@ -14,6 +14,7 @@
     "start:prod": "node dist/src/main.js",
     "generate": "npx prisma generate",
     "migrate": "npx prisma migrate dev",
+    "seed": "node prisma/seed.cjs",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
@@ -21,7 +22,8 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "prisma": {
-    "schema": "src/prisma/schema.prisma"
+    "schema": "prisma/schema.prisma",
+    "seed": "node prisma/seed.cjs"
   },
   "dependencies": {
     "@nestjs/common": "^11.1.17",
@@ -32,7 +34,7 @@
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.1.17",
     "@nestjs/swagger": "^11.2.6",
-    "@prisma/adapter-mariadb": "^7.5.0",
+    "@prisma/adapter-mariadb": "^7.7.0",
     "@prisma/client": "^7.5.0",
     "bcrypt": "^6.0.0",
     "class-transformer": "^0.5.1",
@@ -49,7 +51,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.18.0",
-    "@nestjs/cli": "^11.0.0",
+    "@nestjs/cli": "^11.0.19",
     "@nestjs/schematics": "^11.0.0",
     "@nestjs/testing": "^11.0.1",
     "@types/express": "^5.0.0",

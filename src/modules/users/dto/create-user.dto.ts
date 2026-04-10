@@ -1,6 +1,5 @@
-import { IsString, IsNotEmpty, IsOptional, IsEmail, IsEnum, IsBoolean, MinLength } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsEmail, IsBoolean, MinLength } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { UserStatus } from '@prisma/client';
 
 export class CreateUserDto {
   @ApiProperty({
@@ -19,6 +18,31 @@ export class CreateUserDto {
   @IsNotEmpty()
   @MinLength(8)
   password: string;
+
+  @ApiProperty({ description: 'Role ID', example: 'role-uuid-123' })
+  @IsString()
+  @IsNotEmpty()
+  roleId: string;
+
+  @ApiProperty({ description: 'Country (settings) ID', example: 'country-uuid-123' })
+  @IsString()
+  @IsNotEmpty()
+  countryId: string;
+
+  @ApiProperty({ description: 'Region (settings) ID', example: 'region-uuid-123' })
+  @IsString()
+  @IsNotEmpty()
+  regionId: string;
+
+  @ApiProperty({ description: 'Language (settings) ID', example: 'language-uuid-123' })
+  @IsString()
+  @IsNotEmpty()
+  languageId: string;
+
+  @ApiProperty({ description: 'Gender (settings) ID', example: 'gender-uuid-123' })
+  @IsString()
+  @IsNotEmpty()
+  genderId: string;
 
   @ApiPropertyOptional({
     description: 'First name of the user',
@@ -44,6 +68,11 @@ export class CreateUserDto {
   @IsOptional()
   phone?: string;
 
+  @ApiPropertyOptional({ description: 'Postal / street address' })
+  @IsString()
+  @IsOptional()
+  address?: string;
+
   @ApiPropertyOptional({
     description: 'Avatar URL',
     example: 'https://example.com/avatar.jpg',
@@ -53,35 +82,10 @@ export class CreateUserDto {
   avatar?: string;
 
   @ApiPropertyOptional({
-    description: 'User status',
-    enum: UserStatus,
-    example: UserStatus.ACTIVE,
-  })
-  @IsEnum(UserStatus)
-  @IsOptional()
-  status?: UserStatus;
-
-  @ApiPropertyOptional({
     description: 'Is the user active?',
     example: true,
   })
   @IsBoolean()
   @IsOptional()
   isActive?: boolean;
-
-  @ApiPropertyOptional({
-    description: 'ID of the company the user belongs to',
-    example: 'company-uuid-123',
-  })
-  @IsString()
-  @IsOptional()
-  companyId?: string;
-
-  @ApiPropertyOptional({
-    description: 'ID of the user role',
-    example: 'role-uuid-123',
-  })
-  @IsString()
-  @IsOptional()
-  roleId?: string;
 }

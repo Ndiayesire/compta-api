@@ -5,6 +5,4 @@ export class ContractTypeEntity implements ContractType {
   name: string;
   code: string;
   isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
 }

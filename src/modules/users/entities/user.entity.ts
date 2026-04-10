@@ -1,22 +1,22 @@
-import { User, UserStatus } from '@prisma/client';
+import { User } from '@prisma/client';
 
 export class UserEntity implements User {
   id: string;
   email: string;
   password: string;
-  firstName: string | null;
-  lastName: string | null;
-  phone: string | null;
-  address: string | null;
-  avatar: string | null;
-  status: UserStatus;
+  firstName: string;
+  lastName: string;
+  phone: string;
+  address: string;
+  avatar: string;
   isActive: boolean;
-  companyId: string | null;
-  roleId: string | null;
+  roleId: string;
+  countryId: string;
+  regionId: string;
+  languageId: string;
+  genderId: string;
   lastLoginAt: Date | null;
   refreshToken: string | null;
-  passwordResetToken: string | null;
-  passwordResetExpiry: Date | null;
   createdAt: Date;
   updatedAt: Date;
   deletedAt: Date | null;

@@ -3,6 +3,15 @@ import { PrismaService } from '../../../prisma/prisma.service';
 import { CreateEmployeeDto } from './dto/create-employees.dto';
 import { UpdateEmployeeDto } from './dto/update-employees.dto';
 
+const employeeInclude = {
+  client: true,
+  employeeContractTypes: {
+    where: { deletedAt: null },
+    include: { contractType: true },
+    orderBy: { createdAt: 'desc' as const },
+  },
+};
+
 @Injectable()
 export class EmployeeService {
   constructor(private prisma: PrismaService) {}
@@ -16,29 +25,40 @@ export class EmployeeService {
       throw new BadRequestException('Invalid client');
     }
 
-    return this.prisma.employee.create({
-      data: {
-        ...dto,
-        startDate: new Date(dto.startDate),
-        endDate: dto.endDate ? new Date(dto.endDate) : null,
-      },
+    return this.prisma.$transaction(async (tx) => {
+      const employee = await tx.employee.create({
+        data: {
+          clientId: dto.clientId,
+          firstName: dto.firstName,
+          lastName: dto.lastName,
+          email: dto.email,
+          phone: dto.phone,
+          address: dto.address,
+          isActive: dto.isActive ?? true,
+        },
+      });
+
+      await tx.employeeContractType.create({
+        data: {
+          employeeId: employee.id,
+          contractTypeId: dto.contractTypeId,
+          startDate: new Date(dto.startDate),
+          endDate: new Date(dto.endDate),
+          jobTitle: dto.jobTitle,
+        },
+      });
+
+      return tx.employee.findUniqueOrThrow({
+        where: { id: employee.id },
+        include: employeeInclude,
+      });
     });
   }
-
-  // async findAll(clientId: string) {
-  //   return this.prisma.employee.findMany({
-  //     where: clientId ? { clientId, deletedAt: null } : { deletedAt: null },
-  //     orderBy: { createdAt: 'desc' },
-  //     include: {
-  //       client: true,
-  //     },
-  //   });
-  // }
 
   async findOne(id: string) {
     const employee = await this.prisma.employee.findFirst({
       where: { id, deletedAt: null },
-      include: { client: true, contractType: true },
+      include: employeeInclude,
     });
 
     if (!employee) {
@@ -51,14 +71,47 @@ export class EmployeeService {
   async update(id: string, dto: UpdateEmployeeDto) {
     await this.findOne(id);
 
-    return this.prisma.employee.update({
+    const {
+      contractTypeId,
+      startDate,
+      endDate,
+      jobTitle,
+      ...employeeRest
+    } = dto;
+
+    await this.prisma.employee.update({
       where: { id },
       data: {
-        ...dto,
-        startDate: dto.startDate ? new Date(dto.startDate) : undefined,
-        endDate: dto.endDate ? new Date(dto.endDate) : undefined,
+        ...employeeRest,
       },
     });
+
+    if (
+      contractTypeId !== undefined ||
+      startDate !== undefined ||
+      endDate !== undefined ||
+      jobTitle !== undefined
+    ) {
+      const latest = await this.prisma.employeeContractType.findFirst({
+        where: { employeeId: id, deletedAt: null },
+        orderBy: { createdAt: 'desc' },
+      });
+      if (latest) {
+        await this.prisma.employeeContractType.update({
+          where: { id: latest.id },
+          data: {
+            ...(contractTypeId !== undefined && {
+              contractType: { connect: { id: contractTypeId } },
+            }),
+            ...(startDate !== undefined && { startDate: new Date(startDate) }),
+            ...(endDate !== undefined && { endDate: new Date(endDate) }),
+            ...(jobTitle !== undefined && { jobTitle }),
+          },
+        });
+      }
+    }
+
+    return this.findOne(id);
   }
 
   async remove(id: string) {
@@ -77,7 +130,7 @@ export class EmployeeService {
         deletedAt: null,
       },
       orderBy: { createdAt: 'desc' },
-      include: { contractType: true },
+      include: employeeInclude,
     });
   }
 }

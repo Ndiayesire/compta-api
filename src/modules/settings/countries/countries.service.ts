@@ -9,18 +9,26 @@ export class CountriesService {
 
   create(dto: CreateCountryDto) {
     return this.prisma.country.create({
-      data: dto,
-      include: { regions: true },
+      data: {
+        currencyId: dto.currencyId,
+        name: dto.name,
+        code: dto.code,
+        tva: dto.tva,
+        callingCode: dto.callingCode,
+        ...(dto.isActive !== undefined ? { isActive: dto.isActive } : {}),
+      },
+      include: { regions: true, currency: true },
     });
   }
 
   findAll() {
     return this.prisma.country.findMany({
-      orderBy: { createdAt: 'desc' },
+      orderBy: { name: 'asc' },
       include: {
         regions: {
           orderBy: { name: 'asc' },
         },
+        currency: true,
       },
     });
   }
@@ -28,7 +36,7 @@ export class CountriesService {
   async findOne(id: string) {
     const country = await this.prisma.country.findUnique({
       where: { id },
-      include: { regions: true },
+      include: { regions: true, currency: true },
     });
     if (!country) throw new NotFoundException(`Country ${id} not found`);
     return country;
@@ -38,8 +46,15 @@ export class CountriesService {
     await this.findOne(id);
     return this.prisma.country.update({
       where: { id },
-      data: dto,
-      include: { regions: true },
+      data: {
+        ...(dto.currencyId !== undefined && { currencyId: dto.currencyId }),
+        ...(dto.name !== undefined && { name: dto.name }),
+        ...(dto.code !== undefined && { code: dto.code }),
+        ...(dto.tva !== undefined && { tva: dto.tva }),
+        ...(dto.callingCode !== undefined && { callingCode: dto.callingCode }),
+        ...(dto.isActive !== undefined && { isActive: dto.isActive }),
+      },
+      include: { regions: true, currency: true },
     });
   }
 

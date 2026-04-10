@@ -1,19 +1,23 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 
-const paymentMethodsWithDetails = {
-  include: { paymentMethod: true },
-};
+const companyInclude = {
+  country: true,
+  region: true,
+  legalForm: true,
+  user: true,
+} as const;
 
 @Injectable()
 export class CompanyService {
   constructor(private prisma: PrismaService) {}
 
   async create(dto: CreateCompanyDto) {
-    const { paymentMethodIds, user, ...rest } = dto;
+    const { user, ...companyRest } = dto;
 
     return this.prisma.$transaction(async (tx) => {
       const existing = await tx.user.findUnique({ where: { email: user.email } });
@@ -21,43 +25,48 @@ export class CompanyService {
         throw new ConflictException(`Email "${user.email}" already exists`);
       }
 
-      const company = await tx.company.create({
-        data: {
-          ...rest,
-          paymentMethods: paymentMethodIds?.length
-            ? {
-                create: paymentMethodIds.map((id) => ({
-                  paymentMethod: { connect: { id } },
-                })),
-              }
-            : undefined,
-        },
-        include: {
-          country: true,
-          region: true,
-          paymentMethods: paymentMethodsWithDetails,
-          currency: true,
-          legalForm: true,
-        },
-      });
+      if (!user.roleId) {
+        throw new ConflictException('User roleId is required');
+      }
 
-      const { password, roleId, ...userFields } = user;
-      const hashedPassword = await bcrypt.hash(password, 10);
+      const hashedPassword = await bcrypt.hash(user.password, 10);
 
       const createdUser = await tx.user.create({
         data: {
-          ...userFields,
+          email: user.email,
           password: hashedPassword,
-          company: { connect: { id: company.id } },
-          ...(roleId ? { role: { connect: { id: roleId } } } : {}),
-        },
-        include: {
-          role: { include: { permissions: { include: { permission: true } } } },
-          company: true,
+          firstName: user.firstName ?? '',
+          lastName: user.lastName ?? '',
+          phone: user.phone ?? '',
+          address: user.address ?? '',
+          avatar: user.avatar ?? '',
+          countryId: user.countryId,
+          regionId: user.regionId,
+          languageId: user.languageId,
+          genderId: user.genderId,
+          isActive: user.isActive ?? true,
+          roleId: user.roleId,
         },
       });
 
-      const { password: _omit, ...userSafe } = createdUser;
+      const company = await tx.company.create({
+        data: {
+          userId: createdUser.id,
+          name: companyRest.name,
+          email: companyRest.email,
+          phone: companyRest.phone,
+          address: companyRest.address,
+          ninea: companyRest.ninea,
+          useTva: companyRest.useTva ?? true,
+          reference: companyRest.reference,
+          legalFormId: companyRest.legalFormId,
+          countryId: companyRest.countryId,
+          regionId: companyRest.regionId,
+          meta: (companyRest.meta ?? {}) as Prisma.InputJsonValue,
+        },
+        include: companyInclude,
+      });
+
       return { company };
     });
   }
@@ -65,24 +74,14 @@ export class CompanyService {
   async findAll() {
     return this.prisma.company.findMany({
       orderBy: { createdAt: 'desc' },
-      include: {
-        country: true,
-        region: true,
-        paymentMethods: paymentMethodsWithDetails,
-        currency: true,
-      },
+      include: companyInclude,
     });
   }
 
   async findOne(id: string) {
     const company = await this.prisma.company.findUnique({
       where: { id },
-      include: {
-        country: true,
-        region: true,
-        paymentMethods: paymentMethodsWithDetails,
-        currency: true,
-      },
+      include: companyInclude,
     });
     if (!company) throw new NotFoundException(`Company ${id} not found`);
     return company;
@@ -90,29 +89,20 @@ export class CompanyService {
 
   async update(id: string, dto: UpdateCompanyDto) {
     await this.findOne(id);
-    const { paymentMethodIds, user: _user, ...rest } = dto;
+    const { user: _user, meta, countryId, regionId, legalFormId, ...scalar } = dto;
 
-    const data: Parameters<typeof this.prisma.company.update>[0]['data'] = {
-      ...rest,
-      ...(paymentMethodIds !== undefined && {
-        paymentMethods: {
-          deleteMany: {},
-          create: [...new Set(paymentMethodIds)].map((pmId) => ({
-            paymentMethod: { connect: { id: pmId } },
-          })),
-        },
-      }),
+    const data: Prisma.CompanyUpdateInput = {
+      ...scalar,
+      ...(meta !== undefined ? { meta: meta as Prisma.InputJsonValue } : {}),
+      ...(countryId !== undefined ? { country: { connect: { id: countryId } } } : {}),
+      ...(regionId !== undefined ? { region: { connect: { id: regionId } } } : {}),
+      ...(legalFormId !== undefined ? { legalForm: { connect: { id: legalFormId } } } : {}),
     };
 
     return this.prisma.company.update({
       where: { id },
       data,
-      include: {
-        country: true,
-        region: true,
-        paymentMethods: paymentMethodsWithDetails,
-        currency: true,
-      },
+      include: companyInclude,
     });
   }
 

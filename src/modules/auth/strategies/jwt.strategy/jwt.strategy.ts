@@ -30,7 +30,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
             permissions: { include: { permission: true } },
           },
         },
-        company: true,
+        companies: true,
       },
     });
 
@@ -38,7 +38,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('User not found or inactive');
     }
 
-    const { password: _, refreshToken: __, ...userWithoutSensitive } = user;
-    return userWithoutSensitive as AuthUser;
+    const { password: _, refreshToken: __, companies, ...userWithoutSensitive } = user;
+    const company = companies?.[0] ?? null;
+    return { ...userWithoutSensitive, company, companyId: company?.id } as AuthUser;
   }
 }

@@ -52,6 +52,14 @@ export class PaymentMethodsController {
     return { success: true, message: 'Payment methods retrieved successfully', data };
   }
 
+  @Get('types')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'List payment method types (catalog)' })
+  async findAllTypes() {
+    const data = await this.paymentMethodsService.findAllTypes();
+    return { success: true, message: 'Payment method types retrieved successfully', data };
+  }
+
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Get a payment method by ID' })

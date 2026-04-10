@@ -64,10 +64,10 @@ export class PermissionsController {
     return { success: true, message: 'Permissions retrieved successfully', data };
   }
 
-  @Get('module/:module')
+  @Get('type/:typeId')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Retrieve permissions by module' })
-  @ApiParam({ name: 'module', description: 'Module name', example: 'users' })
+  @ApiOperation({ summary: 'Retrieve permissions by permission type ID' })
+  @ApiParam({ name: 'typeId', description: 'Permission type ID', example: 'perm-type-uuid' })
   @ApiResponse({
     status: 200,
     description: 'Permissions retrieved successfully',
@@ -75,14 +75,14 @@ export class PermissionsController {
       type: 'object',
       properties: {
         success: { type: 'boolean', example: true },
-        message: { type: 'string', example: 'Permissions for module "users" retrieved' },
+        message: { type: 'string', example: 'Permissions for type retrieved' },
         data: { type: 'array', items: { type: 'object' } }
       }
     }
   })
-  async findByModule(@Param('module') module: string) {
-    const data = await this.permissionsService.findByModule(module);
-    return { success: true, message: `Permissions for module "${module}" retrieved`, data };
+  async findByType(@Param('typeId') typeId: string) {
+    const data = await this.permissionsService.findByTypeId(typeId);
+    return { success: true, message: 'Permissions for type retrieved', data };
   }
 
   @Get(':id')

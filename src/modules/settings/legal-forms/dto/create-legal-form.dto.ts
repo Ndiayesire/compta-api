@@ -7,10 +7,10 @@ export class CreateLegalFormDto {
   @IsNotEmpty()
   name: string;
 
-  @ApiPropertyOptional({ description: 'Description', example: 'Société à Responsabilité Limitée' })
+  @ApiProperty({ description: 'Legal form code', example: 'SARL' })
   @IsString()
-  @IsOptional()
-  description?: string;
+  @IsNotEmpty()
+  code: string;
 
   @ApiPropertyOptional({ description: 'Is active', example: true })
   @IsBoolean()

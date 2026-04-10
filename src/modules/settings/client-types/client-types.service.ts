@@ -1,41 +1,27 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../../../prisma/prisma.service';
+import { Injectable, NotImplementedException } from '@nestjs/common';
 import { CreateClientTypeDto } from './dto/create-client-type.dto';
 import { UpdateClientTypeDto } from './dto/update-client-type.dto';
 
+/** Legacy module: `client_types` was removed from the database schema. */
 @Injectable()
 export class ClientTypesService {
-  constructor(private readonly prisma: PrismaService) {}
-
-  create(dto: CreateClientTypeDto) {
-    return this.prisma.clientType.create({ 
-        data: dto 
-    });
+  create(_dto: CreateClientTypeDto) {
+    throw new NotImplementedException('Client types are not part of the current schema');
   }
 
   findAll() {
-    return this.prisma.clientType.findMany({
-        orderBy: { createdAt: 'desc' },
-    });
-    
+    throw new NotImplementedException('Client types are not part of the current schema');
   }
 
-  findOne(id: string) {
-    return this.prisma.clientType.findUnique({ 
-        where: { id } 
-    });
+  findOne(_id: string) {
+    throw new NotImplementedException('Client types are not part of the current schema');
   }
 
-  update(id: string, dto: UpdateClientTypeDto) {
-    return this.prisma.clientType.update({
-        where: { id }, data: dto 
-    });
+  update(_id: string, _dto: UpdateClientTypeDto) {
+    throw new NotImplementedException('Client types are not part of the current schema');
   }
 
-  remove(id: string) {
-    return this.prisma.clientType.update({
-        where: { id },
-        data: { isActive: false },
-    });
- }
+  remove(_id: string) {
+    throw new NotImplementedException('Client types are not part of the current schema');
+  }
 }

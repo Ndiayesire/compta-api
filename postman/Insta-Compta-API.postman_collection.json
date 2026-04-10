@@ -1,0 +1,699 @@
+{
+  "info": {
+    "_postman_id": "a1b2c3d4-e5f6-7890-abcd-comptaapi01",
+    "name": "Insta Compta API",
+    "description": "NestJS compta-api — import into Postman. Set collection variables `baseUrl` (e.g. http://localhost:4230) and `accessToken` after Login. Most routes use JWT Bearer auth (global guard).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:4230" },
+    { "key": "accessToken", "value": "" },
+    { "key": "refreshToken", "value": "" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+  },
+  "item": [
+    {
+      "name": "App",
+      "item": [
+        {
+          "name": "Health",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/health"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@localhost.dev\",\n  \"password\": \"Admin123!dev\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/login",
+            "description": "Public. Copy accessToken / refreshToken into collection variables."
+          }
+        },
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"SecurePass12\",\n  \"roleId\": \"a0000016-0000-4000-8000-000000000001\",\n  \"countryId\": \"a0000002-0000-4000-8000-000000000001\",\n  \"regionId\": \"a0000003-0000-4000-8000-000000000001\",\n  \"languageId\": \"a0000004-0000-4000-8000-000000000001\",\n  \"genderId\": \"a0000007-0000-4000-8000-000000000001\",\n  \"firstName\": \"Jean\",\n  \"lastName\": \"Dupont\",\n  \"phone\": \"+221770000000\",\n  \"address\": \"Dakar\",\n  \"avatar\": \"\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/register"
+          }
+        },
+        {
+          "name": "Refresh tokens",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/refresh"
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/auth/logout"
+          }
+        },
+        {
+          "name": "Me (auth profile)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/auth/me"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Create user",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"new.user@example.com\",\n  \"password\": \"SecurePass12\",\n  \"roleId\": \"a0000016-0000-4000-8000-000000000001\",\n  \"countryId\": \"a0000002-0000-4000-8000-000000000001\",\n  \"regionId\": \"a0000003-0000-4000-8000-000000000001\",\n  \"languageId\": \"a0000004-0000-4000-8000-000000000001\",\n  \"genderId\": \"a0000007-0000-4000-8000-000000000001\",\n  \"firstName\": \"A\",\n  \"lastName\": \"B\",\n  \"phone\": \"+221770000001\",\n  \"address\": \"Dakar\",\n  \"avatar\": \"\"\n}"
+            },
+            "url": "{{baseUrl}}/users"
+          }
+        },
+        {
+          "name": "List users",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/users" }
+        },
+        {
+          "name": "Me",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/users/me" }
+        },
+        {
+          "name": "Get user by id",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/users/:id" }
+        },
+        {
+          "name": "Change password (me)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"Admin123!dev\",\n  \"newPassword\": \"NewSecure12\",\n  \"confirmPassword\": \"NewSecure12\"\n}"
+            },
+            "url": "{{baseUrl}}/users/me/change-password"
+          }
+        },
+        {
+          "name": "Update user",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": "{{baseUrl}}/users/:id"
+          }
+        },
+        {
+          "name": "Set role",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"roleId\": \"a0000016-0000-4000-8000-000000000001\"\n}" },
+            "url": "{{baseUrl}}/users/:id/role"
+          }
+        },
+        {
+          "name": "Unset role",
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/users/:id/role" }
+        },
+        {
+          "name": "Deactivate user",
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/users/:id" }
+        }
+      ]
+    },
+    {
+      "name": "Company",
+      "item": [
+        {
+          "name": "Create company (+ owner user)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Ma SARL\",\n  \"email\": \"contact@masarl.sn\",\n  \"phone\": \"+221338000000\",\n  \"address\": \"Dakar\",\n  \"ninea\": \"SN111222333\",\n  \"useTva\": true,\n  \"reference\": \"REF-001\",\n  \"legalFormId\": \"a0000008-0000-4000-8000-000000000001\",\n  \"countryId\": \"a0000002-0000-4000-8000-000000000001\",\n  \"regionId\": \"a0000003-0000-4000-8000-000000000001\",\n  \"meta\": {},\n  \"user\": {\n    \"email\": \"owner@masarl.sn\",\n    \"password\": \"SecurePass12\",\n    \"roleId\": \"a0000015-0000-4000-8000-000000000001\",\n    \"countryId\": \"a0000002-0000-4000-8000-000000000001\",\n    \"regionId\": \"a0000003-0000-4000-8000-000000000001\",\n    \"languageId\": \"a0000004-0000-4000-8000-000000000001\",\n    \"genderId\": \"a0000007-0000-4000-8000-000000000001\",\n    \"firstName\": \"Owner\",\n    \"lastName\": \"User\"\n  }\n}"
+            },
+            "url": "{{baseUrl}}/company"
+          }
+        },
+        {
+          "name": "List companies",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/company" }
+        },
+        {
+          "name": "Get company",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/company/:id" }
+        },
+        {
+          "name": "Update company",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": "{{baseUrl}}/company/:id"
+          }
+        },
+        {
+          "name": "Soft delete company",
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/company/:id" }
+        }
+      ]
+    },
+    {
+      "name": "Clients",
+      "item": [
+        {
+          "name": "Create client (contact = current user)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Client Test\",\n  \"address\": \"Dakar\",\n  \"ninea\": \"SN999888777\",\n  \"countryId\": \"a0000002-0000-4000-8000-000000000001\",\n  \"regionId\": \"a0000003-0000-4000-8000-000000000001\",\n  \"legalFormId\": \"a0000008-0000-4000-8000-000000000001\",\n  \"useTva\": true,\n  \"meta\": {}\n}"
+            },
+            "url": "{{baseUrl}}/clients"
+          }
+        },
+        {
+          "name": "Create client + portal user",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Client Avec Contact\",\n  \"address\": \"Thiès\",\n  \"ninea\": \"SN111222333\",\n  \"countryId\": \"a0000002-0000-4000-8000-000000000001\",\n  \"regionId\": \"a0000003-0000-4000-8000-000000000001\",\n  \"legalFormId\": \"a0000008-0000-4000-8000-000000000001\",\n  \"useTva\": true,\n  \"meta\": {},\n  \"user\": {\n    \"email\": \"contact.client@example.com\",\n    \"password\": \"SecurePass12\",\n    \"roleId\": \"a0000016-0000-4000-8000-000000000001\",\n    \"countryId\": \"a0000002-0000-4000-8000-000000000001\",\n    \"regionId\": \"a0000003-0000-4000-8000-000000000001\",\n    \"languageId\": \"a0000004-0000-4000-8000-000000000001\",\n    \"genderId\": \"a0000007-0000-4000-8000-000000000001\",\n    \"firstName\": \"Aminata\",\n    \"lastName\": \"Diop\",\n    \"phone\": \"+221770123456\"\n  }\n}"
+            },
+            "url": "{{baseUrl}}/clients"
+          }
+        },
+        {
+          "name": "List clients",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/clients" }
+        },
+        {
+          "name": "Get client",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/clients/:id" }
+        },
+        {
+          "name": "Update client",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": "{{baseUrl}}/clients/:id"
+          }
+        },
+        {
+          "name": "Deactivate client",
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/clients/:id" }
+        }
+      ]
+    },
+    {
+      "name": "Employees",
+      "item": [
+        {
+          "name": "Create employee",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clientId\": \"a0000021-0000-4000-8000-000000000001\",\n  \"contractTypeId\": \"a000000b-0000-4000-8000-000000000001\",\n  \"firstName\": \"Fatou\",\n  \"lastName\": \"Sarr\",\n  \"jobTitle\": \"Comptable\",\n  \"email\": \"fatou.sarr@example.sn\",\n  \"phone\": \"+221770000099\",\n  \"address\": \"Dakar\",\n  \"startDate\": \"2025-01-01T00:00:00.000Z\",\n  \"endDate\": \"2026-12-31T23:59:59.000Z\"\n}"
+            },
+            "url": "{{baseUrl}}/employees"
+          }
+        },
+        {
+          "name": "List by client",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/employees/client/:clientId" }
+        },
+        {
+          "name": "Get employee",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/employees/:id" }
+        },
+        {
+          "name": "Update employee",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": "{{baseUrl}}/employees/:id"
+          }
+        },
+        {
+          "name": "Delete employee (soft)",
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/employees/:id" }
+        }
+      ]
+    },
+    {
+      "name": "Settings — Countries",
+      "item": [
+        {
+          "name": "Create country",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currencyId\": \"a0000001-0000-4000-8000-000000000001\",\n  \"name\": \"Mali\",\n  \"code\": \"ML\",\n  \"tva\": 18,\n  \"callingCode\": \"+223\"\n}"
+            },
+            "url": "{{baseUrl}}/countries"
+          }
+        },
+        {
+          "name": "List countries",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/countries" }
+        },
+        {
+          "name": "Get country",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/countries/:id" }
+        },
+        {
+          "name": "Update country",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": "{{baseUrl}}/countries/:id"
+          }
+        },
+        {
+          "name": "Deactivate country",
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/countries/:id" }
+        }
+      ]
+    },
+    {
+      "name": "Settings — Regions",
+      "item": [
+        {
+          "name": "Create region",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Thiès\",\n  \"countryId\": \"a0000002-0000-4000-8000-000000000001\",\n  \"code\": \"TH\"\n}"
+            },
+            "url": "{{baseUrl}}/regions"
+          }
+        },
+        {
+          "name": "List regions",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/regions" }
+        },
+        {
+          "name": "Get region",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/regions/:id" }
+        },
+        {
+          "name": "Update region",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": "{{baseUrl}}/regions/:id"
+          }
+        },
+        {
+          "name": "Deactivate region",
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/regions/:id" }
+        }
+      ]
+    },
+    {
+      "name": "Settings — Currencies",
+      "item": [
+        {
+          "name": "Create currency",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"code\": \"USD\",\n  \"name\": \"US Dollar\"\n}" },
+            "url": "{{baseUrl}}/currencies"
+          }
+        },
+        {
+          "name": "List currencies",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/currencies" }
+        },
+        {
+          "name": "Get currency",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/currencies/:id" }
+        },
+        {
+          "name": "Get by code",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/currencies/code/XOF" }
+        },
+        {
+          "name": "Update currency",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": "{{baseUrl}}/currencies/:id"
+          }
+        },
+        {
+          "name": "Deactivate",
+          "request": { "method": "PATCH", "header": [], "url": "{{baseUrl}}/currencies/:id/deactivate" }
+        },
+        {
+          "name": "Activate",
+          "request": { "method": "PATCH", "header": [], "url": "{{baseUrl}}/currencies/:id/activate" }
+        }
+      ]
+    },
+    {
+      "name": "Settings — Legal forms",
+      "item": [
+        {
+          "name": "Create legal form",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"SNC\",\n  \"code\": \"SNC\"\n}" },
+            "url": "{{baseUrl}}/legal-forms"
+          }
+        },
+        {
+          "name": "List",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/legal-forms" }
+        },
+        {
+          "name": "Get",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/legal-forms/:id" }
+        },
+        {
+          "name": "Update",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": "{{baseUrl}}/legal-forms/:id"
+          }
+        },
+        {
+          "name": "Deactivate",
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/legal-forms/:id" }
+        }
+      ]
+    },
+    {
+      "name": "Settings — Genders",
+      "item": [
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Non précisé\",\n  \"code\": \"NP\"\n}"
+            },
+            "url": "{{baseUrl}}/genders"
+          }
+        },
+        {
+          "name": "List",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/genders" }
+        },
+        {
+          "name": "Get",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/genders/:id" }
+        },
+        {
+          "name": "Update",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": "{{baseUrl}}/genders/:id"
+          }
+        },
+        {
+          "name": "Deactivate",
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/genders/:id" }
+        }
+      ]
+    },
+    {
+      "name": "Settings — Languages",
+      "item": [
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"countryId\": \"a0000002-0000-4000-8000-000000000001\",\n  \"name\": \"Wolof\",\n  \"code\": \"wo\"\n}"
+            },
+            "url": "{{baseUrl}}/languages"
+          }
+        },
+        {
+          "name": "List",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/languages" }
+        },
+        {
+          "name": "Get",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/languages/:id" }
+        },
+        {
+          "name": "Update",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": "{{baseUrl}}/languages/:id"
+          }
+        },
+        {
+          "name": "Deactivate",
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/languages/:id" }
+        }
+      ]
+    },
+    {
+      "name": "Settings — Payment methods",
+      "item": [
+        {
+          "name": "Create payment method",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"typeId\": \"a000000e-0000-4000-8000-000000000001\",\n  \"name\": \"Free Money\",\n  \"code\": \"FM\",\n  \"avatar\": \"/icons/fm.svg\"\n}"
+            },
+            "url": "{{baseUrl}}/payment-methods"
+          }
+        },
+        {
+          "name": "List all",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/payment-methods" }
+        },
+        {
+          "name": "List types",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/payment-methods/types" }
+        },
+        {
+          "name": "Get by id",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/payment-methods/:id" }
+        },
+        {
+          "name": "Update",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": "{{baseUrl}}/payment-methods/:id"
+          }
+        },
+        {
+          "name": "Deactivate",
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/payment-methods/:id" }
+        }
+      ]
+    },
+    {
+      "name": "Settings — Contract types",
+      "item": [
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Intérim\",\n  \"code\": \"INTERIM\"\n}" },
+            "url": "{{baseUrl}}/contract-types"
+          }
+        },
+        {
+          "name": "List",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/contract-types" }
+        },
+        {
+          "name": "Get",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/contract-types/:id" }
+        },
+        {
+          "name": "Update",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": "{{baseUrl}}/contract-types/:id"
+          }
+        },
+        {
+          "name": "Deactivate",
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/contract-types/:id" }
+        }
+      ]
+    },
+    {
+      "name": "Settings — Permissions",
+      "item": [
+        {
+          "name": "Create permission",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"typeId\": \"a0000013-0000-4000-8000-000000000001\",\n  \"name\": \"Lire sociétés\",\n  \"code\": \"company:read\"\n}"
+            },
+            "url": "{{baseUrl}}/permissions"
+          }
+        },
+        {
+          "name": "List all",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/permissions" }
+        },
+        {
+          "name": "List by permission type id",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/permissions/type/:typeId" }
+        },
+        {
+          "name": "Get",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/permissions/:id" }
+        },
+        {
+          "name": "Update",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": "{{baseUrl}}/permissions/:id"
+          }
+        },
+        {
+          "name": "Deactivate",
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/permissions/:id" }
+        }
+      ]
+    },
+    {
+      "name": "Settings — Roles",
+      "item": [
+        {
+          "name": "Create role",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Comptable\",\n  \"code\": \"ACCOUNTANT\",\n  \"permissionIds\": []\n}"
+            },
+            "url": "{{baseUrl}}/roles"
+          }
+        },
+        {
+          "name": "List",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/roles" }
+        },
+        {
+          "name": "Get",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/roles/:id" }
+        },
+        {
+          "name": "Update",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": "{{baseUrl}}/roles/:id"
+          }
+        },
+        {
+          "name": "Deactivate",
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/roles/:id" }
+        },
+        {
+          "name": "Add permissions",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"permissionIds\": [\"a0000014-0000-4000-8000-000000000001\"]\n}" },
+            "url": "{{baseUrl}}/roles/:id/permissions"
+          }
+        },
+        {
+          "name": "Remove permissions",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"permissionIds\": []\n}" },
+            "url": "{{baseUrl}}/roles/:id/permissions"
+          }
+        },
+        {
+          "name": "Sync permissions",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"permissionIds\": [\"a0000014-0000-4000-8000-000000000001\"]\n}" },
+            "url": "{{baseUrl}}/roles/:id/permissions"
+          }
+        }
+      ]
+    }
+  ]
+}

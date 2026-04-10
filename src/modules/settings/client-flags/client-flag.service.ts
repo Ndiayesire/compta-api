@@ -1,29 +1,27 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../../../prisma/prisma.service';
+import { Injectable, NotImplementedException } from '@nestjs/common';
 import { CreateFlagClientDto } from './dto/create-flag-client.dto';
 import { UpdateFlagClientDto } from './dto/update-flag-client.dto';
 
+/** Legacy module: `client_flags` was removed from the database schema. */
 @Injectable()
 export class ClientFlagService {
-  constructor(private readonly prisma: PrismaService) {}
-
-  create(dto: CreateFlagClientDto) {
-    return this.prisma.clientFlag.create({ data: dto });
+  create(_dto: CreateFlagClientDto) {
+    throw new NotImplementedException('Client flags are not part of the current schema');
   }
 
   findAll() {
-    return this.prisma.clientFlag.findMany({ orderBy: { createdAt: 'desc' } });
+    throw new NotImplementedException('Client flags are not part of the current schema');
   }
 
-  findOne(id: string) {
-    return this.prisma.clientFlag.findUnique({ where: { id } });
+  findOne(_id: string) {
+    throw new NotImplementedException('Client flags are not part of the current schema');
   }
 
-  update(id: string, dto: UpdateFlagClientDto) {
-    return this.prisma.clientFlag.update({ where: { id }, data: dto });
+  update(_id: string, _dto: UpdateFlagClientDto) {
+    throw new NotImplementedException('Client flags are not part of the current schema');
   }
 
-  remove(id: string) {
-    return this.prisma.clientFlag.update({ where: { id }, data: { isActive: false } });
+  remove(_id: string) {
+    throw new NotImplementedException('Client flags are not part of the current schema');
   }
 }

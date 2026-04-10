@@ -1,49 +1,31 @@
-import { IsString, IsNotEmpty, IsOptional, IsBoolean } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsBoolean, IsUUID } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreatePermissionDto {
+  @ApiProperty({ description: 'Permission type ID', example: 'perm-type-uuid' })
+  @IsUUID()
+  typeId: string;
+
   @ApiProperty({
-    description: 'Permission name in format module:action',
-    example: 'company:create',
-    type: 'string'
+    description: 'Permission label',
+    example: 'Create company',
   })
   @IsString()
   @IsNotEmpty()
   name: string;
 
-  @ApiPropertyOptional({
-    description: 'Optional description of the permission',
-    example: 'Allows creating new companies',
-    type: 'string'
-  })
-  @IsString()
-  @IsOptional()
-  description?: string;
-
   @ApiProperty({
-    description: 'Module name this permission belongs to',
-    example: 'company',
-    type: 'string'
+    description: 'Stable permission code',
+    example: 'company:create',
   })
   @IsString()
   @IsNotEmpty()
-  module: string;
-
-  @ApiProperty({
-    description: 'Action type for this permission',
-    example: 'create',
-    enum: ['create', 'read', 'update', 'delete'],
-    type: 'string'
-  })
-  @IsString()
-  @IsNotEmpty()
-  action: string;
+  code: string;
 
   @ApiPropertyOptional({
     description: 'Whether the permission is active',
     example: true,
     default: true,
-    type: 'boolean'
   })
   @IsBoolean()
   @IsOptional()

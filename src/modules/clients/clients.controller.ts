@@ -1,4 +1,16 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, HttpCode, HttpStatus,} from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  HttpCode,
+  HttpStatus,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
 import { ClientsService } from './clients.service';
 import { CreateClientDto } from './dto/create-client.dto';
 import { UpdateClientDto } from './dto/update-client.dto';
@@ -13,15 +25,20 @@ export class ClientsController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Create a new client for the current company' })
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+  @ApiOperation({
+    summary: 'Create a new client for the current company',
+    description:
+      'If `user` is omitted, `client.user_id` is the authenticated user. If `user` is provided, that user is created and linked as the client contact (same pattern as company registration).',
+  })
   @ApiBody({ type: CreateClientDto })
   @ApiResponse({ status: 201, description: 'Client created successfully' })
+  @ApiResponse({ status: 409, description: 'Nested user email already exists' })
   async create(
     @Body() dto: CreateClientDto,
     @CurrentUser() user: any,
   ) {
-    console.log('Creating client with companyId:', user.companyId);
-    const data = await this.clientsService.create(dto, user.companyId);
+    const data = await this.clientsService.create(dto, user.companyId, user.id);
     return { success: true, message: 'Client created successfully', data };
   }
 
@@ -44,6 +61,7 @@ export class ClientsController {
 
   @Patch(':id')
   @HttpCode(HttpStatus.OK)
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   @ApiOperation({ summary: 'Update a client (companyId not modifiable)' })
   async update(
     @Param('id') id: string,
