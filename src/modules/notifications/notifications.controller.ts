@@ -22,7 +22,6 @@ import {
 } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import type { AuthUser } from '../../common/types/auth-user.type';
-import { Public } from 'src/common/decorators/public.decorator';
 
 @ApiTags('notifications')
 @ApiBearerAuth('JWT')
@@ -31,7 +30,6 @@ export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
 
   @Post()
-  @Public()
   @HttpCode(HttpStatus.CREATED)
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   @ApiOperation({
