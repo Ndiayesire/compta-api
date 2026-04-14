@@ -11,7 +11,7 @@ Plateforme SaaS de gestion comptable et déclarations fiscales, ciblant les PME 
   - Auth : JWT Access + Refresh
   - Queue : (à venir selon besoin notifications asynchrones)
   - PDF : modules facturation + génération PDF
-  - Stockage documents : système de fichiers local ou stockage selon configuration
+  - Stockage documents : métadonnées en base (`documents.path`) ; fichier binaire hors API ou flux dédié
 - Frontend : (non inclus dans ce repo / à venir)
 - Données & config
   - `prisma/` : `schema.prisma`, migrations, `seed.cjs`, `prisma.config.ts` (Prisma 7)
@@ -28,8 +28,8 @@ Plateforme SaaS de gestion comptable et déclarations fiscales, ciblant les PME 
 ### Architecture NestJS
 - Une fonctionnalité = un module dans `src/modules/`
 - Réponses API : convention courante `{ success, message, data }` sur les contrôleurs métier
-- Validation : `ValidationPipe` (souvent `transform: true`, `whitelist: true` sur les routes avec DTOs imbriqués)
-- Guard global : `JwtAuthGuard` (`AppModule`) — les routes publiques utilisent `@Public()` si nécessaire
+- Validation : `ValidationPipe` (`transform: true`, `whitelist: true` souvent sur POST/PATCH avec DTOs imbriqués)
+- Guard global : `JwtAuthGuard` (`AppModule`) — routes publiques avec `@Public()` (ex. `POST /auth/login`, `GET /health`)
 - Pas d’accès direct à Prisma dans les controllers — passer par les services.
 
 ### Sécurité
@@ -37,31 +37,38 @@ Plateforme SaaS de gestion comptable et déclarations fiscales, ciblant les PME 
 - RBAC : à affiner par endpoint selon les rôles.
 - Désactivation de l’accès en clair : pas de JWT dans URL, pas d’exposition en log.
 
-## Modules montés dans `AppModule` (référence)
-```
-modules/
-├── auth/              # login, refresh JWT
-├── users/             # CRUD utilisateurs
-├── company/           # entreprises (création avec utilisateur propriétaire imbriqué)
-├── clients/           # clients par société ; création avec contact utilisateur optionnel (voir ci-dessous)
-├── employees/         # salariés rattachés à un client
-├── settings/
-│   ├── countries/
-│   ├── regions/
-│   ├── currency/
-│   ├── legal-forms/
-│   ├── payment-methods/
-│   ├── roles/
-│   ├── permissions/
-│   ├── contract-types/
-│   ├── genders/       # CRUD → table `settings_genders`
-│   └── languages/     # CRUD → table `settings_languages` (FK `country_id`)
-└── (non montés ici)   # invoices, tax, documents dédiés — selon évolutions futures
-```
+## Modules montés dans `AppModule` (référence à jour)
+
+| Zone | Module | Base URL / notes |
+|------|--------|-------------------|
+| Core | `auth` | `/auth` — login public ; **register protégé JWT** |
+| Core | `users` | `/users` |
+| Core | `company` | `/company` |
+| Métier | `clients` | `/clients` — création avec `user` optionnel |
+| Métier | `employees` | `/employees` |
+| Métier | `employee-contracts` | `/employee-contracts` — contrats salarié (`employee_contract_types`), scope société |
+| Métier | `tiers` | `/tiers` — scope société via client |
+| Métier | `documents` | `/documents` — métadonnées ; `companyId` = JWT |
+| Perso | `activities` | `/activities` — scope **utilisateur** JWT |
+| Perso | `notifications` | `/notifications` — scope **utilisateur** ; `GET .../unread` avant `:id` |
+| Settings | `countries`, `regions`, `currency` | `/countries`, `/regions`, `/currencies` |
+| Settings | `legal-forms` | `/legal-forms` |
+| Settings | `document-categories` | `/document-categories` |
+| Settings | `payment-methods` | `/payment-methods` (+ `/payment-methods/types`) |
+| Settings | `permissions`, `roles` | `/permissions`, `/roles` |
+| Settings | `contract-types` | `/contract-types` |
+| Settings | `genders`, `languages` | `/genders`, `/languages` |
+| Settings | `tier-types` | `/tier-types` |
+| App | `AppController` | `/health` |
+
+**Présents dans le repo mais non montés** : `client-types`, `client-flags` (contrôleurs existants, non importés dans `app.module.ts`).
 
 ### Clients : création et `user_id`
-- **Sans** objet `user` dans le body : le client est lié à l’utilisateur authentifié (`clients.user_id` = JWT).
-- **Avec** `user` imbriqué (même forme que l’utilisateur à la création d’entreprise) : création transactionnelle d’un nouvel utilisateur puis `clients.user_id` = cet utilisateur. Email déjà utilisé → `409 Conflict`.
+- **Sans** objet `user` : `clients.user_id` = utilisateur JWT.
+- **Avec** `user` imbriqué : création utilisateur + lien — email déjà pris → conflit (`409` / message métier).
+
+### Documents
+- Enregistrement des champs fichier : `name`, `path`, `mimeType`, `size`, `meta` ; pas d’upload multipart dans ce module par défaut.
 
 ## Pipeline Fonctions / Statuts
 Pour la comptabilité, la pipeline est centrée sur :
@@ -96,8 +103,11 @@ Pour la comptabilité, la pipeline est centrée sur :
 - `npm run lint`
 
 ## API / outillage
-- Swagger : `GET /` (configuré dans `src/main.ts`), auth Bearer JWT
-- Collection Postman : `postman/Insta-Compta-API.postman_collection.json` (`baseUrl`, tokens)
+- **Swagger** : UI sur `GET /` (voir `src/main.ts`), schéma Bearer JWT.
+- **Postman** : `postman/Insta-Compta-API.postman_collection.json`
+  - Variables : `baseUrl`, `accessToken`, `refreshToken`
+  - Auth collection : Bearer `{{accessToken}}`
+  - Dossiers alignés sur les routes montées (voir description intégrée dans la collection).
 
 ## Chronologie des versions
 ### 2026-03-24
@@ -106,30 +116,28 @@ Pour la comptabilité, la pipeline est centrée sur :
 - Auth JWT + Prisma + MySQL
 - Ajout module `users` (CRUD)
 - Swagger : registration de la tag `users` dans `src/main.ts`
-- Swagger docs pour `users` endpoints avec Responses et schemas (GET /users + GET /users/:id, plus create/update/delete)
 - Standardisation des réponses API `success/message/data` pour users
 
 ### 2026-03-25
 - Refactoring modèle utilisateur : passage de many-to-many (UserRole) à one-to-many (User.roleId)
 - Suppression du modèle UserRole
 - Mise à jour des DTOs : CreateUserDto et UpdateUserDto utilisent roleId au lieu de roleIds
-- Modification des endpoints roles : PATCH /users/:id/role (set) et DELETE /users/:id/role (unset)
-- Mise à jour des services, contrôleurs, guards et types AuthUser pour supporter un seul rôle par utilisateur
+- Endpoints rôles utilisateur : PATCH /users/:id/role et DELETE /users/:id/role
 - Migration Prisma appliquée
-- Suppression de l'entité UserRoleEntity inutilisée
 
 ### 2026-04
-- Alignement schéma Prisma sur le DDL MySQL (référentiel settings, users, companies, clients, employees, documents, etc.)
-- Migrations + seed par défaut (`npm run seed`) ; compte démo documenté dans le script de seed
-- Module **clients** : création avec objet **`user` optionnel** (miroir de la création **company** + utilisateur) pour renseigner `clients.user_id`
-- Paramètres : CRUD **genres** (`/genders`, table `settings_genders`) et **langues** (`/languages`, table `settings_languages`, avec `countryId`)
-- Collection Postman mise à jour pour les routes exposées
+- Schéma Prisma aligné DDL MySQL ; migrations + `npm run seed`
+- Clients avec `user` optionnel à la création
+- Settings : genres, langues, types de tiers, catégories document, etc.
+- Tiers, contrats salarié (`employee-contracts`), documents, activities, notifications
+- Collection Postman et `CLAUDE.md` tenus à jour avec l’inventaire des routes montées
 
 ### À venir (piste)
-- Modules facturation / tax / documents en flux complet si hors squelette actuel
-- Automatisation reporting (PDF, notifications)
-- Intégration RBAC fine par permission sur chaque route
+- Facturation / tax en flux complet si besoin
+- Reporting PDF, files d’attente
+- RBAC fin par permission sur chaque route
+- Réactivation des modules `client-types` / `client-flags` dans `AppModule` si produit
 
 ## Notes générales
 - À compléter à chaque mise à jour majeure du projet.
-- Documenter détails métier spécifiques, décision d’architecture, breaking changes.
+- Documenter breaking changes et décisions d’architecture.

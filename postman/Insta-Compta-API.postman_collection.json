@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "a1b2c3d4-e5f6-7890-abcd-comptaapi01",
     "name": "Insta Compta API",
-    "description": "NestJS compta-api — import into Postman. Set collection variables `baseUrl` (e.g. http://localhost:4230) and `accessToken` after Login. Most routes use JWT Bearer auth (global guard).",
+    "description": "NestJS **compta-api** — collection alignée sur les modules montés dans `AppModule` (2026-04).\n\n**Variables** : `baseUrl` (ex. `http://localhost:4230`), `accessToken`, `refreshToken`. La collection utilise l’auth **Bearer** au niveau collection : après **Auth → Login**, copier `accessToken` / `refreshToken` dans les variables.\n\n**Auth** : `POST /auth/login` est public. **`POST /auth/register` exige un JWT** (guard global) — utiliser un compte déjà connecté (ex. admin seed). `GET /health` est public.\n\n**Périmètres** : la plupart des routes métier filtrent par **société** (`companyId` du JWT) ou par **utilisateur** (activities, notifications). Les tables **settings** (pays, rôles, etc.) sont globales.\n\n**Dossiers** : App · Auth · Users · Company · Clients · Employees · Employee contracts · Tiers · Documents · Activities · Notifications · Settings (Countries, Regions, Currencies, Legal forms, Document categories, Genders, Languages, Payment methods, Contract types, Tier types, Permissions, Roles).\n\n**Hors AppModule** (non inclus ici) : modules `client-types` / `client-flags` présents dans le code mais non importés dans `app.module.ts`.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -55,7 +55,8 @@
               "mode": "raw",
               "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"SecurePass12\",\n  \"roleId\": \"a0000016-0000-4000-8000-000000000001\",\n  \"countryId\": \"a0000002-0000-4000-8000-000000000001\",\n  \"regionId\": \"a0000003-0000-4000-8000-000000000001\",\n  \"languageId\": \"a0000004-0000-4000-8000-000000000001\",\n  \"genderId\": \"a0000007-0000-4000-8000-000000000001\",\n  \"firstName\": \"Jean\",\n  \"lastName\": \"Dupont\",\n  \"phone\": \"+221770000000\",\n  \"address\": \"Dakar\",\n  \"avatar\": \"\"\n}"
             },
-            "url": "{{baseUrl}}/auth/register"
+            "url": "{{baseUrl}}/auth/register",
+            "description": "**JWT requis** (pas de `@Public`) — faire Login avant. Utilise le Bearer de la collection (`accessToken`)."
           }
         },
         {
@@ -282,6 +283,208 @@
       ]
     },
     {
+      "name": "Employee contracts",
+      "item": [
+        {
+          "name": "Create contract",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employeeId\": \"a0000022-0000-4000-8000-000000000001\",\n  \"contractTypeId\": \"a000000b-0000-4000-8000-000000000001\",\n  \"startDate\": \"2025-01-01T00:00:00.000Z\",\n  \"endDate\": \"2026-12-31T23:59:59.000Z\",\n  \"jobTitle\": \"Comptable senior\"\n}"
+            },
+            "url": "{{baseUrl}}/employee-contracts"
+          }
+        },
+        {
+          "name": "List (company)",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/employee-contracts" }
+        },
+        {
+          "name": "List by employee",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/employee-contracts/employee/:employeeId" }
+        },
+        {
+          "name": "Get",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/employee-contracts/:id" }
+        },
+        {
+          "name": "Update",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": "{{baseUrl}}/employee-contracts/:id"
+          }
+        },
+        {
+          "name": "Delete (soft)",
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/employee-contracts/:id" }
+        }
+      ]
+    },
+    {
+      "name": "Tiers",
+      "item": [
+        {
+          "name": "Create tier",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tierTypeId\": \"a0000009-0000-4000-8000-000000000001\",\n  \"clientId\": \"a0000021-0000-4000-8000-000000000001\",\n  \"name\": \"Client démo\",\n  \"ninea\": \"SN888777666\",\n  \"useTva\": true,\n  \"reference\": \"TIER-DEMO-001\",\n  \"meta\": {}\n}"
+            },
+            "url": "{{baseUrl}}/tiers"
+          }
+        },
+        {
+          "name": "List tiers (company)",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/tiers" }
+        },
+        {
+          "name": "List tiers by client",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/tiers/client/:clientId" }
+        },
+        {
+          "name": "Get tier",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/tiers/:id" }
+        },
+        {
+          "name": "Update tier",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": "{{baseUrl}}/tiers/:id"
+          }
+        },
+        {
+          "name": "Delete tier (soft)",
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/tiers/:id" }
+        }
+      ]
+    },
+    {
+      "name": "Documents",
+      "item": [
+        {
+          "name": "Create (metadata)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"categoryId\": \"a000001c-0000-4000-8000-000000000001\",\n  \"name\": \"facture_demo.pdf\",\n  \"path\": \"/uploads/demo/facture_demo.pdf\",\n  \"mimeType\": \"application/pdf\",\n  \"size\": 102400,\n  \"meta\": {}\n}"
+            },
+            "url": "{{baseUrl}}/documents"
+          }
+        },
+        {
+          "name": "List (company)",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/documents" }
+        },
+        {
+          "name": "Get",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/documents/:id" }
+        },
+        {
+          "name": "Update",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": "{{baseUrl}}/documents/:id"
+          }
+        },
+        {
+          "name": "Delete (soft)",
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/documents/:id" }
+        }
+      ]
+    },
+    {
+      "name": "Activities",
+      "item": [
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Saisie comptable\",\n  \"styleClass\": \"text-primary\",\n  \"icon\": \"pi pi-pencil\",\n  \"desc\": \"Écriture enregistrée sur le journal.\",\n  \"meta\": {}\n}"
+            },
+            "url": "{{baseUrl}}/activities"
+          }
+        },
+        {
+          "name": "List",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/activities" }
+        },
+        {
+          "name": "Get",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/activities/:id" }
+        },
+        {
+          "name": "Update",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": "{{baseUrl}}/activities/:id"
+          }
+        },
+        {
+          "name": "Delete (soft)",
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/activities/:id" }
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Rappel TVA\",\n  \"desc\": \"Échéance déclaration dans 5 jours.\",\n  \"styleClass\": \"text-warning\",\n  \"icon\": \"pi pi-exclamation-triangle\",\n  \"link\": \"/tax/reminders\",\n  \"isRead\": false,\n  \"meta\": {}\n}"
+            },
+            "url": "{{baseUrl}}/notifications"
+          }
+        },
+        {
+          "name": "List",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/notifications" }
+        },
+        {
+          "name": "List unread",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/notifications/unread" }
+        },
+        {
+          "name": "Get",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/notifications/:id" }
+        },
+        {
+          "name": "Mark read (PATCH)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"isRead\": true\n}" },
+            "url": "{{baseUrl}}/notifications/:id"
+          }
+        },
+        {
+          "name": "Delete (soft)",
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/notifications/:id" }
+        }
+      ]
+    },
+    {
       "name": "Settings — Countries",
       "item": [
         {
@@ -436,6 +639,44 @@
       ]
     },
     {
+      "name": "Settings — Document categories",
+      "item": [
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Bon de commande\",\n  \"code\": \"PO\"\n}"
+            },
+            "url": "{{baseUrl}}/document-categories"
+          }
+        },
+        {
+          "name": "List",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/document-categories" }
+        },
+        {
+          "name": "Get",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/document-categories/:id" }
+        },
+        {
+          "name": "Update",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": "{{baseUrl}}/document-categories/:id"
+          }
+        },
+        {
+          "name": "Delete (soft)",
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/document-categories/:id" }
+        }
+      ]
+    },
+    {
       "name": "Settings — Genders",
       "item": [
         {
@@ -585,6 +826,44 @@
         {
           "name": "Deactivate",
           "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/contract-types/:id" }
+        }
+      ]
+    },
+    {
+      "name": "Settings — Tier types",
+      "item": [
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Partenaire\",\n  \"code\": \"PARTNER\"\n}"
+            },
+            "url": "{{baseUrl}}/tier-types"
+          }
+        },
+        {
+          "name": "List",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/tier-types" }
+        },
+        {
+          "name": "Get",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/tier-types/:id" }
+        },
+        {
+          "name": "Update",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": "{{baseUrl}}/tier-types/:id"
+          }
+        },
+        {
+          "name": "Deactivate",
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/tier-types/:id" }
         }
       ]
     },

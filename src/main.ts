@@ -36,6 +36,10 @@ async function bootstrap() {
     .addTag('users', 'User management')
     .addTag('companies', 'Company management')
     .addTag('legal-forms', 'Company Legal Form Settings')
+    .addTag('document-categories', 'Document categories')
+    .addTag('documents', 'Company documents')
+    .addTag('activities', 'User activities')
+    .addTag('notifications', 'User notifications')
     .addTag('countries', 'Country settings')
     .addTag('regions', 'Region settings')
     .addTag('genders', 'Gender settings')
@@ -48,7 +52,10 @@ async function bootstrap() {
     .addTag('client-flags', 'Client flag management')
     .addTag('clients', 'Client management')
     .addTag('employees', 'Employee management')
+    .addTag('employee-contracts', 'Employee contracts')
     .addTag('contract-types', 'Contract Type management')
+    .addTag('tier-types', 'Tier type settings')
+    .addTag('tiers', 'Tiers per client')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
