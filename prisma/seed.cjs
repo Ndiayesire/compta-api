@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 /**
  * Seeds all Prisma models (reference data + one demo chain: company → client → employee → contract → tier).
+ * Référence inclut notamment les types de pièce d'identité (`settings_identification_type`).
  * Idempotent: fixed UUIDs + upsert.
  *
  *   SEED_ADMIN_PASSWORD — admin bcrypt (default: Admin123!dev)
@@ -70,6 +71,9 @@ const I = {
   documentDemo: 'a0000025-0000-4000-8000-000000000001',
   activityDemo: 'a0000026-0000-4000-8000-000000000001',
   notificationDemo: 'a0000027-0000-4000-8000-000000000001',
+  /** Types de pièce d'identité (`settings_identification_type`) */
+  idTypeCni: 'a0000029-0000-4000-8000-000000000001',
+  idTypePassport: 'a000002a-0000-4000-8000-000000000001',
 };
 
 const DEFAULT_ADMIN_PASSWORD = process.env.SEED_ADMIN_PASSWORD || 'Admin123!dev';
@@ -334,6 +338,18 @@ async function seedReferenceData() {
     },
     update: { isActive: true },
   });
+
+  const identificationTypes = [
+    { id: I.idTypeCni, name: "Carte nationale d'identité", code: 'CNI' },
+    { id: I.idTypePassport, name: 'Passeport', code: 'PASSPORT' },
+  ];
+  for (const it of identificationTypes) {
+    await prisma.identificationType.upsert({
+      where: { id: it.id },
+      create: { ...it, isActive: true },
+      update: { name: it.name, code: it.code, isActive: true },
+    });
+  }
 }
 
 async function seedAdminUser() {
@@ -420,14 +436,22 @@ async function seedDemoChain(seedUserId) {
     create: {
       id: I.employeeDemo,
       clientId: I.clientDemo,
+      identificationTypeId: I.idTypeCni,
       firstName: 'Amadou',
       lastName: 'Diallo',
       email: 'amadou.diallo@demo.client',
       phone: '+221771112233',
       address: 'Dakar',
       isActive: true,
+      socialInsuranceNumber: '1 85 01 75 123 456 78',
+      identityNumber: 'SN-DEMO-CNI-001',
     },
-    update: { isActive: true },
+    update: {
+      identificationTypeId: I.idTypeCni,
+      socialInsuranceNumber: '1 85 01 75 123 456 78',
+      identityNumber: 'SN-DEMO-CNI-001',
+      isActive: true,
+    },
   });
 
   const start = new Date('2024-01-01T00:00:00.000Z');
@@ -441,11 +465,15 @@ async function seedDemoChain(seedUserId) {
       startDate: start,
       endDate: end,
       jobTitle: 'Comptable',
+      salary: 450000,
+      isManager: false,
       isActive: true,
     },
     update: {
       contractTypeId: I.contractCdi,
       jobTitle: 'Comptable',
+      salary: 450000,
+      isManager: false,
       isActive: true,
     },
   });

@@ -48,12 +48,11 @@ async function bootstrap() {
     .addTag('payment-methods', 'Payment method settings')
     .addTag('permissions', 'Permission management')
     .addTag('roles', 'Role management')
-    .addTag('client-types', 'Client type management')
-    .addTag('client-flags', 'Client flag management')
     .addTag('clients', 'Client management')
     .addTag('employees', 'Employee management')
     .addTag('employee-contracts', 'Employee contracts')
     .addTag('contract-types', 'Contract Type management')
+    .addTag('identification-types', 'Identification type settings')
     .addTag('tier-types', 'Tier type settings')
     .addTag('tiers', 'Tiers per client')
     .build();

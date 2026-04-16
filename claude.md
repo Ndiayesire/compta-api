@@ -1,7 +1,5 @@
-# CLAUDE.md — compta-api
-
-## Vision du Projet
-Plateforme SaaS de gestion comptable et déclarations fiscales, ciblant les PME et cabinets d’expertise comptable en Afrique francophone. Trois acteurs principaux : Admin/Comptable, Client entreprise, Utilisateur interne (consultant).
+La documentation projet est dans **[`CLAUDE.md`](./CLAUDE.md)** (fichier canonique à la racine pour les assistants et l’équipe).
+cabinets d’expertise comptable en Afrique francophone. Trois acteurs principaux : Admin/Comptable, Client entreprise, Utilisateur interne (consultant).
 
 ## Stack Technique
 - Langage : TypeScript strict partout
@@ -16,6 +14,11 @@ Plateforme SaaS de gestion comptable et déclarations fiscales, ciblant les PME 
 - Données & config
   - `prisma/` : `schema.prisma`, migrations, `seed.cjs`, `prisma.config.ts` (Prisma 7)
   - `src/common` : utilitaires, guards, decorators, pipes
+
+### Prisma : colonnes SQL vs champs API
+- Les modèles Prisma utilisent du camelCase côté code ; les colonnes MySQL sont explicites via `@map("...")`.
+- Après la migration `20260417160000_shorten_fk_column_names`, plusieurs clés étrangères ont des noms de colonnes courts en base (`country_id`, `region_id`, `legal_form_id`, `identification_type_id`, `category_id`, `type_id` sur `permissions`, `tier_type_id`, etc.).
+- Les **DTOs NestJS et le JSON des requêtes/réponses HTTP** restent en **camelCase** (`countryId`, `categoryId`, `identificationTypeId`, `typeId`, …) : aucun changement pour les clients API — seule la couche Prisma ↔ MySQL reflète les noms de colonnes.
 
 ## Règles de Développement
 ### Devise et Localisation
@@ -54,14 +57,13 @@ Plateforme SaaS de gestion comptable et déclarations fiscales, ciblant les PME 
 | Settings | `countries`, `regions`, `currency` | `/countries`, `/regions`, `/currencies` |
 | Settings | `legal-forms` | `/legal-forms` |
 | Settings | `document-categories` | `/document-categories` |
+| Settings | `identification-types` | `/identification-types` — types de pièce d’identité (salariés) |
 | Settings | `payment-methods` | `/payment-methods` (+ `/payment-methods/types`) |
 | Settings | `permissions`, `roles` | `/permissions`, `/roles` |
 | Settings | `contract-types` | `/contract-types` |
 | Settings | `genders`, `languages` | `/genders`, `/languages` |
 | Settings | `tier-types` | `/tier-types` |
 | App | `AppController` | `/health` |
-
-**Présents dans le repo mais non montés** : `client-types`, `client-flags` (contrôleurs existants, non importés dans `app.module.ts`).
 
 ### Clients : création et `user_id`
 - **Sans** objet `user` : `clients.user_id` = utilisateur JWT.
@@ -111,7 +113,7 @@ Pour la comptabilité, la pipeline est centrée sur :
 
 ## Chronologie des versions
 ### 2026-03-24
-- Création du fichier `claude.md`
+- Ajout du fichier de contexte à la racine (`CLAUDE.md` ; ancien nom `claude.md`)
 - Initialisation du squelette API et des modules `settings` / `company`
 - Auth JWT + Prisma + MySQL
 - Ajout module `users` (CRUD)
@@ -128,15 +130,18 @@ Pour la comptabilité, la pipeline est centrée sur :
 ### 2026-04
 - Schéma Prisma aligné DDL MySQL ; migrations + `npm run seed`
 - Clients avec `user` optionnel à la création
-- Settings : genres, langues, types de tiers, catégories document, etc.
+- Settings : genres, langues, types de tiers, catégories document, types d’identification, etc.
 - Tiers, contrats salarié (`employee-contracts`), documents, activities, notifications
 - Collection Postman et `CLAUDE.md` tenus à jour avec l’inventaire des routes montées
+
+### 2026-04-16
+- Migration Prisma `20260417160000_shorten_fk_column_names` : renommage des colonnes FK en MySQL (chemins data-safe), alignées sur `schema.prisma` (`@map`).
+- Documentation : distinction explicite colonnes SQL vs propriétés JSON API ; module `identification-types` listé dans l’inventaire des routes.
 
 ### À venir (piste)
 - Facturation / tax en flux complet si besoin
 - Reporting PDF, files d’attente
 - RBAC fin par permission sur chaque route
-- Réactivation des modules `client-types` / `client-flags` dans `AppModule` si produit
 
 ## Notes générales
 - À compléter à chaque mise à jour majeure du projet.

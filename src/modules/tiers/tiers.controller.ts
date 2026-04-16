@@ -37,7 +37,7 @@ export class TiersController {
   @ApiOperation({
     summary: 'Create a tier for a client of your company',
     description:
-      'Links a `tiers` row to `client_id` and `settings_tier_type_id`.',
+      'Links a `tiers` row to `client_id` and `tier_type_id`.',
   })
   @ApiResponse({ status: 201, description: 'Tier created' })
   @ApiResponse({ status: 400, description: 'Invalid client or tier type' })

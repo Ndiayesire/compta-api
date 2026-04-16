@@ -59,6 +59,8 @@ export class EmployeeContractsService {
         startDate: new Date(dto.startDate),
         endDate: new Date(dto.endDate),
         jobTitle: dto.jobTitle,
+        ...(dto.salary !== undefined && { salary: dto.salary }),
+        isManager: dto.isManager ?? false,
         isActive: dto.isActive ?? true,
       },
       include: contractInclude,
@@ -132,6 +134,8 @@ export class EmployeeContractsService {
       startDate,
       endDate,
       jobTitle,
+      salary,
+      isManager,
       isActive,
     } = dto;
 
@@ -139,6 +143,8 @@ export class EmployeeContractsService {
       ...(startDate !== undefined && { startDate: new Date(startDate) }),
       ...(endDate !== undefined && { endDate: new Date(endDate) }),
       ...(jobTitle !== undefined && { jobTitle }),
+      ...(salary !== undefined && { salary }),
+      ...(isManager !== undefined && { isManager }),
       ...(isActive !== undefined && { isActive }),
       ...(employeeId !== undefined && {
         employee: { connect: { id: employeeId } },

@@ -28,10 +28,11 @@ import { DocumentCategoriesModule } from './modules/settings/document-categories
 import { DocumentsModule } from './modules/documents/documents.module';
 import { ActivitiesModule } from './modules/activities/activities.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { IdentificationTypesModule } from './modules/settings/identification-types/identification-types.module';
 // import { MailerModule } from './shared-service/mailer/mailer.module';
 
 @Module({
-  imports: [CompanyModule, PrismaModule, RegionsModule, CountriesModule, PaymentMethodsModule, RolesModule, PermissionsModule, AuthModule, UsersModule, CurrencyModule, LegalFormsModule, DocumentCategoriesModule, ClientsModule, EmployeeModule, EmployeeContractsModule, ContractTypesModule, GendersModule, LanguagesModule, TierTypesModule, TiersModule, DocumentsModule, ActivitiesModule, NotificationsModule],
+  imports: [CompanyModule, PrismaModule, RegionsModule, CountriesModule, PaymentMethodsModule, RolesModule, PermissionsModule, AuthModule, UsersModule, CurrencyModule, LegalFormsModule, DocumentCategoriesModule, ClientsModule, EmployeeModule, EmployeeContractsModule, ContractTypesModule, GendersModule, LanguagesModule, TierTypesModule, TiersModule, DocumentsModule, ActivitiesModule, NotificationsModule, IdentificationTypesModule],
   controllers: [AppController],
   providers: [
     AppService,
