@@ -55,6 +55,10 @@ async function bootstrap() {
     .addTag('identification-types', 'Identification type settings')
     .addTag('tier-types', 'Tier type settings')
     .addTag('tiers', 'Tiers per client')
+    .addTag('accounting-years', 'Accounting years')
+    .addTag('accounting-quarters', 'Accounting quarters')
+    .addTag('app-meta', 'Key/value meta table')
+    .addTag('tiers-transactions', 'Tier transaction lines')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

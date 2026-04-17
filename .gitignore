@@ -46,6 +46,10 @@ lerna-debug.log*
 .temp
 .tmp
 
+# Exports Excel / PDF tiers (test / dev)
+/generations/*.xlsx
+/generations/*.pdf
+
 # Runtime data
 pids
 *.pid

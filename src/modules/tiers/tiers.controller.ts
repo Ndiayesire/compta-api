@@ -11,7 +11,9 @@ import {
   HttpStatus,
   UsePipes,
   ValidationPipe,
+  Res,
 } from '@nestjs/common';
+import type { Response } from 'express';
 import { TiersService } from './tiers.service';
 import { CreateTierDto } from './dto/create-tier.dto';
 import { UpdateTierDto } from './dto/update-tier.dto';
@@ -21,6 +23,7 @@ import {
   ApiResponse,
   ApiParam,
   ApiBearerAuth,
+  ApiProduces,
 } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import type { AuthUser } from '../../common/types/auth-user.type';
@@ -86,6 +89,34 @@ export class TiersController {
       message: 'Tiers retrieved successfully',
       data,
     };
+  }
+
+  @Get(':id/xlsx')
+  @ApiOperation({
+    summary:
+      'Télécharger le classeur Excel « État trimestriel » (Template-tiers.xlsx rempli)',
+  })
+  @ApiParam({ name: 'id', type: String })
+  @ApiProduces(
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  )
+  async exportExcel(
+    @Param('id') id: string,
+    @CurrentUser() user: AuthUser,
+    @Res({ passthrough: false }) res: Response,
+  ) {
+    const companyId = user.companyId;
+    if (!companyId) {
+      throw new BadRequestException('User must belong to a company');
+    }
+    const buffer = await this.tiersService.renderTierExcel(id, companyId);
+    const filename = `tier-${id}.xlsx`;
+    res.set({
+      'Content-Type':
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Disposition': `attachment; filename="${filename}"`,
+    });
+    res.send(buffer);
   }
 
   @Get(':id')

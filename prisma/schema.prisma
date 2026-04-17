@@ -303,15 +303,16 @@ model Client {
   id          String @id @default(uuid()) @map("client_id")
   userId      String @map("user_id")
   companyId   String @map("company_id")
-  countryId   String @map("country_id")
-  regionId    String @map("region_id")
-  legalFormId String @map("legal_form_id")
+  countryId   String @map("settings_country_id")
+  regionId    String @map("settings_region_id")
+  legalFormId String @map("settings_legal_form_id")
 
-  name    String @map("client_name")
-  address String @map("client_address")
-  ninea   String @map("client_ninea")
-  useTva  Boolean @default(true) @map("client_use_tva")
-  meta    Json   @map("client_meta")
+  name       String @map("client_name")
+  address    String @map("client_address")
+  postalCode String @map("client_postal_code")
+  ninea      String @map("client_ninea")
+  useTva     Boolean @default(true) @map("client_use_tva")
+  meta       Json    @map("client_meta")
 
   createdAt DateTime  @default(now()) @map("client_created_at")
   updatedAt DateTime  @updatedAt @map("client_updated_at")
@@ -402,9 +403,74 @@ model Tier {
   tierType TierType @relation(fields: [tierTypeId], references: [id])
   client   Client   @relation(fields: [clientId], references: [id])
 
+  tiersTransactions TiersTransaction[]
+
   @@index([tierTypeId])
   @@index([clientId])
   @@map("tiers")
+}
+
+model AccountingYear {
+  id        String    @id @default(uuid()) @map("accounting_year_id")
+  name      String    @map("accounting_year_name") @db.VarChar(255)
+  startDate DateTime  @map("accounting_year_start_date") @db.Date
+  endDate   DateTime  @map("accounting_year_end_date") @db.Date
+  isActive  Boolean   @default(true) @map("accounting_year_is_active")
+  createdAt DateTime  @default(now()) @map("accounting_year_created_at")
+  updatedAt DateTime  @updatedAt @map("accounting_year_updated_at")
+  deletedAt DateTime? @map("accounting_year_deleted_at")
+
+  quarters AccountingQuarter[]
+
+  @@map("accounting_years")
+}
+
+model AccountingQuarter {
+  id               String    @id @default(uuid()) @map("accounting_quarter_id")
+  accountingYearId String    @map("accounting_year_id")
+  name             String    @map("accounting_quarter_name") @db.VarChar(255)
+  monthStartDate   DateTime  @map("accounting_month_start_date") @db.Date
+  endDate          DateTime  @map("accounting_quarter_end_date") @db.Date
+  isActive         Boolean   @default(true) @map("accounting_quarter_is_active")
+  createdAt        DateTime  @default(now()) @map("accounting_quarter_created_at")
+  updatedAt        DateTime  @updatedAt @map("accounting_quarter_updated_at")
+  deletedAt        DateTime? @map("accounting_quarter_deleted_at")
+
+  accountingYear AccountingYear @relation(fields: [accountingYearId], references: [id])
+
+  @@index([accountingYearId])
+  @@map("accounting_quarters")
+}
+
+/// Configuration clé/valeur (ex. bornes trimestres). Table SQL `meta`.
+model AppMeta {
+  id        Int       @id @default(autoincrement()) @map("meta_id")
+  key       String    @unique @map("meta_key") @db.VarChar(255)
+  value     String    @map("meta_value") @db.VarChar(255)
+  createdAt DateTime  @default(now()) @map("meta_created_at")
+  updatedAt DateTime  @updatedAt @map("meta_updated_at")
+  deletedAt DateTime? @map("meta_deleted_at")
+
+  @@map("meta")
+}
+
+model TiersTransaction {
+  id            String    @id @default(uuid()) @map("tiers_transaction_id")
+  tierId        String    @map("tier_id")
+  transactionId String    @map("transaction_id")
+  net           Float     @map("tiers_transaction_net")
+  tax           Float     @map("tiers_transaction_tax")
+  total         Float     @map("tiers_transaction_total")
+  date          DateTime  @map("tiers_transaction_date") @db.Date
+  createdAt     DateTime  @default(now()) @map("tiers_transaction_created_at")
+  updatedAt     DateTime  @updatedAt @map("tiers_transaction_updated_at")
+  deletedAt     DateTime? @map("tiers_transaction_deleted_at")
+
+  tier Tier @relation(fields: [tierId], references: [id])
+
+  @@index([tierId])
+  @@index([transactionId])
+  @@map("tiers_transactions")
 }
 
 //////////////////////////////////////////////////////

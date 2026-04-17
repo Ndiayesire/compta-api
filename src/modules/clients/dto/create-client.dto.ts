@@ -18,6 +18,10 @@ export class CreateClientDto {
   @IsString()
   address: string;
 
+  @ApiProperty({ description: 'Postal / ZIP code', example: '12500' })
+  @IsString()
+  postalCode: string;
+
   @ApiProperty({ description: 'NINEA', example: '123 456 789 00010' })
   @IsString()
   ninea: string;

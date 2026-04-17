@@ -7,6 +7,14 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { CreateTierDto } from './dto/create-tier.dto';
 import { UpdateTierDto } from './dto/update-tier.dto';
+import { TiersExcelTemplateService } from './tiers-excel-template.service';
+import {
+  TIER_EXPORT_INCLUDE,
+  type TierForExport,
+} from './tiers-export.include';
+import { buildSenegalQuarterlyFormData } from './tiers-senegal-form.data';
+import type { SenegalQuarterlyFormData } from './tiers-senegal-form.types';
+import { saveTierExcelToGenerations } from './tiers-generations.util';
 
 const tierInclude = {
   tierType: true,
@@ -15,7 +23,10 @@ const tierInclude = {
 
 @Injectable()
 export class TiersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly tiersExcelTemplateService: TiersExcelTemplateService,
+  ) {}
 
   private async assertClientInCompany(clientId: string, companyId: string) {
     const client = await this.prisma.client.findFirst({
@@ -99,6 +110,26 @@ export class TiersService {
     return tier;
   }
 
+  private async findOneForExport(
+    id: string,
+    companyId: string,
+  ): Promise<TierForExport> {
+    const tier = await this.prisma.tier.findFirst({
+      where: {
+        id,
+        deletedAt: null,
+        client: { companyId, deletedAt: null },
+      },
+      include: TIER_EXPORT_INCLUDE,
+    });
+
+    if (!tier) {
+      throw new NotFoundException('Tier not found');
+    }
+
+    return tier;
+  }
+
   async update(id: string, dto: UpdateTierDto, companyId: string) {
     await this.findOne(id, companyId);
 
@@ -143,5 +174,34 @@ export class TiersService {
       where: { id },
       data: { deletedAt: new Date() },
     });
+  }
+
+  private async buildTierExportFormData(
+    id: string,
+    companyId: string,
+  ): Promise<SenegalQuarterlyFormData> {
+    const anchor = await this.findOneForExport(id, companyId);
+    const tierLines = await this.prisma.tier.findMany({
+      where: {
+        clientId: anchor.clientId,
+        deletedAt: null,
+        client: { companyId, deletedAt: null },
+      },
+      select: { name: true, ninea: true, meta: true },
+      orderBy: { createdAt: 'asc' },
+    });
+    return buildSenegalQuarterlyFormData(
+      anchor.client,
+      anchor.meta,
+      tierLines,
+    );
+  }
+
+  async renderTierExcel(id: string, companyId: string) {
+    const data = await this.buildTierExportFormData(id, companyId);
+    const buffer =
+      await this.tiersExcelTemplateService.fillSenegalTemplateWorkbook(data);
+    saveTierExcelToGenerations(buffer, id);
+    return buffer;
   }
 }

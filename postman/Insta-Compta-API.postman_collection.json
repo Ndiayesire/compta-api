@@ -2,13 +2,16 @@
   "info": {
     "_postman_id": "a1b2c3d4-e5f6-7890-abcd-comptaapi01",
     "name": "Insta Compta API",
-    "description": "NestJS **compta-api** — collection alignée sur les modules montés dans `AppModule` (2026-04 ; **10** migrations Prisma au dépôt, dont `20260417160000_shorten_fk_column_names`).\n\n**JSON HTTP vs MySQL** : les corps de requête utilisent les **DTO camelCase** (`countryId`, `regionId`, `legalFormId`, `categoryId`, `typeId`, `identificationTypeId`, `tierTypeId`, …). En base, Prisma mappe vers des colonnes courtes (`country_id`, `category_id`, `type_id`, etc.) — ne pas les confondre avec les clés JSON.\n\n**Variables** : `baseUrl` (ex. `http://localhost:4230`), `accessToken`, `refreshToken`. La collection utilise l’auth **Bearer** au niveau collection : après **Auth → Login**, copier `accessToken` / `refreshToken` dans les variables.\n\n**Auth** : `POST /auth/login` est public. **`POST /auth/register` exige un JWT** (guard global) — utiliser un compte déjà connecté (ex. admin seed). `GET /health` est public.\n\n**Périmètres** : la plupart des routes métier filtrent par **société** (`companyId` du JWT) ou par **utilisateur** (activities, notifications). Les tables **settings** (pays, rôles, etc.) sont globales.\n\n**Corps JSON** : les requêtes `POST`/`PATCH` listent **tous les champs du DTO** (y compris optionnels) pour faciliter les essais — retirer ou adapter les clés non voulues.\n\n**Dossiers** : App · Auth · Users · Company · Clients · Employees · Employee contracts · Tiers · Documents · Activities · Notifications · Settings (Countries, Regions, Currencies, Legal forms, Document categories, Identification types, Genders, Languages, Payment methods, Contract types, Tier types, Permissions, Roles).",
+    "description": "NestJS **compta-api** — collection alignée sur les modules montés dans `AppModule` (2026-04 ; **10** migrations Prisma au dépôt, dont `20260417160000_shorten_fk_column_names`).\n\n**JSON HTTP vs MySQL** : les corps de requête utilisent les **DTO camelCase** (`countryId`, `regionId`, `legalFormId`, `categoryId`, `typeId`, `identificationTypeId`, `tierTypeId`, …). En base, Prisma mappe vers des colonnes courtes (`country_id`, `category_id`, `type_id`, etc.) — ne pas les confondre avec les clés JSON.\n\n**Variables** : `baseUrl` (ex. `http://localhost:4230`), `accessToken`, `refreshToken`. La collection utilise l’auth **Bearer** au niveau collection : après **Auth → Login**, copier `accessToken` / `refreshToken` dans les variables.\n\n**Auth** : `POST /auth/login` est public. **`POST /auth/register` exige un JWT** (guard global) — utiliser un compte déjà connecté (ex. admin seed). `GET /health` est public.\n\n**Périmètres** : la plupart des routes métier filtrent par **société** (`companyId` du JWT) ou par **utilisateur** (activities, notifications). Les tables **settings** (pays, rôles, etc.) sont globales.\n\n**Corps JSON** : les requêtes `POST`/`PATCH` listent **tous les champs du DTO** (y compris optionnels) pour faciliter les essais — retirer ou adapter les clés non voulues.\n\n**Dossiers** : App · Auth · Users · Company · Clients · Employees · Employee contracts · Tiers · **Accounting years** · **Accounting quarters** · **App meta** · **Tiers transactions** · Documents · Activities · Notifications · Settings (Countries, Regions, Currencies, Legal forms, Document categories, Identification types, Genders, Languages, Payment methods, Contract types, Tier types, Permissions, Roles).\n\n**Variables** supplémentaires : `accountingYearId`, `accountingQuarterId`, `tiersTransactionId` (remplir après création ou coller un UUID).",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
     { "key": "baseUrl", "value": "http://localhost:4230" },
     { "key": "accessToken", "value": "" },
-    { "key": "refreshToken", "value": "" }
+    { "key": "refreshToken", "value": "" },
+    { "key": "accountingYearId", "value": "", "description": "UUID après POST /accounting-years (trimestres)" },
+    { "key": "accountingQuarterId", "value": "", "description": "UUID après POST /accounting-quarters" },
+    { "key": "tiersTransactionId", "value": "", "description": "UUID après POST /tiers-transactions" }
   ],
   "auth": {
     "type": "bearer",
@@ -210,7 +213,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Client Test\",\n  \"address\": \"Dakar\",\n  \"ninea\": \"SN999888777\",\n  \"countryId\": \"a0000002-0000-4000-8000-000000000001\",\n  \"regionId\": \"a0000003-0000-4000-8000-000000000001\",\n  \"legalFormId\": \"a0000008-0000-4000-8000-000000000001\",\n  \"useTva\": true,\n  \"meta\": {}\n}"
+              "raw": "{\n  \"name\": \"Client Test\",\n  \"address\": \"Dakar\",\n  \"postalCode\": \"12500\",\n  \"ninea\": \"SN999888777\",\n  \"countryId\": \"a0000002-0000-4000-8000-000000000001\",\n  \"regionId\": \"a0000003-0000-4000-8000-000000000001\",\n  \"legalFormId\": \"a0000008-0000-4000-8000-000000000001\",\n  \"useTva\": true,\n  \"meta\": {}\n}"
             },
             "url": "{{baseUrl}}/clients"
           }
@@ -222,7 +225,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Client Avec Contact\",\n  \"address\": \"Thiès\",\n  \"ninea\": \"SN111222333\",\n  \"countryId\": \"a0000002-0000-4000-8000-000000000001\",\n  \"regionId\": \"a0000003-0000-4000-8000-000000000001\",\n  \"legalFormId\": \"a0000008-0000-4000-8000-000000000001\",\n  \"useTva\": true,\n  \"meta\": {},\n  \"user\": {\n    \"email\": \"contact.client@example.com\",\n    \"password\": \"SecurePass12\",\n    \"roleId\": \"a0000016-0000-4000-8000-000000000001\",\n    \"countryId\": \"a0000002-0000-4000-8000-000000000001\",\n    \"regionId\": \"a0000003-0000-4000-8000-000000000001\",\n    \"languageId\": \"a0000004-0000-4000-8000-000000000001\",\n    \"genderId\": \"a0000007-0000-4000-8000-000000000001\",\n    \"firstName\": \"Aminata\",\n    \"lastName\": \"Diop\",\n    \"phone\": \"+221770123456\",\n    \"address\": \"Thiès\",\n    \"avatar\": \"\",\n    \"isActive\": true\n  }\n}"
+              "raw": "{\n  \"name\": \"Client Avec Contact\",\n  \"address\": \"Thiès\",\n  \"postalCode\": \"14000\",\n  \"ninea\": \"SN111222333\",\n  \"countryId\": \"a0000002-0000-4000-8000-000000000001\",\n  \"regionId\": \"a0000003-0000-4000-8000-000000000001\",\n  \"legalFormId\": \"a0000008-0000-4000-8000-000000000001\",\n  \"useTva\": true,\n  \"meta\": {},\n  \"user\": {\n    \"email\": \"contact.client@example.com\",\n    \"password\": \"SecurePass12\",\n    \"roleId\": \"a0000016-0000-4000-8000-000000000001\",\n    \"countryId\": \"a0000002-0000-4000-8000-000000000001\",\n    \"regionId\": \"a0000003-0000-4000-8000-000000000001\",\n    \"languageId\": \"a0000004-0000-4000-8000-000000000001\",\n    \"genderId\": \"a0000007-0000-4000-8000-000000000001\",\n    \"firstName\": \"Aminata\",\n    \"lastName\": \"Diop\",\n    \"phone\": \"+221770123456\",\n    \"address\": \"Thiès\",\n    \"avatar\": \"\",\n    \"isActive\": true\n  }\n}"
             },
             "url": "{{baseUrl}}/clients"
           }
@@ -242,7 +245,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Client Test MAJ\",\n  \"address\": \"Dakar\",\n  \"ninea\": \"SN999888777\",\n  \"countryId\": \"a0000002-0000-4000-8000-000000000001\",\n  \"regionId\": \"a0000003-0000-4000-8000-000000000001\",\n  \"legalFormId\": \"a0000008-0000-4000-8000-000000000001\",\n  \"useTva\": true,\n  \"meta\": {}\n}"
+              "raw": "{\n  \"name\": \"Client Test MAJ\",\n  \"address\": \"Dakar\",\n  \"postalCode\": \"12500\",\n  \"ninea\": \"SN999888777\",\n  \"countryId\": \"a0000002-0000-4000-8000-000000000001\",\n  \"regionId\": \"a0000003-0000-4000-8000-000000000001\",\n  \"legalFormId\": \"a0000008-0000-4000-8000-000000000001\",\n  \"useTva\": true,\n  \"meta\": {}\n}"
             },
             "url": "{{baseUrl}}/clients/:id"
           }
@@ -367,6 +370,10 @@
           "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/tiers/:id" }
         },
         {
+          "name": "Download Excel (état trimestriel)",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/tiers/:id/xlsx" }
+        },
+        {
           "name": "Update tier",
           "request": {
             "method": "PATCH",
@@ -381,6 +388,192 @@
         {
           "name": "Delete tier (soft)",
           "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/tiers/:id" }
+        }
+      ]
+    },
+    {
+      "name": "Accounting years",
+      "item": [
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Exercice 2025\",\n  \"startDate\": \"2025-01-01T00:00:00.000Z\",\n  \"endDate\": \"2025-12-31T00:00:00.000Z\",\n  \"isActive\": true\n}"
+            },
+            "url": "{{baseUrl}}/accounting-years"
+          }
+        },
+        {
+          "name": "List",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/accounting-years" }
+        },
+        {
+          "name": "Get by id",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/accounting-years/:accountingYearId" }
+        },
+        {
+          "name": "Update",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Exercice 2025 (MAJ)\",\n  \"isActive\": true\n}"
+            },
+            "url": "{{baseUrl}}/accounting-years/:accountingYearId"
+          }
+        },
+        {
+          "name": "Delete (soft)",
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/accounting-years/:accountingYearId" }
+        }
+      ]
+    },
+    {
+      "name": "Accounting quarters",
+      "item": [
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accountingYearId\": \"{{accountingYearId}}\",\n  \"name\": \"T1 2025\",\n  \"monthStartDate\": \"2025-01-01T00:00:00.000Z\",\n  \"endDate\": \"2025-03-31T00:00:00.000Z\",\n  \"isActive\": true\n}"
+            },
+            "description": "Renseigner `accountingYearId` (variable collection ou UUID d’un exercice créé).",
+            "url": "{{baseUrl}}/accounting-quarters"
+          }
+        },
+        {
+          "name": "List",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/accounting-quarters" }
+        },
+        {
+          "name": "List by accounting year",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/accounting-quarters?accountingYearId={{accountingYearId}}"
+          }
+        },
+        {
+          "name": "Get by id",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/accounting-quarters/:accountingQuarterId" }
+        },
+        {
+          "name": "Update",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"T1 2025 (MAJ)\",\n  \"isActive\": true\n}"
+            },
+            "url": "{{baseUrl}}/accounting-quarters/:accountingQuarterId"
+          }
+        },
+        {
+          "name": "Delete (soft)",
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/accounting-quarters/:accountingQuarterId" }
+        }
+      ]
+    },
+    {
+      "name": "App meta",
+      "item": [
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"key\": \"custom_key_demo\",\n  \"value\": \"{\\\"start_date\\\":\\\"01-01\\\",\\\"end_date\\\":\\\"03-31\\\"}\"\n}"
+            },
+            "url": "{{baseUrl}}/app-meta"
+          }
+        },
+        {
+          "name": "List",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/app-meta" }
+        },
+        {
+          "name": "Get by key",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/app-meta/by-key/accounting_year" }
+        },
+        {
+          "name": "Get by numeric id",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/app-meta/1" }
+        },
+        {
+          "name": "Update",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"value\": \"{\\\"start_date\\\":\\\"01-01\\\",\\\"end_date\\\":\\\"12-31\\\"}\"\n}"
+            },
+            "url": "{{baseUrl}}/app-meta/1"
+          }
+        },
+        {
+          "name": "Delete (soft)",
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/app-meta/1" }
+        }
+      ]
+    },
+    {
+      "name": "Tiers transactions",
+      "item": [
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tierId\": \"a0000024-0000-4000-8000-000000000001\",\n  \"transactionId\": \"TX-DEMO-001\",\n  \"net\": 1000.5,\n  \"tax\": 180.09,\n  \"total\": 1180.59,\n  \"date\": \"2025-04-15T00:00:00.000Z\"\n}"
+            },
+            "description": "Le tier doit appartenir à un client de la société du JWT (ex. tier seed `a0000024-...`).",
+            "url": "{{baseUrl}}/tiers-transactions"
+          }
+        },
+        {
+          "name": "List (company)",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/tiers-transactions" }
+        },
+        {
+          "name": "List by tier",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/tiers-transactions?tierId=a0000024-0000-4000-8000-000000000001"
+          }
+        },
+        {
+          "name": "Get by id",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/tiers-transactions/:tiersTransactionId" }
+        },
+        {
+          "name": "Update",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"net\": 1100,\n  \"tax\": 198,\n  \"total\": 1298\n}"
+            },
+            "url": "{{baseUrl}}/tiers-transactions/:tiersTransactionId"
+          }
+        },
+        {
+          "name": "Delete (soft)",
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/tiers-transactions/:tiersTransactionId" }
         }
       ]
     },

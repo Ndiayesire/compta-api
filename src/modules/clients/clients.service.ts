@@ -56,6 +56,7 @@ export class ClientsService {
             companyId,
             name: clientFields.name,
             address: clientFields.address,
+            postalCode: clientFields.postalCode,
             ninea: clientFields.ninea,
             useTva: clientFields.useTva ?? true,
             countryId: clientFields.countryId,
@@ -76,6 +77,7 @@ export class ClientsService {
         companyId,
         name: clientFields.name,
         address: clientFields.address,
+        postalCode: clientFields.postalCode,
         ninea: clientFields.ninea,
         useTva: clientFields.useTva ?? true,
         countryId: clientFields.countryId,
@@ -112,6 +114,7 @@ export class ClientsService {
     const data: Prisma.ClientUpdateInput = {};
     if (dto.name !== undefined) data.name = dto.name;
     if (dto.address !== undefined) data.address = dto.address;
+    if (dto.postalCode !== undefined) data.postalCode = dto.postalCode;
     if (dto.ninea !== undefined) data.ninea = dto.ninea;
     if (dto.useTva !== undefined) data.useTva = dto.useTva;
     if (dto.countryId !== undefined) data.country = { connect: { id: dto.countryId } };

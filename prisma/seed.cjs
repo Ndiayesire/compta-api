@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 /**
  * Seeds all Prisma models (reference data + one demo chain: company → client → employee → contract → tier).
+ * Inclut exercices/trimestres comptables (`accounting_years`, `accounting_quarters`), `meta`, ligne `tiers_transactions` démo.
  * Référence inclut notamment les types de pièce d'identité (`settings_identification_type`).
  * Idempotent: fixed UUIDs + upsert.
  *
@@ -74,6 +75,12 @@ const I = {
   /** Types de pièce d'identité (`settings_identification_type`) */
   idTypeCni: 'a0000029-0000-4000-8000-000000000001',
   idTypePassport: 'a000002a-0000-4000-8000-000000000001',
+  accountingYearDemo: 'a000002b-0000-4000-8000-000000000001',
+  accountingQ1: 'a000002c-0000-4000-8000-000000000001',
+  accountingQ2: 'a000002d-0000-4000-8000-000000000001',
+  accountingQ3: 'a000002e-0000-4000-8000-000000000001',
+  accountingQ4: 'a000002f-0000-4000-8000-000000000001',
+  tiersTxDemo: 'a0000030-0000-4000-8000-000000000001',
 };
 
 const DEFAULT_ADMIN_PASSWORD = process.env.SEED_ADMIN_PASSWORD || 'Admin123!dev';
@@ -352,6 +359,107 @@ async function seedReferenceData() {
   }
 }
 
+/**
+ * Méta (bornes trimestres / année) + exercice 2025 + 4 trimestres — idempotent (upsert).
+ */
+async function seedAccountingCatalog() {
+  const metaRows = [
+    {
+      key: 'accounting_quarter_1',
+      value: '{"start_date":"01-01","end_date":"03-31"}',
+    },
+    {
+      key: 'accounting_quarter_2',
+      value: '{"start_date":"04-01","end_date":"06-30"}',
+    },
+    {
+      key: 'accounting_quarter_3',
+      value: '{"start_date":"07-01","end_date":"09-30"}',
+    },
+    {
+      key: 'accounting_quarter_4',
+      value: '{"start_date":"10-01","end_date":"12-31"}',
+    },
+    {
+      key: 'accounting_year',
+      value: '{"start_date":"01-01","end_date":"12-31"}',
+    },
+  ];
+  for (const row of metaRows) {
+    await prisma.appMeta.upsert({
+      where: { key: row.key },
+      create: { key: row.key, value: row.value },
+      update: { value: row.value, deletedAt: null },
+    });
+  }
+
+  await prisma.accountingYear.upsert({
+    where: { id: I.accountingYearDemo },
+    create: {
+      id: I.accountingYearDemo,
+      name: 'Exercice 2025 (seed)',
+      startDate: new Date('2025-01-01T00:00:00.000Z'),
+      endDate: new Date('2025-12-31T00:00:00.000Z'),
+      isActive: true,
+    },
+    update: {
+      name: 'Exercice 2025 (seed)',
+      startDate: new Date('2025-01-01T00:00:00.000Z'),
+      endDate: new Date('2025-12-31T00:00:00.000Z'),
+      isActive: true,
+      deletedAt: null,
+    },
+  });
+
+  const quarters = [
+    {
+      id: I.accountingQ1,
+      name: 'T1 2025',
+      monthStart: '2025-01-01',
+      end: '2025-03-31',
+    },
+    {
+      id: I.accountingQ2,
+      name: 'T2 2025',
+      monthStart: '2025-04-01',
+      end: '2025-06-30',
+    },
+    {
+      id: I.accountingQ3,
+      name: 'T3 2025',
+      monthStart: '2025-07-01',
+      end: '2025-09-30',
+    },
+    {
+      id: I.accountingQ4,
+      name: 'T4 2025',
+      monthStart: '2025-10-01',
+      end: '2025-12-31',
+    },
+  ];
+  for (const q of quarters) {
+    await prisma.accountingQuarter.upsert({
+      where: { id: q.id },
+      create: {
+        id: q.id,
+        accountingYearId: I.accountingYearDemo,
+        name: q.name,
+        monthStartDate: new Date(`${q.monthStart}T00:00:00.000Z`),
+        endDate: new Date(`${q.end}T00:00:00.000Z`),
+        isActive: true,
+      },
+      update: {
+        accountingYearId: I.accountingYearDemo,
+        name: q.name,
+        monthStartDate: new Date(`${q.monthStart}T00:00:00.000Z`),
+        endDate: new Date(`${q.end}T00:00:00.000Z`),
+        isActive: true,
+        deletedAt: null,
+      },
+    });
+  }
+}
+
 async function seedAdminUser() {
   const hash = await bcrypt.hash(DEFAULT_ADMIN_PASSWORD, 10);
   await prisma.user.upsert({
@@ -421,12 +529,14 @@ async function seedDemoChain(seedUserId) {
       legalFormId: I.legalSarl,
       name: 'Client démo',
       address: 'Almadies, Dakar',
+      postalCode: '12500',
       ninea: 'SN987654321',
       useTva: true,
       meta: { seeded: true },
     },
     update: {
       companyId: I.companyDemo,
+      postalCode: '12500',
       meta: { seeded: true },
     },
   });
@@ -497,6 +607,28 @@ async function seedDemoChain(seedUserId) {
     },
   });
 
+  await prisma.tiersTransaction.upsert({
+    where: { id: I.tiersTxDemo },
+    create: {
+      id: I.tiersTxDemo,
+      tierId: I.tierDemo,
+      transactionId: 'SEED-TX-001',
+      net: 100000,
+      tax: 18000,
+      total: 118000,
+      date: new Date('2025-04-15T00:00:00.000Z'),
+    },
+    update: {
+      tierId: I.tierDemo,
+      transactionId: 'SEED-TX-001',
+      net: 100000,
+      tax: 18000,
+      total: 118000,
+      date: new Date('2025-04-15T00:00:00.000Z'),
+      deletedAt: null,
+    },
+  });
+
   await prisma.document.upsert({
     where: { id: I.documentDemo },
     create: {
@@ -554,6 +686,7 @@ async function seedDemoChain(seedUserId) {
 
 async function main() {
   await seedReferenceData();
+  await seedAccountingCatalog();
 
   if (process.env.SEED_SKIP_ADMIN === '1') {
     const anyUser = await prisma.user.findFirst();

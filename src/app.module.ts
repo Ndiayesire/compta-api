@@ -29,10 +29,43 @@ import { DocumentsModule } from './modules/documents/documents.module';
 import { ActivitiesModule } from './modules/activities/activities.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { IdentificationTypesModule } from './modules/settings/identification-types/identification-types.module';
+import { AccountingYearsModule } from './modules/accounting-years/accounting-years.module';
+import { AccountingQuartersModule } from './modules/accounting-quarters/accounting-quarters.module';
+import { AppMetaModule } from './modules/app-meta/app-meta.module';
+import { TiersTransactionsModule } from './modules/tiers-transactions/tiers-transactions.module';
 // import { MailerModule } from './shared-service/mailer/mailer.module';
 
 @Module({
-  imports: [CompanyModule, PrismaModule, RegionsModule, CountriesModule, PaymentMethodsModule, RolesModule, PermissionsModule, AuthModule, UsersModule, CurrencyModule, LegalFormsModule, DocumentCategoriesModule, ClientsModule, EmployeeModule, EmployeeContractsModule, ContractTypesModule, GendersModule, LanguagesModule, TierTypesModule, TiersModule, DocumentsModule, ActivitiesModule, NotificationsModule, IdentificationTypesModule],
+  imports: [
+    CompanyModule,
+    PrismaModule,
+    RegionsModule,
+    CountriesModule,
+    PaymentMethodsModule,
+    RolesModule,
+    PermissionsModule,
+    AuthModule,
+    UsersModule,
+    CurrencyModule,
+    LegalFormsModule,
+    DocumentCategoriesModule,
+    ClientsModule,
+    EmployeeModule,
+    EmployeeContractsModule,
+    ContractTypesModule,
+    GendersModule,
+    LanguagesModule,
+    TierTypesModule,
+    TiersModule,
+    AccountingYearsModule,
+    AccountingQuartersModule,
+    AppMetaModule,
+    TiersTransactionsModule,
+    DocumentsModule,
+    ActivitiesModule,
+    NotificationsModule,
+    IdentificationTypesModule,
+  ],
   controllers: [AppController],
   providers: [
     AppService,

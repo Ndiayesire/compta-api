@@ -13,6 +13,7 @@ export class ClientEntity implements Client {
   legalFormId: string;
   name: string;
   address: string;
+  postalCode: string;
   ninea: string;
   useTva: boolean;
   meta: Client['meta'];
