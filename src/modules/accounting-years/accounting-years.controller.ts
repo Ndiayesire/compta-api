@@ -1,25 +1,8 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  HttpCode,
-  HttpStatus,
-  UsePipes,
-  ValidationPipe,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, UsePipes, ValidationPipe } from '@nestjs/common';
 import { AccountingYearsService } from './accounting-years.service';
 import { CreateAccountingYearDto } from './dto/create-accounting-year.dto';
 import { UpdateAccountingYearDto } from './dto/update-accounting-year.dto';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiParam,
-  ApiBearerAuth,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
 
 @ApiTags('accounting-years')
 @ApiBearerAuth('JWT')

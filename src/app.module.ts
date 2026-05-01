@@ -33,7 +33,7 @@ import { AccountingYearsModule } from './modules/accounting-years/accounting-yea
 import { AccountingQuartersModule } from './modules/accounting-quarters/accounting-quarters.module';
 import { AppMetaModule } from './modules/app-meta/app-meta.module';
 import { TiersTransactionsModule } from './modules/tiers-transactions/tiers-transactions.module';
-// import { MailerModule } from './shared-service/mailer/mailer.module';
+// import { MailerModule } from './modules/mailer/mailer.module';
 
 @Module({
   imports: [

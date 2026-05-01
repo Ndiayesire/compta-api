@@ -45,12 +45,12 @@ ALTER TABLE `permissions` CHANGE `permission_type_id` `type_id` VARCHAR(191) NOT
 
 ALTER TABLE `tiers` CHANGE `settings_tier_type_id` `tier_type_id` VARCHAR(191) NOT NULL;
 
--- Rename indexes to Prisma default names (MySQL 8+)
-ALTER TABLE `documents` RENAME INDEX `documents_document_category_id_idx` TO `documents_category_id_idx`;
-ALTER TABLE `permissions` RENAME INDEX `permissions_permission_type_id_idx` TO `permissions_type_id_idx`;
-ALTER TABLE `tiers` RENAME INDEX `tiers_settings_tier_type_id_idx` TO `tiers_tier_type_id_idx`;
-ALTER TABLE `employees` RENAME INDEX `employees_settings_identification_type_id_idx` TO `employees_identification_type_id_idx`;
-ALTER TABLE `employee_contract_types` RENAME INDEX `employee_contract_types_settings_contract_type_id_idx` TO `employee_contract_types_contract_type_id_idx`;
+-- Rename indexes to Prisma default names (DROP+ADD for MariaDB / MySQL < 8)
+ALTER TABLE `documents` DROP INDEX `documents_document_category_id_idx`, ADD INDEX `documents_category_id_idx` (`category_id`);
+ALTER TABLE `permissions` DROP INDEX `permissions_permission_type_id_idx`, ADD INDEX `permissions_type_id_idx` (`type_id`);
+ALTER TABLE `tiers` DROP INDEX `tiers_settings_tier_type_id_idx`, ADD INDEX `tiers_tier_type_id_idx` (`tier_type_id`);
+ALTER TABLE `employees` DROP INDEX `employees_settings_identification_type_id_idx`, ADD INDEX `employees_identification_type_id_idx` (`identification_type_id`);
+ALTER TABLE `employee_contract_types` DROP INDEX `employee_contract_types_settings_contract_type_id_idx`, ADD INDEX `employee_contract_types_contract_type_id_idx` (`contract_type_id`);
 
 -- AddForeignKey
 ALTER TABLE `users` ADD CONSTRAINT `users_country_id_fkey` FOREIGN KEY (`country_id`) REFERENCES `settings_countries`(`country_id`) ON DELETE RESTRICT ON UPDATE CASCADE;

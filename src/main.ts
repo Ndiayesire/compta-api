@@ -20,7 +20,11 @@ async function bootstrap() {
 
   const config = new DocumentBuilder()
     .setTitle('Insta Compta API')
-    .setDescription('Comptabilité InstaHR API documentation')
+    .setDescription(
+      'Comptabilité InstaHR — documentation API. ' +
+        'Identifiants de démonstration stables : `prisma/seed.cjs` (ex. client, exercice, trimestre). ' +
+        'Variables Postman : `postman/Insta-Compta-API.postman_collection.json`.',
+    )
     .setVersion('1.0.0')
     .addBearerAuth(
       {
@@ -55,6 +59,10 @@ async function bootstrap() {
     .addTag('identification-types', 'Identification type settings')
     .addTag('tier-types', 'Tier type settings')
     .addTag('tiers', 'Tiers per client')
+    .addTag(
+      'Etats',
+      'Rapports Excel DGID (sommes versées) — GET sur `/tiers/{clientId}/xlsx` et `/xlsx/annual` (Bearer JWT, société du token)',
+    )
     .addTag('accounting-years', 'Accounting years')
     .addTag('accounting-quarters', 'Accounting quarters')
     .addTag('app-meta', 'Key/value meta table')

@@ -7,14 +7,17 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { CreateTierDto } from './dto/create-tier.dto';
 import { UpdateTierDto } from './dto/update-tier.dto';
-import { TiersExcelTemplateService } from './tiers-excel-template.service';
+import { EtatAnnuelSommesVerseesExcelService } from '../excel-reports/services/etat-annuel-sommes-versees-excel.service';
+import { EtatTrimestrielSommesVerseesExcelService } from '../excel-reports/services/etat-trimestriel-sommes-versees-excel.service';
+import { TIER_EXPORT_INCLUDE } from './tiers-export.include';
 import {
-  TIER_EXPORT_INCLUDE,
-  type TierForExport,
-} from './tiers-export.include';
-import { buildSenegalQuarterlyFormData } from './tiers-senegal-form.data';
-import type { SenegalQuarterlyFormData } from './tiers-senegal-form.types';
+  buildSenegalAnnualFormData,
+  buildSenegalQuarterlyFormData,
+} from './tiers-senegal-form.data';
+import type { EtatAnnuelSommesVerseesFormData } from '../excel-reports/types/etat-annuel-sommes-versees.types';
+import type { EtatTrimestrielSommesVerseesFormData } from '../excel-reports/types/etat-trimestriel-sommes-versees.types';
 import { saveTierExcelToGenerations } from './tiers-generations.util';
+// import { convertExcelBufferToPdf } from './tiers-pdf.util';
 
 const tierInclude = {
   tierType: true,
@@ -25,7 +28,8 @@ const tierInclude = {
 export class TiersService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly tiersExcelTemplateService: TiersExcelTemplateService,
+    private readonly etatTrimestrielSommesVerseesExcel: EtatTrimestrielSommesVerseesExcelService,
+    private readonly etatAnnuelSommesVerseesExcel: EtatAnnuelSommesVerseesExcelService,
   ) {}
 
   private async assertClientInCompany(clientId: string, companyId: string) {
@@ -110,24 +114,25 @@ export class TiersService {
     return tier;
   }
 
-  private async findOneForExport(
-    id: string,
-    companyId: string,
-  ): Promise<TierForExport> {
-    const tier = await this.prisma.tier.findFirst({
+  private async findClientForExport(clientId: string, companyId: string) {
+    const client = await this.prisma.client.findFirst({
       where: {
-        id,
+        id: clientId,
+        companyId,
         deletedAt: null,
-        client: { companyId, deletedAt: null },
       },
-      include: TIER_EXPORT_INCLUDE,
+      include: {
+        country: true,
+        region: true,
+        legalForm: true,
+      },
     });
 
-    if (!tier) {
-      throw new NotFoundException('Tier not found');
+    if (!client) {
+      throw new NotFoundException('Client not found');
     }
 
-    return tier;
+    return client;
   }
 
   async update(id: string, dto: UpdateTierDto, companyId: string) {
@@ -177,31 +182,214 @@ export class TiersService {
   }
 
   private async buildTierExportFormData(
-    id: string,
+    clientId: string,
     companyId: string,
-  ): Promise<SenegalQuarterlyFormData> {
-    const anchor = await this.findOneForExport(id, companyId);
-    const tierLines = await this.prisma.tier.findMany({
+    accountingYearId: string,
+    accountingQuarterId: string,
+  ): Promise<EtatTrimestrielSommesVerseesFormData> {
+    const client = await this.findClientForExport(clientId, companyId);
+    const anchor = await this.prisma.tier.findFirst({
       where: {
-        clientId: anchor.clientId,
+        clientId,
         deletedAt: null,
         client: { companyId, deletedAt: null },
       },
-      select: { name: true, ninea: true, meta: true },
+      include: TIER_EXPORT_INCLUDE,
       orderBy: { createdAt: 'asc' },
     });
+    const quarter = await this.prisma.accountingQuarter.findFirst({
+      where: {
+        id: accountingQuarterId,
+        accountingYearId,
+        deletedAt: null,
+        accountingYear: {
+          id: accountingYearId,
+          deletedAt: null,
+        },
+      },
+      include: { accountingYear: true },
+    });
+    if (!quarter) {
+      throw new BadRequestException(
+        'Accounting quarter not found for provided accounting year',
+      );
+    }
+
+    const tierLines = await this.prisma.tier.findMany({
+      where: {
+        clientId,
+        deletedAt: null,
+        client: { companyId, deletedAt: null },
+      },
+      select: { id: true, name: true, ninea: true, meta: true },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    const tierIds = tierLines.map((t) => t.id);
+    const sumsByTier = await this.prisma.tiersTransaction.groupBy({
+      by: ['tierId'],
+      where: {
+        deletedAt: null,
+        tierId: { in: tierIds },
+        date: {
+          gte: quarter.monthStartDate,
+          lte: quarter.endDate,
+        },
+      },
+      _sum: {
+        total: true,
+        tax: true,
+      },
+    });
+
+    const sumsByTierId = new Map(
+      sumsByTier.map((s) => [
+        s.tierId,
+        {
+          montantVerse: s._sum.total ?? 0,
+          irRetenu: s._sum.tax ?? 0,
+        },
+      ]),
+    );
     return buildSenegalQuarterlyFormData(
-      anchor.client,
-      anchor.meta,
+      client,
+      anchor?.meta,
+      quarter,
       tierLines,
+      sumsByTierId,
     );
   }
 
-  async renderTierExcel(id: string, companyId: string) {
-    const data = await this.buildTierExportFormData(id, companyId);
-    const buffer =
-      await this.tiersExcelTemplateService.fillSenegalTemplateWorkbook(data);
-    saveTierExcelToGenerations(buffer, id);
-    return buffer;
+  private async buildTierAnnualExportFormData(
+    clientId: string,
+    companyId: string,
+    accountingYearId: string,
+  ): Promise<EtatAnnuelSommesVerseesFormData> {
+    const client = await this.findClientForExport(clientId, companyId);
+    const anchor = await this.prisma.tier.findFirst({
+      where: {
+        clientId,
+        deletedAt: null,
+        client: { companyId, deletedAt: null },
+      },
+      include: TIER_EXPORT_INCLUDE,
+      orderBy: { createdAt: 'asc' },
+    });
+    const year = await this.prisma.accountingYear.findFirst({
+      where: {
+        id: accountingYearId,
+        deletedAt: null,
+      },
+    });
+    if (!year) {
+      throw new BadRequestException('Accounting year not found');
+    }
+
+    const tierLines = await this.prisma.tier.findMany({
+      where: {
+        clientId,
+        deletedAt: null,
+        client: { companyId, deletedAt: null },
+      },
+      select: { id: true, name: true, ninea: true, meta: true },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    const tierIds = tierLines.map((t) => t.id);
+    const sumsByTier = await this.prisma.tiersTransaction.groupBy({
+      by: ['tierId'],
+      where: {
+        deletedAt: null,
+        tierId: { in: tierIds },
+        date: {
+          gte: year.startDate,
+          lte: year.endDate,
+        },
+      },
+      _sum: {
+        total: true,
+        tax: true,
+      },
+    });
+
+    const sumsByTierId = new Map(
+      sumsByTier.map((s) => [
+        s.tierId,
+        {
+          montantVerse: s._sum.total ?? 0,
+          irRetenu: s._sum.tax ?? 0,
+        },
+      ]),
+    );
+
+    return buildSenegalAnnualFormData(
+      client,
+      anchor?.meta,
+      year,
+      tierLines,
+      sumsByTierId,
+    );
   }
+
+  private buildExportFilenameBase(trimestreLibelle: string, clientName: string): string {
+    const safe = (value: string) =>
+      (value ?? '')
+        .trim()
+        .replace(/\s+/g, '-')
+        .replace(/[^a-zA-Z0-9-_]/g, '')
+        .toLowerCase();
+
+    const quarterPart = safe(trimestreLibelle);
+    const clientPart = safe(clientName);
+    return `etat-${quarterPart}-${clientPart}`;
+  }
+
+  async renderTierExcel(
+    clientId: string,
+    companyId: string,
+    accountingYearId: string,
+    accountingQuarterId: string,
+  ) {
+    const data = await this.buildTierExportFormData(
+      clientId,
+      companyId,
+      accountingYearId,
+      accountingQuarterId,
+    );
+    const filenameBase = this.buildExportFilenameBase(
+      data.trimestreLibelle,
+      data.declarant.raisonSociale,
+    );
+    const buffer =
+      await this.etatTrimestrielSommesVerseesExcel.fillWorkbook(data);
+    saveTierExcelToGenerations(buffer, filenameBase);
+    return {
+      buffer,
+      filenameBase,
+    };
+  }
+
+  async renderTierAnnualExcel(clientId: string, companyId: string, accountingYearId: string) {
+    const data = await this.buildTierAnnualExportFormData(
+      clientId,
+      companyId,
+      accountingYearId,
+    );
+    const filenameBase = this.buildExportFilenameBase(
+      `annuel-${data.periodeAnnuelleLibelle}`,
+      data.declarant.raisonSociale,
+    );
+    const buffer = await this.etatAnnuelSommesVerseesExcel.fillWorkbook(data);
+    saveTierExcelToGenerations(buffer, filenameBase);
+    return {
+      buffer,
+      filenameBase,
+    };
+  }
+
+  // PDF export temporarily disabled (kept for later).
+  // async renderTierPdf(id: string, companyId: string) {
+  //   const excelBuffer = await this.renderTierExcel(id, companyId);
+  //   return convertExcelBufferToPdf(excelBuffer, `tier-${id}`);
+  // }
 }

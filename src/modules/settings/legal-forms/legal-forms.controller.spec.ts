@@ -1,5 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { LegalFormsController } from './legal-forms.controller';
+import { LegalFormsService } from './legal-forms.service';
+import { prismaMockProvider } from '../../../common/testing/prisma-mock';
 
 describe('LegalFormsController', () => {
   let controller: LegalFormsController;
@@ -7,6 +9,7 @@ describe('LegalFormsController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [LegalFormsController],
+      providers: [LegalFormsService, prismaMockProvider],
     }).compile();
 
     controller = module.get<LegalFormsController>(LegalFormsController);

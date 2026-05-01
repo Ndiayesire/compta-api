@@ -7,7 +7,10 @@ import { join } from 'path';
  * - **Hors production** : activé par défaut (désactiver avec `TIERS_SAVE_GENERATIONS=0`).
  * - **Production** : uniquement si `TIERS_SAVE_GENERATIONS=1`.
  */
-export function saveTierExcelToGenerations(buffer: Buffer, tierId: string): void {
+export function saveTierExcelToGenerations(
+  buffer: Buffer,
+  generatedName: string,
+): void {
   const explicitOff =
     process.env.TIERS_SAVE_GENERATIONS === '0' ||
     process.env.TIERS_SAVE_GENERATIONS === 'false';
@@ -22,8 +25,11 @@ export function saveTierExcelToGenerations(buffer: Buffer, tierId: string): void
 
   const dir = join(process.cwd(), 'generations');
   mkdirSync(dir, { recursive: true });
-  const stamp = new Date().toISOString().replace(/[:.]/g, '-');
-  const safeId = tierId.replace(/[^a-zA-Z0-9-]/g, '_');
-  const name = `tier-${safeId}-${stamp}.xlsx`;
+  const safeName = generatedName
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/[^a-zA-Z0-9-_]/g, '')
+    .toLowerCase();
+  const name = `${safeName || 'etat'}.xlsx`;
   writeFileSync(join(dir, name), buffer);
 }

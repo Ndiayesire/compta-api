@@ -66,9 +66,13 @@ const I = {
   docCatProof: 'a000001d-0000-4000-8000-000000000001',
   companyDemo: 'a0000020-0000-4000-8000-000000000001',
   clientDemo: 'a0000021-0000-4000-8000-000000000001',
+  clientDemo2: 'a0000031-0000-4000-8000-000000000001',
   employeeDemo: 'a0000022-0000-4000-8000-000000000001',
   empContractDemo: 'a0000023-0000-4000-8000-000000000001',
   tierDemo: 'a0000024-0000-4000-8000-000000000001',
+  tierDemo2: 'a0000032-0000-4000-8000-000000000001',
+  tierDemo3: 'a0000033-0000-4000-8000-000000000001',
+  tierDemoClient2: 'a0000034-0000-4000-8000-000000000001',
   documentDemo: 'a0000025-0000-4000-8000-000000000001',
   activityDemo: 'a0000026-0000-4000-8000-000000000001',
   notificationDemo: 'a0000027-0000-4000-8000-000000000001',
@@ -81,6 +85,10 @@ const I = {
   accountingQ3: 'a000002e-0000-4000-8000-000000000001',
   accountingQ4: 'a000002f-0000-4000-8000-000000000001',
   tiersTxDemo: 'a0000030-0000-4000-8000-000000000001',
+  tiersTxDemo2: 'a0000035-0000-4000-8000-000000000001',
+  tiersTxDemo3: 'a0000036-0000-4000-8000-000000000001',
+  tiersTxDemo4: 'a0000037-0000-4000-8000-000000000001',
+  tiersTxDemo5: 'a0000038-0000-4000-8000-000000000001',
 };
 
 const DEFAULT_ADMIN_PASSWORD = process.env.SEED_ADMIN_PASSWORD || 'Admin123!dev';
@@ -414,25 +422,25 @@ async function seedAccountingCatalog() {
   const quarters = [
     {
       id: I.accountingQ1,
-      name: 'T1 2025',
+      name: 'Premier Trimestre 2025',
       monthStart: '2025-01-01',
       end: '2025-03-31',
     },
     {
       id: I.accountingQ2,
-      name: 'T2 2025',
+      name: 'Deuxième Trimestre 2025',
       monthStart: '2025-04-01',
       end: '2025-06-30',
     },
     {
       id: I.accountingQ3,
-      name: 'T3 2025',
+      name: 'Troisième Trimestre 2025',
       monthStart: '2025-07-01',
       end: '2025-09-30',
     },
     {
       id: I.accountingQ4,
-      name: 'T4 2025',
+      name: 'Quatrième Trimestre 2025',
       monthStart: '2025-10-01',
       end: '2025-12-31',
     },
@@ -532,12 +540,35 @@ async function seedDemoChain(seedUserId) {
       postalCode: '12500',
       ninea: 'SN987654321',
       useTva: true,
-      meta: { seeded: true },
+      meta: { seeded: true, bp: 'BP 12500 Dakar' },
     },
     update: {
       companyId: I.companyDemo,
       postalCode: '12500',
-      meta: { seeded: true },
+      meta: { seeded: true, bp: 'BP 12500 Dakar' },
+    },
+  });
+
+  await prisma.client.upsert({
+    where: { id: I.clientDemo2 },
+    create: {
+      id: I.clientDemo2,
+      userId: seedUserId,
+      companyId: I.companyDemo,
+      countryId: I.countrySn,
+      regionId: I.regionDakar,
+      legalFormId: I.legalSarl,
+      name: 'Client démo 2',
+      address: 'Mermoz, Dakar',
+      postalCode: '12000',
+      ninea: 'SN123123123',
+      useTva: true,
+      meta: { seeded: true, segment: 'SMB' },
+    },
+    update: {
+      companyId: I.companyDemo,
+      postalCode: '12000',
+      meta: { seeded: true, segment: 'SMB' },
     },
   });
 
@@ -607,6 +638,81 @@ async function seedDemoChain(seedUserId) {
     },
   });
 
+  await prisma.tier.upsert({
+    where: { id: I.tierDemo2 },
+    create: {
+      id: I.tierDemo2,
+      tierTypeId: I.tierTypeSupplier,
+      clientId: I.clientDemo,
+      name: 'Tier démo fournisseur A',
+      ninea: 'SN222333444',
+      useTva: true,
+      reference: 'TIER-DEMO-2',
+      meta: {
+        seeded: true,
+        beneficiaryAddress: 'Point E, Dakar',
+      },
+      isActive: true,
+    },
+    update: {
+      meta: {
+        seeded: true,
+        beneficiaryAddress: 'Point E, Dakar',
+      },
+      isActive: true,
+    },
+  });
+
+  await prisma.tier.upsert({
+    where: { id: I.tierDemo3 },
+    create: {
+      id: I.tierDemo3,
+      tierTypeId: I.tierTypeSupplier,
+      clientId: I.clientDemo,
+      name: 'Tier démo fournisseur B',
+      ninea: 'SN333444555',
+      useTva: true,
+      reference: 'TIER-DEMO-3',
+      meta: {
+        seeded: true,
+        beneficiaryAddress: 'Ouakam, Dakar',
+      },
+      isActive: true,
+    },
+    update: {
+      meta: {
+        seeded: true,
+        beneficiaryAddress: 'Ouakam, Dakar',
+      },
+      isActive: true,
+    },
+  });
+
+  await prisma.tier.upsert({
+    where: { id: I.tierDemoClient2 },
+    create: {
+      id: I.tierDemoClient2,
+      tierTypeId: I.tierTypeCustomer,
+      clientId: I.clientDemo2,
+      name: 'Tier client 2 démo',
+      ninea: 'SN444555666',
+      useTva: true,
+      reference: 'TIER-DEMO-4',
+      meta: {
+        seeded: true,
+        beneficiaryAddress: 'Sicap Liberté, Dakar',
+      },
+      isActive: true,
+    },
+    update: {
+      meta: {
+        seeded: true,
+        beneficiaryAddress: 'Sicap Liberté, Dakar',
+      },
+      isActive: true,
+    },
+  });
+
   await prisma.tiersTransaction.upsert({
     where: { id: I.tiersTxDemo },
     create: {
@@ -625,6 +731,94 @@ async function seedDemoChain(seedUserId) {
       tax: 18000,
       total: 118000,
       date: new Date('2025-04-15T00:00:00.000Z'),
+      deletedAt: null,
+    },
+  });
+
+  await prisma.tiersTransaction.upsert({
+    where: { id: I.tiersTxDemo2 },
+    create: {
+      id: I.tiersTxDemo2,
+      tierId: I.tierDemo2,
+      transactionId: 'SEED-TX-002',
+      net: 220000,
+      tax: 39600,
+      total: 259600,
+      date: new Date('2025-04-20T00:00:00.000Z'),
+    },
+    update: {
+      tierId: I.tierDemo2,
+      transactionId: 'SEED-TX-002',
+      net: 220000,
+      tax: 39600,
+      total: 259600,
+      date: new Date('2025-04-20T00:00:00.000Z'),
+      deletedAt: null,
+    },
+  });
+
+  await prisma.tiersTransaction.upsert({
+    where: { id: I.tiersTxDemo3 },
+    create: {
+      id: I.tiersTxDemo3,
+      tierId: I.tierDemo3,
+      transactionId: 'SEED-TX-003',
+      net: 150000,
+      tax: 27000,
+      total: 177000,
+      date: new Date('2025-05-05T00:00:00.000Z'),
+    },
+    update: {
+      tierId: I.tierDemo3,
+      transactionId: 'SEED-TX-003',
+      net: 150000,
+      tax: 27000,
+      total: 177000,
+      date: new Date('2025-05-05T00:00:00.000Z'),
+      deletedAt: null,
+    },
+  });
+
+  await prisma.tiersTransaction.upsert({
+    where: { id: I.tiersTxDemo4 },
+    create: {
+      id: I.tiersTxDemo4,
+      tierId: I.tierDemo,
+      transactionId: 'SEED-TX-004',
+      net: 90000,
+      tax: 16200,
+      total: 106200,
+      date: new Date('2025-02-10T00:00:00.000Z'),
+    },
+    update: {
+      tierId: I.tierDemo,
+      transactionId: 'SEED-TX-004',
+      net: 90000,
+      tax: 16200,
+      total: 106200,
+      date: new Date('2025-02-10T00:00:00.000Z'),
+      deletedAt: null,
+    },
+  });
+
+  await prisma.tiersTransaction.upsert({
+    where: { id: I.tiersTxDemo5 },
+    create: {
+      id: I.tiersTxDemo5,
+      tierId: I.tierDemoClient2,
+      transactionId: 'SEED-TX-005',
+      net: 125000,
+      tax: 22500,
+      total: 147500,
+      date: new Date('2025-04-28T00:00:00.000Z'),
+    },
+    update: {
+      tierId: I.tierDemoClient2,
+      transactionId: 'SEED-TX-005',
+      net: 125000,
+      tax: 22500,
+      total: 147500,
+      date: new Date('2025-04-28T00:00:00.000Z'),
       deletedAt: null,
     },
   });

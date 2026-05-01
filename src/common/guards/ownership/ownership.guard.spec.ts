@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { Reflector } from '@nestjs/core';
 import { OwnershipGuard } from './ownership.guard';
 
 describe('OwnershipGuard', () => {
@@ -6,7 +7,7 @@ describe('OwnershipGuard', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [OwnershipGuard],
+      providers: [OwnershipGuard, Reflector],
     }).compile();
 
     guard = module.get<OwnershipGuard>(OwnershipGuard);

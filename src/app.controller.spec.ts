@@ -14,9 +14,11 @@ describe('AppController', () => {
     appController = app.get<AppController>(AppController);
   });
 
-  describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(appController.getHello()).toBe('Hello World!');
+  describe('health', () => {
+    it('should return API status', () => {
+      const res = appController.getStatus();
+      expect(res.success).toBe(true);
+      expect(res.data?.name).toBe('Insta Compta API');
     });
   });
 });

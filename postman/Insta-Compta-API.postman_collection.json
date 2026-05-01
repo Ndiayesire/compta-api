@@ -2,16 +2,43 @@
   "info": {
     "_postman_id": "a1b2c3d4-e5f6-7890-abcd-comptaapi01",
     "name": "Insta Compta API",
-    "description": "NestJS **compta-api** — collection alignée sur les modules montés dans `AppModule` (2026-04 ; **10** migrations Prisma au dépôt, dont `20260417160000_shorten_fk_column_names`).\n\n**JSON HTTP vs MySQL** : les corps de requête utilisent les **DTO camelCase** (`countryId`, `regionId`, `legalFormId`, `categoryId`, `typeId`, `identificationTypeId`, `tierTypeId`, …). En base, Prisma mappe vers des colonnes courtes (`country_id`, `category_id`, `type_id`, etc.) — ne pas les confondre avec les clés JSON.\n\n**Variables** : `baseUrl` (ex. `http://localhost:4230`), `accessToken`, `refreshToken`. La collection utilise l’auth **Bearer** au niveau collection : après **Auth → Login**, copier `accessToken` / `refreshToken` dans les variables.\n\n**Auth** : `POST /auth/login` est public. **`POST /auth/register` exige un JWT** (guard global) — utiliser un compte déjà connecté (ex. admin seed). `GET /health` est public.\n\n**Périmètres** : la plupart des routes métier filtrent par **société** (`companyId` du JWT) ou par **utilisateur** (activities, notifications). Les tables **settings** (pays, rôles, etc.) sont globales.\n\n**Corps JSON** : les requêtes `POST`/`PATCH` listent **tous les champs du DTO** (y compris optionnels) pour faciliter les essais — retirer ou adapter les clés non voulues.\n\n**Dossiers** : App · Auth · Users · Company · Clients · Employees · Employee contracts · Tiers · **Accounting years** · **Accounting quarters** · **App meta** · **Tiers transactions** · Documents · Activities · Notifications · Settings (Countries, Regions, Currencies, Legal forms, Document categories, Identification types, Genders, Languages, Payment methods, Contract types, Tier types, Permissions, Roles).\n\n**Variables** supplémentaires : `accountingYearId`, `accountingQuarterId`, `tiersTransactionId` (remplir après création ou coller un UUID).",
+    "description": "NestJS **compta-api** — collection alignée sur les modules montés dans `AppModule`. Rapports Excel DGID : dossier **Financial Report**.\n\n**JSON HTTP vs MySQL** : les corps de requête utilisent les **DTO camelCase** (`countryId`, `regionId`, `legalFormId`, `categoryId`, `typeId`, `identificationTypeId`, `tierTypeId`, …). En base, Prisma mappe vers des colonnes courtes (`country_id`, `category_id`, `type_id`, etc.) — ne pas les confondre avec les clés JSON.\n\n**Variables** : `baseUrl` (ex. `http://localhost:4230`), `accessToken`, `refreshToken`. La collection utilise l’auth **Bearer** au niveau collection : après **Auth → Login**, copier `accessToken` / `refreshToken` dans les variables.\n\n**Auth** : `POST /auth/login` est public. **`POST /auth/register` exige un JWT** (guard global) — utiliser un compte déjà connecté (ex. admin seed). `GET /health` est public.\n\n**Périmètres** : la plupart des routes métier filtrent par **société** (`companyId` du JWT) ou par **utilisateur** (activities, notifications). Les tables **settings** (pays, rôles, etc.) sont globales.\n\n**Corps JSON** : les requêtes `POST`/`PATCH` listent **tous les champs du DTO** (y compris optionnels) pour faciliter les essais — retirer ou adapter les clés non voulues.\n\n**Dossiers** : App · Auth · Users · Company · Clients · Employees · Employee contracts · Tiers · **Financial Report** (exports Excel DGID) · **Accounting years** · **Accounting quarters** · **App meta** · **Tiers transactions** · Documents · Activities · Notifications · Settings (Countries, Regions, Currencies, Legal forms, Document categories, Identification types, Genders, Languages, Payment methods, Contract types, Tier types, Permissions, Roles).\n\n**Variables seed** (`prisma/seed.cjs`) : `clientId`, `companyId`, `userId` (admin), `employeeId`, `employeeContractId`, `tierId`, `documentId`, `activityId`, `notificationId`, `accountingYearId`, `accountingQuarterId`, `tiersTransactionId`, et références settings (`countryId`, `regionId`, …). Préremplies pour tests après `npm run seed`.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
     { "key": "baseUrl", "value": "http://localhost:4230" },
     { "key": "accessToken", "value": "" },
     { "key": "refreshToken", "value": "" },
-    { "key": "accountingYearId", "value": "", "description": "UUID après POST /accounting-years (trimestres)" },
-    { "key": "accountingQuarterId", "value": "", "description": "UUID après POST /accounting-quarters" },
-    { "key": "tiersTransactionId", "value": "", "description": "UUID après POST /tiers-transactions" }
+    { "key": "userId", "value": "a0000017-0000-4000-8000-000000000001", "description": "seed adminUser" },
+    { "key": "companyId", "value": "a0000020-0000-4000-8000-000000000001", "description": "seed companyDemo" },
+    { "key": "clientId", "value": "a0000021-0000-4000-8000-000000000001", "description": "seed clientDemo" },
+    { "key": "clientId2", "value": "a0000031-0000-4000-8000-000000000001", "description": "seed clientDemo2" },
+    { "key": "employeeId", "value": "a0000022-0000-4000-8000-000000000001", "description": "seed employeeDemo" },
+    { "key": "employeeContractId", "value": "a0000023-0000-4000-8000-000000000001", "description": "seed empContractDemo" },
+    { "key": "tierId", "value": "a0000024-0000-4000-8000-000000000001", "description": "seed tierDemo" },
+    { "key": "documentId", "value": "a0000025-0000-4000-8000-000000000001", "description": "seed documentDemo" },
+    { "key": "activityId", "value": "a0000026-0000-4000-8000-000000000001", "description": "seed activityDemo" },
+    { "key": "notificationId", "value": "a0000027-0000-4000-8000-000000000001", "description": "seed notificationDemo" },
+    { "key": "accountingYearId", "value": "a000002b-0000-4000-8000-000000000001", "description": "seed accountingYearDemo" },
+    { "key": "accountingQuarterId", "value": "a000002c-0000-4000-8000-000000000001", "description": "seed accountingQ1 (Premier Trimestre 2025)" },
+    { "key": "tiersTransactionId", "value": "a0000030-0000-4000-8000-000000000001", "description": "seed tiersTxDemo" },
+    { "key": "roleIdAdmin", "value": "a0000015-0000-4000-8000-000000000001", "description": "seed roleAdmin" },
+    { "key": "roleIdUser", "value": "a0000016-0000-4000-8000-000000000001", "description": "seed roleUser" },
+    { "key": "permissionId", "value": "a0000014-0000-4000-8000-000000000001", "description": "seed permAll" },
+    { "key": "countryId", "value": "a0000002-0000-4000-8000-000000000001", "description": "seed countrySn" },
+    { "key": "regionId", "value": "a0000003-0000-4000-8000-000000000001", "description": "seed regionDakar" },
+    { "key": "currencyId", "value": "a0000001-0000-4000-8000-000000000001", "description": "seed currencyXof" },
+    { "key": "legalFormId", "value": "a0000008-0000-4000-8000-000000000001", "description": "seed legalSarl" },
+    { "key": "languageId", "value": "a0000004-0000-4000-8000-000000000001", "description": "seed langFr" },
+    { "key": "genderId", "value": "a0000007-0000-4000-8000-000000000001", "description": "seed genderO" },
+    { "key": "tierTypeId", "value": "a0000009-0000-4000-8000-000000000001", "description": "seed tierTypeCustomer" },
+    { "key": "contractTypeId", "value": "a000000b-0000-4000-8000-000000000001", "description": "seed contractCdi" },
+    { "key": "identificationTypeId", "value": "a0000029-0000-4000-8000-000000000001", "description": "seed idTypeCni" },
+    { "key": "documentCategoryId", "value": "a000001c-0000-4000-8000-000000000001", "description": "seed docCatInvoice" },
+    { "key": "paymentMethodTypeId", "value": "a000000e-0000-4000-8000-000000000001", "description": "seed pmTypeMobile" },
+    { "key": "paymentMethodId", "value": "a0000010-0000-4000-8000-000000000001", "description": "seed pmOm" },
+    { "key": "permissionTypeId", "value": "a0000013-0000-4000-8000-000000000001", "description": "seed permTypeCore" },
+    { "key": "roleId", "value": "a0000015-0000-4000-8000-000000000001", "description": "seed roleAdmin (GET/PATCH rôle)" }
   ],
   "auth": {
     "type": "bearer",
@@ -56,7 +83,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"SecurePass12\",\n  \"roleId\": \"a0000016-0000-4000-8000-000000000001\",\n  \"countryId\": \"a0000002-0000-4000-8000-000000000001\",\n  \"regionId\": \"a0000003-0000-4000-8000-000000000001\",\n  \"languageId\": \"a0000004-0000-4000-8000-000000000001\",\n  \"genderId\": \"a0000007-0000-4000-8000-000000000001\",\n  \"firstName\": \"Jean\",\n  \"lastName\": \"Dupont\",\n  \"phone\": \"+221770000000\",\n  \"address\": \"Dakar\",\n  \"avatar\": \"\",\n  \"isActive\": true\n}"
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"SecurePass12\",\n  \"roleId\": \"{{roleIdUser}}\",\n  \"countryId\": \"{{countryId}}\",\n  \"regionId\": \"{{regionId}}\",\n  \"languageId\": \"{{languageId}}\",\n  \"genderId\": \"{{genderId}}\",\n  \"firstName\": \"Jean\",\n  \"lastName\": \"Dupont\",\n  \"phone\": \"+221770000000\",\n  \"address\": \"Dakar\",\n  \"avatar\": \"\",\n  \"isActive\": true\n}"
             },
             "url": "{{baseUrl}}/auth/register",
             "description": "**JWT requis** (pas de `@Public`) — faire Login avant. Utilise le Bearer de la collection (`accessToken`)."
@@ -102,7 +129,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"new.user@example.com\",\n  \"password\": \"SecurePass12\",\n  \"roleId\": \"a0000016-0000-4000-8000-000000000001\",\n  \"countryId\": \"a0000002-0000-4000-8000-000000000001\",\n  \"regionId\": \"a0000003-0000-4000-8000-000000000001\",\n  \"languageId\": \"a0000004-0000-4000-8000-000000000001\",\n  \"genderId\": \"a0000007-0000-4000-8000-000000000001\",\n  \"firstName\": \"A\",\n  \"lastName\": \"B\",\n  \"phone\": \"+221770000001\",\n  \"address\": \"Dakar\",\n  \"avatar\": \"\",\n  \"isActive\": true\n}"
+              "raw": "{\n  \"email\": \"new.user@example.com\",\n  \"password\": \"SecurePass12\",\n  \"roleId\": \"{{roleIdUser}}\",\n  \"countryId\": \"{{countryId}}\",\n  \"regionId\": \"{{regionId}}\",\n  \"languageId\": \"{{languageId}}\",\n  \"genderId\": \"{{genderId}}\",\n  \"firstName\": \"A\",\n  \"lastName\": \"B\",\n  \"phone\": \"+221770000001\",\n  \"address\": \"Dakar\",\n  \"avatar\": \"\",\n  \"isActive\": true\n}"
             },
             "url": "{{baseUrl}}/users"
           }
@@ -117,7 +144,7 @@
         },
         {
           "name": "Get user by id",
-          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/users/:id" }
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/users/{{userId}}" }
         },
         {
           "name": "Change password (me)",
@@ -138,9 +165,9 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"updated.user@example.com\",\n  \"password\": \"SecurePass12\",\n  \"roleId\": \"a0000016-0000-4000-8000-000000000001\",\n  \"countryId\": \"a0000002-0000-4000-8000-000000000001\",\n  \"regionId\": \"a0000003-0000-4000-8000-000000000001\",\n  \"languageId\": \"a0000004-0000-4000-8000-000000000001\",\n  \"genderId\": \"a0000007-0000-4000-8000-000000000001\",\n  \"firstName\": \"Updated\",\n  \"lastName\": \"User\",\n  \"phone\": \"+221770000099\",\n  \"address\": \"Dakar\",\n  \"avatar\": \"\",\n  \"isActive\": true\n}"
+              "raw": "{\n  \"email\": \"updated.user@example.com\",\n  \"password\": \"SecurePass12\",\n  \"roleId\": \"{{roleIdUser}}\",\n  \"countryId\": \"{{countryId}}\",\n  \"regionId\": \"{{regionId}}\",\n  \"languageId\": \"{{languageId}}\",\n  \"genderId\": \"{{genderId}}\",\n  \"firstName\": \"Updated\",\n  \"lastName\": \"User\",\n  \"phone\": \"+221770000099\",\n  \"address\": \"Dakar\",\n  \"avatar\": \"\",\n  \"isActive\": true\n}"
             },
-            "url": "{{baseUrl}}/users/:id"
+            "url": "{{baseUrl}}/users/{{userId}}"
           }
         },
         {
@@ -148,17 +175,17 @@
           "request": {
             "method": "PATCH",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"roleId\": \"a0000016-0000-4000-8000-000000000001\"\n}" },
-            "url": "{{baseUrl}}/users/:id/role"
+            "body": { "mode": "raw", "raw": "{\n  \"roleId\": \"{{roleIdUser}}\"\n}" },
+            "url": "{{baseUrl}}/users/{{userId}}/role"
           }
         },
         {
           "name": "Unset role",
-          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/users/:id/role" }
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/users/{{userId}}/role" }
         },
         {
           "name": "Deactivate user",
-          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/users/:id" }
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/users/{{userId}}" }
         }
       ]
     },
@@ -172,7 +199,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Ma SARL\",\n  \"email\": \"contact@masarl.sn\",\n  \"phone\": \"+221338000000\",\n  \"address\": \"Dakar\",\n  \"ninea\": \"SN111222333\",\n  \"useTva\": true,\n  \"reference\": \"REF-001\",\n  \"legalFormId\": \"a0000008-0000-4000-8000-000000000001\",\n  \"countryId\": \"a0000002-0000-4000-8000-000000000001\",\n  \"regionId\": \"a0000003-0000-4000-8000-000000000001\",\n  \"meta\": {},\n  \"user\": {\n    \"email\": \"owner@masarl.sn\",\n    \"password\": \"SecurePass12\",\n    \"roleId\": \"a0000015-0000-4000-8000-000000000001\",\n    \"countryId\": \"a0000002-0000-4000-8000-000000000001\",\n    \"regionId\": \"a0000003-0000-4000-8000-000000000001\",\n    \"languageId\": \"a0000004-0000-4000-8000-000000000001\",\n    \"genderId\": \"a0000007-0000-4000-8000-000000000001\",\n    \"firstName\": \"Owner\",\n    \"lastName\": \"User\",\n    \"phone\": \"+221770000000\",\n    \"address\": \"Plateau\",\n    \"avatar\": \"\",\n    \"isActive\": true\n  }\n}"
+              "raw": "{\n  \"name\": \"Ma SARL\",\n  \"email\": \"contact@masarl.sn\",\n  \"phone\": \"+221338000000\",\n  \"address\": \"Dakar\",\n  \"ninea\": \"SN111222333\",\n  \"useTva\": true,\n  \"reference\": \"REF-001\",\n  \"legalFormId\": \"{{legalFormId}}\",\n  \"countryId\": \"{{countryId}}\",\n  \"regionId\": \"{{regionId}}\",\n  \"meta\": {},\n  \"user\": {\n    \"email\": \"owner@masarl.sn\",\n    \"password\": \"SecurePass12\",\n    \"roleId\": \"{{roleIdAdmin}}\",\n    \"countryId\": \"{{countryId}}\",\n    \"regionId\": \"{{regionId}}\",\n    \"languageId\": \"{{languageId}}\",\n    \"genderId\": \"{{genderId}}\",\n    \"firstName\": \"Owner\",\n    \"lastName\": \"User\",\n    \"phone\": \"+221770000000\",\n    \"address\": \"Plateau\",\n    \"avatar\": \"\",\n    \"isActive\": true\n  }\n}"
             },
             "url": "{{baseUrl}}/company"
           }
@@ -183,7 +210,7 @@
         },
         {
           "name": "Get company",
-          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/company/:id" }
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/company/{{companyId}}" }
         },
         {
           "name": "Update company",
@@ -192,14 +219,14 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Ma SARL (MAJ)\",\n  \"email\": \"contact@masarl.sn\",\n  \"phone\": \"+221338000000\",\n  \"address\": \"Plateau, Dakar\",\n  \"ninea\": \"SN111222333\",\n  \"useTva\": true,\n  \"reference\": \"REF-001-MAJ\",\n  \"legalFormId\": \"a0000008-0000-4000-8000-000000000001\",\n  \"countryId\": \"a0000002-0000-4000-8000-000000000001\",\n  \"regionId\": \"a0000003-0000-4000-8000-000000000001\",\n  \"meta\": { \"note\": \"patch exemple\" }\n}"
+              "raw": "{\n  \"name\": \"Ma SARL (MAJ)\",\n  \"email\": \"contact@masarl.sn\",\n  \"phone\": \"+221338000000\",\n  \"address\": \"Plateau, Dakar\",\n  \"ninea\": \"SN111222333\",\n  \"useTva\": true,\n  \"reference\": \"REF-001-MAJ\",\n  \"legalFormId\": \"{{legalFormId}}\",\n  \"countryId\": \"{{countryId}}\",\n  \"regionId\": \"{{regionId}}\",\n  \"meta\": { \"note\": \"patch exemple\" }\n}"
             },
-            "url": "{{baseUrl}}/company/:id"
+            "url": "{{baseUrl}}/company/{{companyId}}"
           }
         },
         {
           "name": "Soft delete company",
-          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/company/:id" }
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/company/{{companyId}}" }
         }
       ]
     },
@@ -213,7 +240,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Client Test\",\n  \"address\": \"Dakar\",\n  \"postalCode\": \"12500\",\n  \"ninea\": \"SN999888777\",\n  \"countryId\": \"a0000002-0000-4000-8000-000000000001\",\n  \"regionId\": \"a0000003-0000-4000-8000-000000000001\",\n  \"legalFormId\": \"a0000008-0000-4000-8000-000000000001\",\n  \"useTva\": true,\n  \"meta\": {}\n}"
+              "raw": "{\n  \"name\": \"Client Test\",\n  \"address\": \"Dakar\",\n  \"postalCode\": \"12500\",\n  \"ninea\": \"SN999888777\",\n  \"countryId\": \"{{countryId}}\",\n  \"regionId\": \"{{regionId}}\",\n  \"legalFormId\": \"{{legalFormId}}\",\n  \"useTva\": true,\n  \"meta\": {}\n}"
             },
             "url": "{{baseUrl}}/clients"
           }
@@ -225,7 +252,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Client Avec Contact\",\n  \"address\": \"Thiès\",\n  \"postalCode\": \"14000\",\n  \"ninea\": \"SN111222333\",\n  \"countryId\": \"a0000002-0000-4000-8000-000000000001\",\n  \"regionId\": \"a0000003-0000-4000-8000-000000000001\",\n  \"legalFormId\": \"a0000008-0000-4000-8000-000000000001\",\n  \"useTva\": true,\n  \"meta\": {},\n  \"user\": {\n    \"email\": \"contact.client@example.com\",\n    \"password\": \"SecurePass12\",\n    \"roleId\": \"a0000016-0000-4000-8000-000000000001\",\n    \"countryId\": \"a0000002-0000-4000-8000-000000000001\",\n    \"regionId\": \"a0000003-0000-4000-8000-000000000001\",\n    \"languageId\": \"a0000004-0000-4000-8000-000000000001\",\n    \"genderId\": \"a0000007-0000-4000-8000-000000000001\",\n    \"firstName\": \"Aminata\",\n    \"lastName\": \"Diop\",\n    \"phone\": \"+221770123456\",\n    \"address\": \"Thiès\",\n    \"avatar\": \"\",\n    \"isActive\": true\n  }\n}"
+              "raw": "{\n  \"name\": \"Client Avec Contact\",\n  \"address\": \"Thiès\",\n  \"postalCode\": \"14000\",\n  \"ninea\": \"SN111222333\",\n  \"countryId\": \"{{countryId}}\",\n  \"regionId\": \"{{regionId}}\",\n  \"legalFormId\": \"{{legalFormId}}\",\n  \"useTva\": true,\n  \"meta\": {},\n  \"user\": {\n    \"email\": \"contact.client@example.com\",\n    \"password\": \"SecurePass12\",\n    \"roleId\": \"{{roleIdUser}}\",\n    \"countryId\": \"{{countryId}}\",\n    \"regionId\": \"{{regionId}}\",\n    \"languageId\": \"{{languageId}}\",\n    \"genderId\": \"{{genderId}}\",\n    \"firstName\": \"Aminata\",\n    \"lastName\": \"Diop\",\n    \"phone\": \"+221770123456\",\n    \"address\": \"Thiès\",\n    \"avatar\": \"\",\n    \"isActive\": true\n  }\n}"
             },
             "url": "{{baseUrl}}/clients"
           }
@@ -236,7 +263,7 @@
         },
         {
           "name": "Get client",
-          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/clients/:id" }
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/clients/{{clientId}}" }
         },
         {
           "name": "Update client",
@@ -245,14 +272,14 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Client Test MAJ\",\n  \"address\": \"Dakar\",\n  \"postalCode\": \"12500\",\n  \"ninea\": \"SN999888777\",\n  \"countryId\": \"a0000002-0000-4000-8000-000000000001\",\n  \"regionId\": \"a0000003-0000-4000-8000-000000000001\",\n  \"legalFormId\": \"a0000008-0000-4000-8000-000000000001\",\n  \"useTva\": true,\n  \"meta\": {}\n}"
+              "raw": "{\n  \"name\": \"Client Test MAJ\",\n  \"address\": \"Dakar\",\n  \"postalCode\": \"12500\",\n  \"ninea\": \"SN999888777\",\n  \"countryId\": \"{{countryId}}\",\n  \"regionId\": \"{{regionId}}\",\n  \"legalFormId\": \"{{legalFormId}}\",\n  \"useTva\": true,\n  \"meta\": {}\n}"
             },
-            "url": "{{baseUrl}}/clients/:id"
+            "url": "{{baseUrl}}/clients/{{clientId}}"
           }
         },
         {
           "name": "Deactivate client",
-          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/clients/:id" }
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/clients/{{clientId}}" }
         }
       ]
     },
@@ -266,18 +293,18 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"clientId\": \"a0000021-0000-4000-8000-000000000001\",\n  \"identificationTypeId\": \"a0000029-0000-4000-8000-000000000001\",\n  \"contractTypeId\": \"a000000b-0000-4000-8000-000000000001\",\n  \"firstName\": \"Fatou\",\n  \"lastName\": \"Sarr\",\n  \"jobTitle\": \"Comptable\",\n  \"email\": \"fatou.sarr@example.sn\",\n  \"phone\": \"+221770000099\",\n  \"address\": \"Dakar\",\n  \"socialInsuranceNumber\": \"1 85 08 75 123 456 78\",\n  \"identityNumber\": \"CNI-AB123456\",\n  \"salary\": 450000,\n  \"isManager\": false,\n  \"startDate\": \"2025-01-01T00:00:00.000Z\",\n  \"endDate\": \"2026-12-31T23:59:59.000Z\",\n  \"isActive\": true\n}"
+              "raw": "{\n  \"clientId\": \"{{clientId}}\",\n  \"identificationTypeId\": \"{{identificationTypeId}}\",\n  \"contractTypeId\": \"{{contractTypeId}}\",\n  \"firstName\": \"Fatou\",\n  \"lastName\": \"Sarr\",\n  \"jobTitle\": \"Comptable\",\n  \"email\": \"fatou.sarr@example.sn\",\n  \"phone\": \"+221770000099\",\n  \"address\": \"Dakar\",\n  \"socialInsuranceNumber\": \"1 85 08 75 123 456 78\",\n  \"identityNumber\": \"CNI-AB123456\",\n  \"salary\": 450000,\n  \"isManager\": false,\n  \"startDate\": \"2025-01-01T00:00:00.000Z\",\n  \"endDate\": \"2026-12-31T23:59:59.000Z\",\n  \"isActive\": true\n}"
             },
             "url": "{{baseUrl}}/employees"
           }
         },
         {
           "name": "List by client",
-          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/employees/client/:clientId" }
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/employees/client/{{clientId}}" }
         },
         {
           "name": "Get employee",
-          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/employees/:id" }
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/employees/{{employeeId}}" }
         },
         {
           "name": "Update employee",
@@ -286,14 +313,14 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"clientId\": \"a0000021-0000-4000-8000-000000000001\",\n  \"identificationTypeId\": \"a0000029-0000-4000-8000-000000000001\",\n  \"contractTypeId\": \"a000000b-0000-4000-8000-000000000001\",\n  \"firstName\": \"Fatou\",\n  \"lastName\": \"Sarr\",\n  \"jobTitle\": \"Comptable senior\",\n  \"email\": \"fatou.sarr@example.sn\",\n  \"phone\": \"+221770000099\",\n  \"address\": \"Dakar\",\n  \"socialInsuranceNumber\": \"1 85 08 75 123 456 78\",\n  \"identityNumber\": \"CNI-AB123456\",\n  \"salary\": 500000,\n  \"isManager\": true,\n  \"startDate\": \"2025-01-01T00:00:00.000Z\",\n  \"endDate\": \"2026-12-31T23:59:59.000Z\",\n  \"isActive\": true\n}"
+              "raw": "{\n  \"clientId\": \"{{clientId}}\",\n  \"identificationTypeId\": \"{{identificationTypeId}}\",\n  \"contractTypeId\": \"{{contractTypeId}}\",\n  \"firstName\": \"Fatou\",\n  \"lastName\": \"Sarr\",\n  \"jobTitle\": \"Comptable senior\",\n  \"email\": \"fatou.sarr@example.sn\",\n  \"phone\": \"+221770000099\",\n  \"address\": \"Dakar\",\n  \"socialInsuranceNumber\": \"1 85 08 75 123 456 78\",\n  \"identityNumber\": \"CNI-AB123456\",\n  \"salary\": 500000,\n  \"isManager\": true,\n  \"startDate\": \"2025-01-01T00:00:00.000Z\",\n  \"endDate\": \"2026-12-31T23:59:59.000Z\",\n  \"isActive\": true\n}"
             },
-            "url": "{{baseUrl}}/employees/:id"
+            "url": "{{baseUrl}}/employees/{{employeeId}}"
           }
         },
         {
           "name": "Delete employee (soft)",
-          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/employees/:id" }
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/employees/{{employeeId}}" }
         }
       ]
     },
@@ -307,7 +334,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"employeeId\": \"a0000022-0000-4000-8000-000000000001\",\n  \"contractTypeId\": \"a000000b-0000-4000-8000-000000000001\",\n  \"startDate\": \"2025-01-01T00:00:00.000Z\",\n  \"endDate\": \"2026-12-31T23:59:59.000Z\",\n  \"jobTitle\": \"Comptable senior\",\n  \"salary\": 480000,\n  \"isManager\": false,\n  \"isActive\": true\n}"
+              "raw": "{\n  \"employeeId\": \"{{employeeId}}\",\n  \"contractTypeId\": \"{{contractTypeId}}\",\n  \"startDate\": \"2025-01-01T00:00:00.000Z\",\n  \"endDate\": \"2026-12-31T23:59:59.000Z\",\n  \"jobTitle\": \"Comptable senior\",\n  \"salary\": 480000,\n  \"isManager\": false,\n  \"isActive\": true\n}"
             },
             "url": "{{baseUrl}}/employee-contracts"
           }
@@ -322,7 +349,7 @@
         },
         {
           "name": "Get",
-          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/employee-contracts/:id" }
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/employee-contracts/{{employeeContractId}}" }
         },
         {
           "name": "Update",
@@ -331,14 +358,14 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"employeeId\": \"a0000022-0000-4000-8000-000000000001\",\n  \"contractTypeId\": \"a000000b-0000-4000-8000-000000000001\",\n  \"startDate\": \"2025-01-01T00:00:00.000Z\",\n  \"endDate\": \"2026-12-31T23:59:59.000Z\",\n  \"jobTitle\": \"Comptable senior (MAJ)\",\n  \"salary\": 520000,\n  \"isManager\": true,\n  \"isActive\": true\n}"
+              "raw": "{\n  \"employeeId\": \"{{employeeId}}\",\n  \"contractTypeId\": \"{{contractTypeId}}\",\n  \"startDate\": \"2025-01-01T00:00:00.000Z\",\n  \"endDate\": \"2026-12-31T23:59:59.000Z\",\n  \"jobTitle\": \"Comptable senior (MAJ)\",\n  \"salary\": 520000,\n  \"isManager\": true,\n  \"isActive\": true\n}"
             },
-            "url": "{{baseUrl}}/employee-contracts/:id"
+            "url": "{{baseUrl}}/employee-contracts/{{employeeContractId}}"
           }
         },
         {
           "name": "Delete (soft)",
-          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/employee-contracts/:id" }
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/employee-contracts/{{employeeContractId}}" }
         }
       ]
     },
@@ -352,7 +379,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"tierTypeId\": \"a0000009-0000-4000-8000-000000000001\",\n  \"clientId\": \"a0000021-0000-4000-8000-000000000001\",\n  \"name\": \"Client démo\",\n  \"ninea\": \"SN888777666\",\n  \"useTva\": true,\n  \"reference\": \"TIER-DEMO-001\",\n  \"meta\": {},\n  \"isActive\": true\n}"
+              "raw": "{\n  \"tierTypeId\": \"{{tierTypeId}}\",\n  \"clientId\": \"{{clientId}}\",\n  \"name\": \"Client démo\",\n  \"ninea\": \"SN888777666\",\n  \"useTva\": true,\n  \"reference\": \"TIER-DEMO-001\",\n  \"meta\": {},\n  \"isActive\": true\n}"
             },
             "url": "{{baseUrl}}/tiers"
           }
@@ -363,15 +390,11 @@
         },
         {
           "name": "List tiers by client",
-          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/tiers/client/:clientId" }
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/tiers/client/{{clientId}}" }
         },
         {
           "name": "Get tier",
-          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/tiers/:id" }
-        },
-        {
-          "name": "Download Excel (état trimestriel)",
-          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/tiers/:id/xlsx" }
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/tiers/{{tierId}}" }
         },
         {
           "name": "Update tier",
@@ -380,14 +403,38 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"tierTypeId\": \"a0000009-0000-4000-8000-000000000001\",\n  \"clientId\": \"a0000021-0000-4000-8000-000000000001\",\n  \"name\": \"Tier MAJ\",\n  \"ninea\": \"SN888777666\",\n  \"useTva\": true,\n  \"reference\": \"TIER-DEMO-002\",\n  \"meta\": {},\n  \"isActive\": true\n}"
+              "raw": "{\n  \"tierTypeId\": \"{{tierTypeId}}\",\n  \"clientId\": \"{{clientId}}\",\n  \"name\": \"Tier MAJ\",\n  \"ninea\": \"SN888777666\",\n  \"useTva\": true,\n  \"reference\": \"TIER-DEMO-002\",\n  \"meta\": {},\n  \"isActive\": true\n}"
             },
-            "url": "{{baseUrl}}/tiers/:id"
+            "url": "{{baseUrl}}/tiers/{{tierId}}"
           }
         },
         {
           "name": "Delete tier (soft)",
-          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/tiers/:id" }
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/tiers/{{tierId}}" }
+        }
+      ]
+    },
+    {
+      "name": "Financial Report",
+      "description": "Exports Excel **DGID** (sommes versées) — routes sous `/tiers/{{clientId}}/…`. Variables : `{{clientId}}`, `{{accountingYearId}}`, `{{accountingQuarterId}}` (seed `prisma/seed.cjs`). Auth Bearer collection.",
+      "item": [
+        {
+          "name": "Download Excel (état trimestriel sommes versées)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/tiers/{{clientId}}/xlsx?accountingYearId={{accountingYearId}}&accountingQuarterId={{accountingQuarterId}}",
+            "description": "Fichier **binaire** `.xlsx` — utiliser **Send and Download**. Queries obligatoires : `accountingYearId`, `accountingQuarterId`. JWT Bearer (collection).\n\n**Remplissage modèle** : année de référence **R1** ; libellé trimestre découpé (**H9** / **I9** / **K9**) à partir du nom type « Premier Trimestre 2025 ». Seed : variables `clientId`, `accountingYearId`, `accountingQuarterId`."
+          }
+        },
+        {
+          "name": "Download Excel (état annuel sommes versées)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/tiers/{{clientId}}/xlsx/annual?accountingYearId={{accountingYearId}}",
+            "description": "Fichier **binaire** `.xlsx` — **Send and Download**. Query : `accountingYearId` (agrégation sur tout l’exercice). JWT Bearer.\n\n**Modèle** : année de référence **Q2** ; tableau bénéficiaires à partir de la **ligne 28**."
+          }
         }
       ]
     },
@@ -412,7 +459,7 @@
         },
         {
           "name": "Get by id",
-          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/accounting-years/:accountingYearId" }
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/accounting-years/{{accountingYearId}}" }
         },
         {
           "name": "Update",
@@ -423,12 +470,12 @@
               "mode": "raw",
               "raw": "{\n  \"name\": \"Exercice 2025 (MAJ)\",\n  \"isActive\": true\n}"
             },
-            "url": "{{baseUrl}}/accounting-years/:accountingYearId"
+            "url": "{{baseUrl}}/accounting-years/{{accountingYearId}}"
           }
         },
         {
           "name": "Delete (soft)",
-          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/accounting-years/:accountingYearId" }
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/accounting-years/{{accountingYearId}}" }
         }
       ]
     },
@@ -442,7 +489,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"accountingYearId\": \"{{accountingYearId}}\",\n  \"name\": \"T1 2025\",\n  \"monthStartDate\": \"2025-01-01T00:00:00.000Z\",\n  \"endDate\": \"2025-03-31T00:00:00.000Z\",\n  \"isActive\": true\n}"
+              "raw": "{\n  \"accountingYearId\": \"{{accountingYearId}}\",\n  \"name\": \"Premier Trimestre 2025\",\n  \"monthStartDate\": \"2025-01-01T00:00:00.000Z\",\n  \"endDate\": \"2025-03-31T00:00:00.000Z\",\n  \"isActive\": true\n}"
             },
             "description": "Renseigner `accountingYearId` (variable collection ou UUID d’un exercice créé).",
             "url": "{{baseUrl}}/accounting-quarters"
@@ -462,7 +509,7 @@
         },
         {
           "name": "Get by id",
-          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/accounting-quarters/:accountingQuarterId" }
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/accounting-quarters/{{accountingQuarterId}}" }
         },
         {
           "name": "Update",
@@ -473,12 +520,12 @@
               "mode": "raw",
               "raw": "{\n  \"name\": \"T1 2025 (MAJ)\",\n  \"isActive\": true\n}"
             },
-            "url": "{{baseUrl}}/accounting-quarters/:accountingQuarterId"
+            "url": "{{baseUrl}}/accounting-quarters/{{accountingQuarterId}}"
           }
         },
         {
           "name": "Delete (soft)",
-          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/accounting-quarters/:accountingQuarterId" }
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/accounting-quarters/{{accountingQuarterId}}" }
         }
       ]
     },
@@ -537,9 +584,9 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"tierId\": \"a0000024-0000-4000-8000-000000000001\",\n  \"transactionId\": \"TX-DEMO-001\",\n  \"net\": 1000.5,\n  \"tax\": 180.09,\n  \"total\": 1180.59,\n  \"date\": \"2025-04-15T00:00:00.000Z\"\n}"
+              "raw": "{\n  \"tierId\": \"{{tierId}}\",\n  \"transactionId\": \"TX-DEMO-001\",\n  \"net\": 1000.5,\n  \"tax\": 180.09,\n  \"total\": 1180.59,\n  \"date\": \"2025-04-15T00:00:00.000Z\"\n}"
             },
-            "description": "Le tier doit appartenir à un client de la société du JWT (ex. tier seed `a0000024-...`).",
+            "description": "Le tier doit appartenir à un client de la société du JWT (variable `{{tierId}}`, seed `tierDemo`).",
             "url": "{{baseUrl}}/tiers-transactions"
           }
         },
@@ -552,12 +599,12 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/tiers-transactions?tierId=a0000024-0000-4000-8000-000000000001"
+            "url": "{{baseUrl}}/tiers-transactions?tierId={{tierId}}"
           }
         },
         {
           "name": "Get by id",
-          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/tiers-transactions/:tiersTransactionId" }
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/tiers-transactions/{{tiersTransactionId}}" }
         },
         {
           "name": "Update",
@@ -568,12 +615,12 @@
               "mode": "raw",
               "raw": "{\n  \"net\": 1100,\n  \"tax\": 198,\n  \"total\": 1298\n}"
             },
-            "url": "{{baseUrl}}/tiers-transactions/:tiersTransactionId"
+            "url": "{{baseUrl}}/tiers-transactions/{{tiersTransactionId}}"
           }
         },
         {
           "name": "Delete (soft)",
-          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/tiers-transactions/:tiersTransactionId" }
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/tiers-transactions/{{tiersTransactionId}}" }
         }
       ]
     },
@@ -587,7 +634,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"categoryId\": \"a000001c-0000-4000-8000-000000000001\",\n  \"name\": \"facture_demo.pdf\",\n  \"path\": \"/uploads/demo/facture_demo.pdf\",\n  \"mimeType\": \"application/pdf\",\n  \"size\": 102400,\n  \"meta\": {}\n}"
+              "raw": "{\n  \"categoryId\": \"{{documentCategoryId}}\",\n  \"name\": \"facture_demo.pdf\",\n  \"path\": \"/uploads/demo/facture_demo.pdf\",\n  \"mimeType\": \"application/pdf\",\n  \"size\": 102400,\n  \"meta\": {}\n}"
             },
             "description": "Pas de `companyId` dans le corps : il est pris sur l’utilisateur JWT (`companyId` du token). L’utilisateur doit être lié à une société.",
             "url": "{{baseUrl}}/documents"
@@ -599,7 +646,7 @@
         },
         {
           "name": "Get",
-          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/documents/:id" }
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/documents/{{documentId}}" }
         },
         {
           "name": "Update",
@@ -608,14 +655,14 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"categoryId\": \"a000001c-0000-4000-8000-000000000001\",\n  \"name\": \"facture_maj.pdf\",\n  \"path\": \"/uploads/demo/facture_maj.pdf\",\n  \"mimeType\": \"application/pdf\",\n  \"size\": 204800,\n  \"meta\": { \"version\": 2 }\n}"
+              "raw": "{\n  \"categoryId\": \"{{documentCategoryId}}\",\n  \"name\": \"facture_maj.pdf\",\n  \"path\": \"/uploads/demo/facture_maj.pdf\",\n  \"mimeType\": \"application/pdf\",\n  \"size\": 204800,\n  \"meta\": { \"version\": 2 }\n}"
             },
-            "url": "{{baseUrl}}/documents/:id"
+            "url": "{{baseUrl}}/documents/{{documentId}}"
           }
         },
         {
           "name": "Delete (soft)",
-          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/documents/:id" }
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/documents/{{documentId}}" }
         }
       ]
     },
@@ -640,7 +687,7 @@
         },
         {
           "name": "Get",
-          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/activities/:id" }
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/activities/{{activityId}}" }
         },
         {
           "name": "Update",
@@ -651,12 +698,12 @@
               "mode": "raw",
               "raw": "{\n  \"title\": \"Saisie comptable (MAJ)\",\n  \"styleClass\": \"text-primary\",\n  \"icon\": \"pi pi-pencil\",\n  \"desc\": \"Mise à jour activité.\",\n  \"meta\": { \"edited\": true }\n}"
             },
-            "url": "{{baseUrl}}/activities/:id"
+            "url": "{{baseUrl}}/activities/{{activityId}}"
           }
         },
         {
           "name": "Delete (soft)",
-          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/activities/:id" }
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/activities/{{activityId}}" }
         }
       ]
     },
@@ -685,7 +732,7 @@
         },
         {
           "name": "Get",
-          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/notifications/:id" }
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/notifications/{{notificationId}}" }
         },
         {
           "name": "Mark read (PATCH)",
@@ -696,12 +743,12 @@
               "mode": "raw",
               "raw": "{\n  \"title\": \"Rappel TVA (MAJ)\",\n  \"desc\": \"Échéance déclaration — lu.\",\n  \"styleClass\": \"text-warning\",\n  \"icon\": \"pi pi-exclamation-triangle\",\n  \"link\": \"/tax/reminders\",\n  \"isRead\": true,\n  \"meta\": { \"readAt\": \"2026-04-16\" }\n}"
             },
-            "url": "{{baseUrl}}/notifications/:id"
+            "url": "{{baseUrl}}/notifications/{{notificationId}}"
           }
         },
         {
           "name": "Delete (soft)",
-          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/notifications/:id" }
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/notifications/{{notificationId}}" }
         }
       ]
     },
@@ -715,7 +762,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"currencyId\": \"a0000001-0000-4000-8000-000000000001\",\n  \"name\": \"Mali\",\n  \"code\": \"ML\",\n  \"tva\": 18,\n  \"callingCode\": \"+223\",\n  \"isActive\": true\n}"
+              "raw": "{\n  \"currencyId\": \"{{currencyId}}\",\n  \"name\": \"Mali\",\n  \"code\": \"ML\",\n  \"tva\": 18,\n  \"callingCode\": \"+223\",\n  \"isActive\": true\n}"
             },
             "url": "{{baseUrl}}/countries"
           }
@@ -726,7 +773,7 @@
         },
         {
           "name": "Get country",
-          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/countries/:id" }
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/countries/{{countryId}}" }
         },
         {
           "name": "Update country",
@@ -735,14 +782,14 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"currencyId\": \"a0000001-0000-4000-8000-000000000001\",\n  \"name\": \"Mali (MAJ)\",\n  \"code\": \"ML\",\n  \"tva\": 18,\n  \"callingCode\": \"+223\",\n  \"isActive\": true\n}"
+              "raw": "{\n  \"currencyId\": \"{{currencyId}}\",\n  \"name\": \"Mali (MAJ)\",\n  \"code\": \"ML\",\n  \"tva\": 18,\n  \"callingCode\": \"+223\",\n  \"isActive\": true\n}"
             },
-            "url": "{{baseUrl}}/countries/:id"
+            "url": "{{baseUrl}}/countries/{{countryId}}"
           }
         },
         {
           "name": "Deactivate country",
-          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/countries/:id" }
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/countries/{{countryId}}" }
         }
       ]
     },
@@ -756,7 +803,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Thiès\",\n  \"countryId\": \"a0000002-0000-4000-8000-000000000001\",\n  \"code\": \"TH\"\n}"
+              "raw": "{\n  \"name\": \"Thiès\",\n  \"countryId\": \"{{countryId}}\",\n  \"code\": \"TH\"\n}"
             },
             "url": "{{baseUrl}}/regions"
           }
@@ -767,7 +814,7 @@
         },
         {
           "name": "Get region",
-          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/regions/:id" }
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/regions/{{regionId}}" }
         },
         {
           "name": "Update region",
@@ -776,14 +823,14 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Thiès (MAJ)\",\n  \"countryId\": \"a0000002-0000-4000-8000-000000000001\",\n  \"code\": \"TH\"\n}"
+              "raw": "{\n  \"name\": \"Thiès (MAJ)\",\n  \"countryId\": \"{{countryId}}\",\n  \"code\": \"TH\"\n}"
             },
-            "url": "{{baseUrl}}/regions/:id"
+            "url": "{{baseUrl}}/regions/{{regionId}}"
           }
         },
         {
           "name": "Deactivate region",
-          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/regions/:id" }
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/regions/{{regionId}}" }
         }
       ]
     },
@@ -805,7 +852,7 @@
         },
         {
           "name": "Get currency",
-          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/currencies/:id" }
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/currencies/{{currencyId}}" }
         },
         {
           "name": "Get by code",
@@ -820,16 +867,16 @@
               "mode": "raw",
               "raw": "{\n  \"code\": \"USD\",\n  \"name\": \"US Dollar (MAJ)\",\n  \"isActive\": true\n}"
             },
-            "url": "{{baseUrl}}/currencies/:id"
+            "url": "{{baseUrl}}/currencies/{{currencyId}}"
           }
         },
         {
           "name": "Deactivate",
-          "request": { "method": "PATCH", "header": [], "url": "{{baseUrl}}/currencies/:id/deactivate" }
+          "request": { "method": "PATCH", "header": [], "url": "{{baseUrl}}/currencies/{{currencyId}}/deactivate" }
         },
         {
           "name": "Activate",
-          "request": { "method": "PATCH", "header": [], "url": "{{baseUrl}}/currencies/:id/activate" }
+          "request": { "method": "PATCH", "header": [], "url": "{{baseUrl}}/currencies/{{currencyId}}/activate" }
         }
       ]
     },
@@ -851,7 +898,7 @@
         },
         {
           "name": "Get",
-          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/legal-forms/:id" }
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/legal-forms/{{legalFormId}}" }
         },
         {
           "name": "Update",
@@ -862,12 +909,12 @@
               "mode": "raw",
               "raw": "{\n  \"name\": \"SNC (MAJ)\",\n  \"code\": \"SNC\",\n  \"isActive\": true\n}"
             },
-            "url": "{{baseUrl}}/legal-forms/:id"
+            "url": "{{baseUrl}}/legal-forms/{{legalFormId}}"
           }
         },
         {
           "name": "Deactivate",
-          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/legal-forms/:id" }
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/legal-forms/{{legalFormId}}" }
         }
       ]
     },
@@ -892,7 +939,7 @@
         },
         {
           "name": "Get",
-          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/document-categories/:id" }
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/document-categories/{{documentCategoryId}}" }
         },
         {
           "name": "Update",
@@ -903,12 +950,12 @@
               "mode": "raw",
               "raw": "{\n  \"name\": \"Bon de commande (MAJ)\",\n  \"code\": \"PO\",\n  \"isActive\": true\n}"
             },
-            "url": "{{baseUrl}}/document-categories/:id"
+            "url": "{{baseUrl}}/document-categories/{{documentCategoryId}}"
           }
         },
         {
           "name": "Delete (soft)",
-          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/document-categories/:id" }
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/document-categories/{{documentCategoryId}}" }
         }
       ]
     },
@@ -933,7 +980,7 @@
         },
         {
           "name": "Get",
-          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/identification-types/:id" }
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/identification-types/{{identificationTypeId}}" }
         },
         {
           "name": "Update",
@@ -944,12 +991,12 @@
               "mode": "raw",
               "raw": "{\n  \"name\": \"Passeport\",\n  \"code\": \"PASS\",\n  \"isActive\": true\n}"
             },
-            "url": "{{baseUrl}}/identification-types/:id"
+            "url": "{{baseUrl}}/identification-types/{{identificationTypeId}}"
           }
         },
         {
           "name": "Delete",
-          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/identification-types/:id" }
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/identification-types/{{identificationTypeId}}" }
         }
       ]
     },
@@ -974,7 +1021,7 @@
         },
         {
           "name": "Get",
-          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/genders/:id" }
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/genders/{{genderId}}" }
         },
         {
           "name": "Update",
@@ -985,12 +1032,12 @@
               "mode": "raw",
               "raw": "{\n  \"name\": \"Non précisé (MAJ)\",\n  \"code\": \"NP\",\n  \"isActive\": true\n}"
             },
-            "url": "{{baseUrl}}/genders/:id"
+            "url": "{{baseUrl}}/genders/{{genderId}}"
           }
         },
         {
           "name": "Deactivate",
-          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/genders/:id" }
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/genders/{{genderId}}" }
         }
       ]
     },
@@ -1004,7 +1051,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"countryId\": \"a0000002-0000-4000-8000-000000000001\",\n  \"name\": \"Wolof\",\n  \"code\": \"wo\",\n  \"isActive\": true\n}"
+              "raw": "{\n  \"countryId\": \"{{countryId}}\",\n  \"name\": \"Wolof\",\n  \"code\": \"wo\",\n  \"isActive\": true\n}"
             },
             "url": "{{baseUrl}}/languages"
           }
@@ -1015,7 +1062,7 @@
         },
         {
           "name": "Get",
-          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/languages/:id" }
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/languages/{{languageId}}" }
         },
         {
           "name": "Update",
@@ -1024,14 +1071,14 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"countryId\": \"a0000002-0000-4000-8000-000000000001\",\n  \"name\": \"Wolof (MAJ)\",\n  \"code\": \"wo\",\n  \"isActive\": true\n}"
+              "raw": "{\n  \"countryId\": \"{{countryId}}\",\n  \"name\": \"Wolof (MAJ)\",\n  \"code\": \"wo\",\n  \"isActive\": true\n}"
             },
-            "url": "{{baseUrl}}/languages/:id"
+            "url": "{{baseUrl}}/languages/{{languageId}}"
           }
         },
         {
           "name": "Deactivate",
-          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/languages/:id" }
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/languages/{{languageId}}" }
         }
       ]
     },
@@ -1045,7 +1092,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"typeId\": \"a000000e-0000-4000-8000-000000000001\",\n  \"name\": \"Free Money\",\n  \"code\": \"FM\",\n  \"avatar\": \"/icons/fm.svg\",\n  \"isActive\": true\n}"
+              "raw": "{\n  \"typeId\": \"{{paymentMethodTypeId}}\",\n  \"name\": \"Free Money\",\n  \"code\": \"FM\",\n  \"avatar\": \"/icons/fm.svg\",\n  \"isActive\": true\n}"
             },
             "url": "{{baseUrl}}/payment-methods"
           }
@@ -1060,7 +1107,7 @@
         },
         {
           "name": "Get by id",
-          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/payment-methods/:id" }
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/payment-methods/{{paymentMethodId}}" }
         },
         {
           "name": "Update",
@@ -1069,14 +1116,14 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"typeId\": \"a000000e-0000-4000-8000-000000000001\",\n  \"name\": \"Free Money (MAJ)\",\n  \"code\": \"FM\",\n  \"avatar\": \"/icons/fm.svg\",\n  \"isActive\": true\n}"
+              "raw": "{\n  \"typeId\": \"{{paymentMethodTypeId}}\",\n  \"name\": \"Free Money (MAJ)\",\n  \"code\": \"FM\",\n  \"avatar\": \"/icons/fm.svg\",\n  \"isActive\": true\n}"
             },
-            "url": "{{baseUrl}}/payment-methods/:id"
+            "url": "{{baseUrl}}/payment-methods/{{paymentMethodId}}"
           }
         },
         {
           "name": "Deactivate",
-          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/payment-methods/:id" }
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/payment-methods/{{paymentMethodId}}" }
         }
       ]
     },
@@ -1098,7 +1145,7 @@
         },
         {
           "name": "Get",
-          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/contract-types/:id" }
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/contract-types/{{contractTypeId}}" }
         },
         {
           "name": "Update",
@@ -1109,12 +1156,12 @@
               "mode": "raw",
               "raw": "{\n  \"name\": \"Intérim (MAJ)\",\n  \"code\": \"INTERIM\",\n  \"isActive\": true\n}"
             },
-            "url": "{{baseUrl}}/contract-types/:id"
+            "url": "{{baseUrl}}/contract-types/{{contractTypeId}}"
           }
         },
         {
           "name": "Deactivate",
-          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/contract-types/:id" }
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/contract-types/{{contractTypeId}}" }
         }
       ]
     },
@@ -1139,7 +1186,7 @@
         },
         {
           "name": "Get",
-          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/tier-types/:id" }
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/tier-types/{{tierTypeId}}" }
         },
         {
           "name": "Update",
@@ -1150,12 +1197,12 @@
               "mode": "raw",
               "raw": "{\n  \"name\": \"Partenaire (MAJ)\",\n  \"code\": \"PARTNER\",\n  \"isActive\": true\n}"
             },
-            "url": "{{baseUrl}}/tier-types/:id"
+            "url": "{{baseUrl}}/tier-types/{{tierTypeId}}"
           }
         },
         {
           "name": "Deactivate",
-          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/tier-types/:id" }
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/tier-types/{{tierTypeId}}" }
         }
       ]
     },
@@ -1169,7 +1216,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"typeId\": \"a0000013-0000-4000-8000-000000000001\",\n  \"name\": \"Lire sociétés\",\n  \"code\": \"company:read\",\n  \"isActive\": true\n}"
+              "raw": "{\n  \"typeId\": \"{{permissionTypeId}}\",\n  \"name\": \"Lire sociétés\",\n  \"code\": \"company:read\",\n  \"isActive\": true\n}"
             },
             "url": "{{baseUrl}}/permissions"
           }
@@ -1184,7 +1231,7 @@
         },
         {
           "name": "Get",
-          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/permissions/:id" }
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/permissions/{{permissionId}}" }
         },
         {
           "name": "Update",
@@ -1193,14 +1240,14 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"typeId\": \"a0000013-0000-4000-8000-000000000001\",\n  \"name\": \"Lire sociétés (MAJ)\",\n  \"code\": \"company:read\",\n  \"isActive\": true\n}"
+              "raw": "{\n  \"typeId\": \"{{permissionTypeId}}\",\n  \"name\": \"Lire sociétés (MAJ)\",\n  \"code\": \"company:read\",\n  \"isActive\": true\n}"
             },
-            "url": "{{baseUrl}}/permissions/:id"
+            "url": "{{baseUrl}}/permissions/{{permissionId}}"
           }
         },
         {
           "name": "Deactivate",
-          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/permissions/:id" }
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/permissions/{{permissionId}}" }
         }
       ]
     },
@@ -1225,7 +1272,7 @@
         },
         {
           "name": "Get",
-          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/roles/:id" }
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/roles/{{roleId}}" }
         },
         {
           "name": "Update",
@@ -1234,22 +1281,22 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Comptable (MAJ)\",\n  \"code\": \"ACCOUNTANT\",\n  \"isActive\": true,\n  \"permissionIds\": [\"a0000014-0000-4000-8000-000000000001\"]\n}"
+              "raw": "{\n  \"name\": \"Comptable (MAJ)\",\n  \"code\": \"ACCOUNTANT\",\n  \"isActive\": true,\n  \"permissionIds\": [\"{{permissionId}}\"]\n}"
             },
-            "url": "{{baseUrl}}/roles/:id"
+            "url": "{{baseUrl}}/roles/{{roleId}}"
           }
         },
         {
           "name": "Deactivate",
-          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/roles/:id" }
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/roles/{{roleId}}" }
         },
         {
           "name": "Add permissions",
           "request": {
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"permissionIds\": [\"a0000014-0000-4000-8000-000000000001\"]\n}" },
-            "url": "{{baseUrl}}/roles/:id/permissions"
+            "body": { "mode": "raw", "raw": "{\n  \"permissionIds\": [\"{{permissionId}}\"]\n}" },
+            "url": "{{baseUrl}}/roles/{{roleId}}/permissions"
           }
         },
         {
@@ -1258,7 +1305,7 @@
             "method": "DELETE",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": { "mode": "raw", "raw": "{\n  \"permissionIds\": []\n}" },
-            "url": "{{baseUrl}}/roles/:id/permissions"
+            "url": "{{baseUrl}}/roles/{{roleId}}/permissions"
           }
         },
         {
@@ -1266,8 +1313,8 @@
           "request": {
             "method": "PATCH",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"permissionIds\": [\"a0000014-0000-4000-8000-000000000001\"]\n}" },
-            "url": "{{baseUrl}}/roles/:id/permissions"
+            "body": { "mode": "raw", "raw": "{\n  \"permissionIds\": [\"{{permissionId}}\"]\n}" },
+            "url": "{{baseUrl}}/roles/{{roleId}}/permissions"
           }
         }
       ]
