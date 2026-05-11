@@ -46,6 +46,8 @@ export class EmployeeContractsController {
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   @ApiOperation({
     summary: 'Create an employee contract row (employee_contract_types)',
+    description:
+      "Si `isActive=true`, ce contrat devient l'unique contrat actif de l'employé et les autres contrats actifs passent automatiquement à `isActive=false`.",
   })
   @ApiResponse({ status: 201, description: 'Created' })
   async create(
@@ -109,6 +111,11 @@ export class EmployeeContractsController {
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   @ApiOperation({ summary: 'Update employee contract' })
+  @ApiResponse({
+    status: 200,
+    description:
+      "Contrat mis à jour. Si `isActive=true`, les autres contrats actifs du même employé sont désactivés automatiquement.",
+  })
   @ApiParam({ name: 'id', type: String })
   async update(
     @Param('id') id: string,

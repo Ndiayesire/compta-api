@@ -1,11 +1,17 @@
 import { PrismaService } from '../../../prisma/prisma.service';
 
-function modelDelegate(): Record<string, jest.Mock> {
+/** Délégué modèle : une même méthode (ex. findFirst) réutilise toujours le même jest.fn(). */
+function createModelDelegate(): Record<string, jest.Mock> {
+  const cache: Record<string, jest.Mock> = {};
   return new Proxy(
     {},
     {
-      get() {
-        return jest.fn().mockResolvedValue(null);
+      get(_target, prop: string | symbol) {
+        const method = String(prop);
+        if (!cache[method]) {
+          cache[method] = jest.fn().mockResolvedValue(null);
+        }
+        return cache[method];
       },
     },
   ) as Record<string, jest.Mock>;
@@ -13,10 +19,12 @@ function modelDelegate(): Record<string, jest.Mock> {
 
 /**
  * Faux `PrismaService` pour les tests unitaires (aucune base réelle).
- * Les délégués modèle renvoient des `jest.fn().mockResolvedValue(null)`.
+ * Les délégués modèle renvoient des `jest.fn().mockResolvedValue(null)` stables par modèle.
  */
 export function createPrismaMock(): PrismaService {
-  return new Proxy(
+  const models = new Map<string, Record<string, jest.Mock>>();
+
+  const proxy = new Proxy(
     {},
     {
       get(_target, prop: string | symbol) {
@@ -28,7 +36,8 @@ export function createPrismaMock(): PrismaService {
           if (key === '$transaction') {
             return jest.fn(async (arg: unknown) => {
               if (typeof arg === 'function') {
-                return arg(createPrismaMock());
+                /** Même instance que client racine pour que les mocks `tx.*` soient les mêmes. */
+                return arg(proxy);
               }
               return null;
             });
@@ -38,10 +47,15 @@ export function createPrismaMock(): PrismaService {
           }
           return jest.fn().mockResolvedValue(undefined);
         }
-        return modelDelegate();
+        if (!models.has(key)) {
+          models.set(key, createModelDelegate());
+        }
+        return models.get(key)!;
       },
     },
   ) as unknown as PrismaService;
+
+  return proxy;
 }
 
 export const prismaMockProvider = {

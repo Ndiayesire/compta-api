@@ -1,18 +1,18 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { EmployeeController } from './employees.controller';
-import { EmployeeService } from './employees.service';
+import { EmployeesController } from './employees.controller';
+import { EmployeesService } from './employees.service';
 import { prismaMockProvider } from '../../common/testing/prisma-mock';
 
-describe('EmployeeController', () => {
-  let controller: EmployeeController;
+describe('EmployeesController', () => {
+  let controller: EmployeesController;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [EmployeeController],
-      providers: [EmployeeService, prismaMockProvider],
+      controllers: [EmployeesController],
+      providers: [EmployeesService, prismaMockProvider],
     }).compile();
 
-    controller = module.get<EmployeeController>(EmployeeController);
+    controller = module.get<EmployeesController>(EmployeesController);
   });
 
   it('should be defined', () => {

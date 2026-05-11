@@ -2,13 +2,14 @@
   "info": {
     "_postman_id": "a1b2c3d4-e5f6-7890-abcd-comptaapi01",
     "name": "Insta Compta API",
-    "description": "NestJS **compta-api** — collection alignée sur les modules montés dans `AppModule`. Rapports Excel DGID : dossier **Financial Report**.\n\n**JSON HTTP vs MySQL** : les corps de requête utilisent les **DTO camelCase** (`countryId`, `regionId`, `legalFormId`, `categoryId`, `typeId`, `identificationTypeId`, `tierTypeId`, …). En base, Prisma mappe vers des colonnes courtes (`country_id`, `category_id`, `type_id`, etc.) — ne pas les confondre avec les clés JSON.\n\n**Variables** : `baseUrl` (ex. `http://localhost:4230`), `accessToken`, `refreshToken`. La collection utilise l’auth **Bearer** au niveau collection : après **Auth → Login**, copier `accessToken` / `refreshToken` dans les variables.\n\n**Auth** : `POST /auth/login` est public. **`POST /auth/register` exige un JWT** (guard global) — utiliser un compte déjà connecté (ex. admin seed). `GET /health` est public.\n\n**Périmètres** : la plupart des routes métier filtrent par **société** (`companyId` du JWT) ou par **utilisateur** (activities, notifications). Les tables **settings** (pays, rôles, etc.) sont globales.\n\n**Corps JSON** : les requêtes `POST`/`PATCH` listent **tous les champs du DTO** (y compris optionnels) pour faciliter les essais — retirer ou adapter les clés non voulues.\n\n**Dossiers** : App · Auth · Users · Company · Clients · Employees · Employee contracts · Tiers · **Financial Report** (exports Excel DGID) · **Accounting years** · **Accounting quarters** · **App meta** · **Tiers transactions** · Documents · Activities · Notifications · Settings (Countries, Regions, Currencies, Legal forms, Document categories, Identification types, Genders, Languages, Payment methods, Contract types, Tier types, Permissions, Roles).\n\n**Variables seed** (`prisma/seed.cjs`) : `clientId`, `companyId`, `userId` (admin), `employeeId`, `employeeContractId`, `tierId`, `documentId`, `activityId`, `notificationId`, `accountingYearId`, `accountingQuarterId`, `tiersTransactionId`, et références settings (`countryId`, `regionId`, …). Préremplies pour tests après `npm run seed`.",
+    "description": "NestJS **compta-api** — collection alignée sur les modules montés dans `AppModule`. Rapports Excel DGID : dossier **Financial Report**.\n\n**JSON HTTP vs MySQL** : les corps de requête utilisent les **DTO camelCase** (`countryId`, `regionId`, `legalFormId`, `categoryId`, `typeId`, `identificationTypeId`, `tierTypeId`, …). En base, Prisma mappe vers des colonnes courtes (`country_id`, `category_id`, `type_id`, etc.) — ne pas les confondre avec les clés JSON.\n\n**Variables** : `baseUrl` (ex. `http://localhost:4230`), `accessToken`, `refreshToken`. La collection utilise l’auth **Bearer** au niveau collection : après **Auth → Login**, copier `accessToken` / `refreshToken` dans les variables.\n\n**Auth** : `POST /auth/login` est public. **`POST /auth/register` exige un JWT** (guard global) — utiliser un compte déjà connecté (ex. admin seed). `GET /health` est public.\n\n**Périmètres** : la plupart des routes métier filtrent par **société** (`companyId` du JWT) ou par **utilisateur** (activities, notifications). Les tables **settings** (pays, rôles, etc.) sont globales.\n\n**Corps JSON** : les requêtes `POST`/`PATCH` listent **tous les champs du DTO** (y compris optionnels) pour faciliter les essais — retirer ou adapter les clés non voulues.\n\n**Dossiers** : App · Auth · Users · Company · Clients · **Employees** (`POST /employees` JSON, **`POST /employees/import`** fichier `.xlsx` **form-data** `file`) · Employee contracts · Tiers · **Financial Report** (exports Excel / PDF DGID) · **Accounting years** · **Accounting quarters** · **App meta** · **Tiers transactions** · Documents · Activities · Notifications · Settings (Countries, Regions, Currencies, Legal forms, Document categories, Identification types, Genders, Languages, Payment methods, Contract types, Tier types, Permissions, Roles).\n\n**Variables seed** (`prisma/seed.cjs`) : `clientId`, `companyId`, `userId` (admin), `employeeId`, `employeeContractId`, `tierId`, `documentId`, `activityId`, `notificationId`, `accountingYearId`, `accountingQuarterId`, `tiersTransactionId`, et références settings (`countryId`, `regionId`, …). Préremplies pour tests après `npm run seed`.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
     { "key": "baseUrl", "value": "http://localhost:4230" },
     { "key": "accessToken", "value": "" },
     { "key": "refreshToken", "value": "" },
+    { "key": "exportJobId", "value": "", "description": "id retourné par POST /tiers/.../jobs" },
     { "key": "userId", "value": "a0000017-0000-4000-8000-000000000001", "description": "seed adminUser" },
     { "key": "companyId", "value": "a0000020-0000-4000-8000-000000000001", "description": "seed companyDemo" },
     { "key": "clientId", "value": "a0000021-0000-4000-8000-000000000001", "description": "seed clientDemo" },
@@ -285,6 +286,7 @@
     },
     {
       "name": "Employees",
+      "description": "**Auth** : Bearer `{{accessToken}}` (hérité collection). **Société** : `companyId` du JWT ; **import Excel** : query **`clientId`** (UUID client de la société).\n\n**Import** : `POST /employees/import?clientId={{clientId}}` — Body **form-data**, clé **`file`** (type File), fichier `.xlsx` (1ʳᵉ feuille, en-têtes FR reconnus par l’API — voir Swagger / module `employees`). Ne pas ajouter `Content-Type` manuellement. Après **Auth → Login**, renseigner `accessToken` et `clientId`.\n\n**Réponse import** : `201`, `data.createdCount`, `data.failedCount`, `data.errors[]` (numéro de ligne Excel + message).",
       "item": [
         {
           "name": "Create employee",
@@ -296,6 +298,27 @@
               "raw": "{\n  \"clientId\": \"{{clientId}}\",\n  \"identificationTypeId\": \"{{identificationTypeId}}\",\n  \"contractTypeId\": \"{{contractTypeId}}\",\n  \"firstName\": \"Fatou\",\n  \"lastName\": \"Sarr\",\n  \"jobTitle\": \"Comptable\",\n  \"email\": \"fatou.sarr@example.sn\",\n  \"phone\": \"+221770000099\",\n  \"address\": \"Dakar\",\n  \"socialInsuranceNumber\": \"1 85 08 75 123 456 78\",\n  \"identityNumber\": \"CNI-AB123456\",\n  \"salary\": 450000,\n  \"isManager\": false,\n  \"startDate\": \"2025-01-01T00:00:00.000Z\",\n  \"endDate\": \"2026-12-31T23:59:59.000Z\",\n  \"isActive\": true\n}"
             },
             "url": "{{baseUrl}}/employees"
+          }
+        },
+        {
+          "name": "Import employees (Excel .xlsx)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": [],
+                  "disabled": false,
+                  "description": "Sélectionner un fichier `.xlsx` (1ʳᵉ feuille). En-têtes FR (ordre modèle) : Prenom, Nom, Poste, Type de contrat, Type d'identification, Email, Telephone, Adresse, Numero d'identification, Numero d'identification social, Salaire, Cadre, Date de début, Date de fin — l’import reconnaît les colonnes par **libellé** (pas besoin de cet ordre exact). Le **client** = query `clientId` (UUID). Résolution par **nom** : type de contrat et type d’identification."
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/employees/import?clientId={{clientId}}",
+            "description": "**Étapes Postman**\n1. **Variables** : `baseUrl`, `clientId` (UUID client seed), puis **Login** → copier `data.accessToken` dans `accessToken`.\n2. Onglet **Body** → **form-data** : une ligne **`file`** en type **File** (pas Text).\n3. **Select Files** → choisir votre classeur `.xlsx` conforme aux en-têtes attendus.\n4. **Send** — attendre `201`.\n\n**Réponse** : `data.createdCount`, `data.failedCount`, `data.created`, `data.errors` (`row` = n° ligne feuille, `message`).\n\n**Erreurs fréquentes** : `400` sans fichier / mauvais type / `clientId` absent ou invalide ; `400` utilisateur sans société ; `401` token absent."
           }
         },
         {
@@ -326,6 +349,7 @@
     },
     {
       "name": "Employee contracts",
+      "description": "Règle métier: un seul contrat actif par employé. Si vous créez/mettez à jour un contrat avec `isActive=true`, les autres contrats actifs du même employé sont automatiquement passés à `isActive=false`.",
       "item": [
         {
           "name": "Create contract",
@@ -336,7 +360,8 @@
               "mode": "raw",
               "raw": "{\n  \"employeeId\": \"{{employeeId}}\",\n  \"contractTypeId\": \"{{contractTypeId}}\",\n  \"startDate\": \"2025-01-01T00:00:00.000Z\",\n  \"endDate\": \"2026-12-31T23:59:59.000Z\",\n  \"jobTitle\": \"Comptable senior\",\n  \"salary\": 480000,\n  \"isManager\": false,\n  \"isActive\": true\n}"
             },
-            "url": "{{baseUrl}}/employee-contracts"
+            "url": "{{baseUrl}}/employee-contracts",
+            "description": "Si `isActive=true`, ce contrat devient le seul actif pour cet employé; les autres contrats actifs sont désactivés."
           }
         },
         {
@@ -345,7 +370,7 @@
         },
         {
           "name": "List by employee",
-          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/employee-contracts/employee/:employeeId" }
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/employee-contracts/employee/{{employeeId}}" }
         },
         {
           "name": "Get",
@@ -360,7 +385,8 @@
               "mode": "raw",
               "raw": "{\n  \"employeeId\": \"{{employeeId}}\",\n  \"contractTypeId\": \"{{contractTypeId}}\",\n  \"startDate\": \"2025-01-01T00:00:00.000Z\",\n  \"endDate\": \"2026-12-31T23:59:59.000Z\",\n  \"jobTitle\": \"Comptable senior (MAJ)\",\n  \"salary\": 520000,\n  \"isManager\": true,\n  \"isActive\": true\n}"
             },
-            "url": "{{baseUrl}}/employee-contracts/{{employeeContractId}}"
+            "url": "{{baseUrl}}/employee-contracts/{{employeeContractId}}",
+            "description": "Si `isActive=true`, ce contrat devient le seul actif pour cet employé; les autres contrats actifs sont désactivés."
           }
         },
         {
@@ -416,7 +442,7 @@
     },
     {
       "name": "Financial Report",
-      "description": "Exports Excel **DGID** (sommes versées) — routes sous `/tiers/{{clientId}}/…`. Variables : `{{clientId}}`, `{{accountingYearId}}`, `{{accountingQuarterId}}` (seed `prisma/seed.cjs`). Auth Bearer collection.",
+      "description": "Exports Excel **DGID** (sommes versées) — routes sous `/tiers/{{clientId}}/…`. Variables : `{{clientId}}`, `{{accountingYearId}}`, `{{accountingQuarterId}}` (seed `prisma/seed.cjs`). Auth Bearer collection. Les routes `POST .../jobs` retournent `201` et doivent être suivies via `GET /tiers/jobs/{{jobId}}` avant téléchargement.",
       "item": [
         {
           "name": "Download Excel (état trimestriel sommes versées)",
@@ -434,6 +460,42 @@
             "header": [],
             "url": "{{baseUrl}}/tiers/{{clientId}}/xlsx/annual?accountingYearId={{accountingYearId}}",
             "description": "Fichier **binaire** `.xlsx` — **Send and Download**. Query : `accountingYearId` (agrégation sur tout l’exercice). JWT Bearer.\n\n**Modèle** : année de référence **Q2** ; tableau bénéficiaires à partir de la **ligne 28**."
+          }
+        },
+        {
+          "name": "Create quarterly export job",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/tiers/{{clientId}}/xlsx/jobs?accountingYearId={{accountingYearId}}&accountingQuarterId={{accountingQuarterId}}",
+            "description": "Crée un job d’export trimestriel asynchrone (`201 Created`). Réponse `{ success, data: { id, status } }`."
+          }
+        },
+        {
+          "name": "Create annual export job",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/tiers/{{clientId}}/xlsx/annual/jobs?accountingYearId={{accountingYearId}}",
+            "description": "Crée un job d’export annuel asynchrone (`201 Created`)."
+          }
+        },
+        {
+          "name": "Get export job status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/tiers/jobs/{{exportJobId}}",
+            "description": "Poller jusqu’à `data.status = completed` (ou `failed`)."
+          }
+        },
+        {
+          "name": "Download export job file",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/tiers/jobs/{{exportJobId}}/download",
+            "description": "Télécharge le binaire `.xlsx` d’un job terminé. En cas de job en cours/échoué, l’API renvoie un conflit."
           }
         }
       ]
@@ -1227,7 +1289,7 @@
         },
         {
           "name": "List by permission type id",
-          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/permissions/type/:typeId" }
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/permissions/type/{{permissionTypeId}}" }
         },
         {
           "name": "Get",

@@ -4,7 +4,6 @@ import { EtatTrimestrielSommesVerseesExcelService } from './services/etat-trimes
 
 /**
  * Générateurs Excel pour les états / rapports métier.
- * Fichiers modèles : `src/assets/xlsx/` (assets Nest → `dist/assets/`, voir `resolveBundledAsset`).
  */
 @Module({
   providers: [

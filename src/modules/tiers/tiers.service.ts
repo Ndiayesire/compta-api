@@ -17,7 +17,6 @@ import {
 import type { EtatAnnuelSommesVerseesFormData } from '../excel-reports/types/etat-annuel-sommes-versees.types';
 import type { EtatTrimestrielSommesVerseesFormData } from '../excel-reports/types/etat-trimestriel-sommes-versees.types';
 import { saveTierExcelToGenerations } from './tiers-generations.util';
-// import { convertExcelBufferToPdf } from './tiers-pdf.util';
 
 const tierInclude = {
   tierType: true,
@@ -386,10 +385,4 @@ export class TiersService {
       filenameBase,
     };
   }
-
-  // PDF export temporarily disabled (kept for later).
-  // async renderTierPdf(id: string, companyId: string) {
-  //   const excelBuffer = await this.renderTierExcel(id, companyId);
-  //   return convertExcelBufferToPdf(excelBuffer, `tier-${id}`);
-  // }
 }

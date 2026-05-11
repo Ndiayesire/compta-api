@@ -1,6 +1,7 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import ExcelJS from 'exceljs';
 import { resolveBundledAsset } from '../../../common/utils/resolve-bundled-asset.util';
+import { clearWorkbookDefinedNamesBeforeSave } from '../utils/workbook-defined-names.util';
 import type { EtatAnnuelSommesVerseesFormData } from '../types/etat-annuel-sommes-versees.types';
 
 const TEMPLATE_FILENAME = 'etat-annuel-sommes-versees.xlsx' as const;
@@ -111,6 +112,7 @@ export class EtatAnnuelSommesVerseesExcelService {
         setText(sheet, `T${r}`, b.ninea);
       }
 
+      clearWorkbookDefinedNamesBeforeSave(workbook);
       const out = await workbook.xlsx.writeBuffer();
       return Buffer.from(out);
     } catch (e) {

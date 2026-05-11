@@ -5,9 +5,9 @@ import { JwtAuthGuard } from './jwt/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import type { AuthUser } from '../../common/types/auth-user.type';
 import { Public } from '../../common/decorators/public.decorator';
-import { LoginDtoValidation } from './dto/login-dto';
-import { RegisterDtoValidation } from './dto/register-dto';
-import { RefreshTokenDto } from './dto/refresh-token-dto';
+import { LoginDto } from './dto/login.dto';
+import { RegisterDto } from './dto/register.dto';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
 
 
 @ApiTags('auth')
@@ -47,7 +47,7 @@ export class AuthController {
       },
     },
   })
-  async login(@Body() loginDto: LoginDtoValidation) {
+  async login(@Body() loginDto: LoginDto) {
     const tokens = await this.authService.login(loginDto);
     return {
       success: true,
@@ -87,7 +87,7 @@ export class AuthController {
       },
     },
   })
-  async register(@Body() registerDto: RegisterDtoValidation) {
+  async register(@Body() registerDto: RegisterDto) {
     const user = await this.authService.register(registerDto);
     return {
       success: true,

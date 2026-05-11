@@ -21,9 +21,7 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setTitle('Insta Compta API')
     .setDescription(
-      'Comptabilité InstaHR — documentation API. ' +
-        'Identifiants de démonstration stables : `prisma/seed.cjs` (ex. client, exercice, trimestre). ' +
-        'Variables Postman : `postman/Insta-Compta-API.postman_collection.json`.',
+      'Comptabilité InstaHR — Documentation API pour la gestion métier (CRUD), la comptabilité et les rapports DGID (exports directs et jobs asynchrones).'
     )
     .setVersion('1.0.0')
     .addBearerAuth(
@@ -53,16 +51,16 @@ async function bootstrap() {
     .addTag('permissions', 'Permission management')
     .addTag('roles', 'Role management')
     .addTag('clients', 'Client management')
-    .addTag('employees', 'Employee management')
+    .addTag(
+      'employees',
+      'Employés : CRUD et import Excel (.xlsx) sur `POST /employees/import` avec `clientId` en query.',
+    )
     .addTag('employee-contracts', 'Employee contracts')
     .addTag('contract-types', 'Contract Type management')
     .addTag('identification-types', 'Identification type settings')
     .addTag('tier-types', 'Tier type settings')
     .addTag('tiers', 'Tiers per client')
-    .addTag(
-      'Etats',
-      'Rapports Excel DGID (sommes versées) — GET sur `/tiers/{clientId}/xlsx` et `/xlsx/annual` (Bearer JWT, société du token)',
-    )
+    .addTag('Etats', 'Rapports Excel DGID (sommes versées)')
     .addTag('accounting-years', 'Accounting years')
     .addTag('accounting-quarters', 'Accounting quarters')
     .addTag('app-meta', 'Key/value meta table')
@@ -84,7 +82,6 @@ async function bootstrap() {
       docExpansion: 'none',
       // defaultModelsExpandDepth: 1,
       tagsSorter: 'alpha',
-      // tryItOutEnabled: false
     },
   });
 

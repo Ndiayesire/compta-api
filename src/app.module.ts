@@ -1,5 +1,6 @@
 import { Module, MiddlewareConsumer } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { CompanyModule } from './modules/company/company.module';
@@ -17,7 +18,7 @@ import { CurrencyModule } from './modules/settings/currency/currency.module';
 import { LegalFormsModule } from './modules/settings/legal-forms/legal-forms.module';
 import { MorganMiddleware } from './common/middleware/logger/logger.middleware';
 import { ClientsModule } from './modules/clients/clients.module';
-import { EmployeeModule } from './modules/employees/employees.module';
+import { EmployeesModule } from './modules/employees/employees.module';
 import { ContractTypesModule } from './modules/settings/contract-types/contract-types.module';
 import { GendersModule } from './modules/settings/genders/genders.module';
 import { LanguagesModule } from './modules/settings/languages/languages.module';
@@ -33,6 +34,7 @@ import { AccountingYearsModule } from './modules/accounting-years/accounting-yea
 import { AccountingQuartersModule } from './modules/accounting-quarters/accounting-quarters.module';
 import { AppMetaModule } from './modules/app-meta/app-meta.module';
 import { TiersTransactionsModule } from './modules/tiers-transactions/tiers-transactions.module';
+import { HttpLatencyInterceptor } from './common/interceptors/http-latency/http-latency.interceptor';
 // import { MailerModule } from './modules/mailer/mailer.module';
 
 @Module({
@@ -50,7 +52,7 @@ import { TiersTransactionsModule } from './modules/tiers-transactions/tiers-tran
     LegalFormsModule,
     DocumentCategoriesModule,
     ClientsModule,
-    EmployeeModule,
+    EmployeesModule,
     EmployeeContractsModule,
     ContractTypesModule,
     GendersModule,
@@ -72,6 +74,10 @@ import { TiersTransactionsModule } from './modules/tiers-transactions/tiers-tran
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: HttpLatencyInterceptor,
     },
   ],
 })

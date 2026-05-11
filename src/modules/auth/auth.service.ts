@@ -4,9 +4,8 @@ import { PrismaService } from '../../../prisma/prisma.service';
 import { UsersService } from '../users/users.service';
 import * as bcrypt from 'bcrypt';
 import type { AuthUser } from '../../common/types/auth-user.type';
-import { LoginDtoValidation } from './dto/login-dto';
-import { RegisterDtoValidation } from './dto/register-dto';
-import { RefreshTokenDto } from './dto/refresh-token-dto';
+import { LoginDto } from './dto/login.dto';
+import { RegisterDto } from './dto/register.dto';
 
 export interface Tokens {
   accessToken: string;
@@ -53,7 +52,7 @@ export class AuthService {
     return { ...userWithoutSensitive, company, companyId: company?.id } as AuthUser;
   }
 
-  async login(loginDto: LoginDtoValidation): Promise<Tokens> {
+  async login(loginDto: LoginDto): Promise<Tokens> {
     const user = await this.validateUser(loginDto.email, loginDto.password);
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
@@ -65,7 +64,7 @@ export class AuthService {
     return tokens;
   }
 
-  async register(registerDto: RegisterDtoValidation) {
+  async register(registerDto: RegisterDto) {
     const user = await this.usersService.create(registerDto);
     return user;
   }

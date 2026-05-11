@@ -25,7 +25,12 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
   constructor() {
     const config = parseDatabaseUrl(process.env.DATABASE_URL!);
     const adapter = new PrismaMariaDb(config);
-    super({ adapter });
+    super({
+      adapter,
+      // Prisma engine logs provide minimal DB monitoring
+      // (query duration + warnings + errors).
+      log: ['query', 'warn', 'error'],
+    });
   }
 
   async onModuleInit() {

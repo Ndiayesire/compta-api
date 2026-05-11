@@ -1,7 +1,6 @@
-// src/regions/regions.service.ts
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../../../prisma/prisma.service';
-import { CreateRegionDto } from './dto/create-dto.region';
+import { CreateRegionDto } from './dto/create-region.dto';
 import { UpdateRegionDto } from './dto/update-region.dto';
 
 @Injectable()
@@ -29,7 +28,7 @@ export class RegionsService {
     return this.prisma.region.update({ where: { id }, data: dto });
   }
 
- async remove(id: string) {
+  async remove(id: string) {
     await this.findOne(id);
     return this.prisma.region.update({
       where: { id },

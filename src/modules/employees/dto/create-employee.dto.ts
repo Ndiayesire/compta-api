@@ -53,7 +53,7 @@ export class CreateEmployeeDto {
   address: string;
 
   @ApiPropertyOptional({
-    description: 'Numéro Assuré Sociale',
+    description: 'Numero Assure Sociale',
     example: '1 85 08 75 123 456 78',
   })
   @IsOptional()
@@ -61,7 +61,7 @@ export class CreateEmployeeDto {
   socialInsuranceNumber?: string;
 
   @ApiPropertyOptional({
-    description: "Numéro d'identité (texte libre)",
+    description: "Numero d'identite (texte libre)",
     example: 'AB1234567',
   })
   @IsOptional()

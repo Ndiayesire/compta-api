@@ -1,27 +1,193 @@
-import { Controller, Get, Post, Body, Param, Patch, Delete } from '@nestjs/common';
-import { EmployeeService } from './employees.service';
-import { CreateEmployeeDto } from './dto/create-employees.dto';
-import { UpdateEmployeeDto } from './dto/update-employees.dto';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  ParseUUIDPipe,
+  Patch,
+  Delete,
+  Query,
+  UseInterceptors,
+  UploadedFile,
+  BadRequestException,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { EmployeesService } from './employees.service';
+import { CreateEmployeeDto } from './dto/create-employee.dto';
+import { UpdateEmployeeDto } from './dto/update-employee.dto';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiQuery,
+} from '@nestjs/swagger';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import type { AuthUser } from '../../common/types/auth-user.type';
+
+type EmployeeImportUploadedFile = {
+  buffer: Buffer;
+  mimetype: string;
+  originalname: string;
+};
+
+const XLSX_MIME =
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
 @ApiTags('employees')
 @ApiBearerAuth('JWT')
 @Controller('employees')
-export class EmployeeController {
-  constructor(private readonly employeeService: EmployeeService) {}
+export class EmployeesController {
+  constructor(private readonly employeesService: EmployeesService) {}
 
   @Post()
-  @ApiOperation({ summary: 'Create employee' })
+  @ApiOperation({
+    summary: 'Create employee',
+    description:
+      "Crée l'employé puis son contrat courant dans `employee_contract_types` (contractTypeId, dates, poste, salaire, manager).",
+  })
   @ApiResponse({
     status: 201,
     description: 'Employee created successfully',
   })
   async create(@Body() dto: CreateEmployeeDto) {
-    const data = await this.employeeService.create(dto);
+    const data = await this.employeesService.create(dto);
 
     return {
       success: true,
       message: 'Employee created successfully',
+      data,
+    };
+  }
+
+  @Post('import')
+  @HttpCode(HttpStatus.CREATED)
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: { fileSize: 5 * 1024 * 1024 },
+    }),
+  )
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({
+    summary: 'Importer des employés depuis un Excel (.xlsx)',
+    description: [
+      '**Requête** : `multipart/form-data` avec le champ **`file`** (classeur `.xlsx`, max 5 Mo). **Query obligatoire** : `clientId` (UUID du client entreprise) — doit exister et appartenir à la **société du JWT**.',
+      '',
+      '**Feuille** : uniquement la **1ʳᵉ feuille**. **Ligne 1** = libellés de colonnes. Les colonnes sont reconnues par **texte d’en-tête** (normalisation : accents / casse / espaces) — **l’ordre des colonnes est libre**.',
+      '',
+      '**En-têtes obligatoires** (au moins une variante reconnue) : `Type de contrat`, `Prenom` ou `Prénom`, `Nom`, `Poste`, `Email`, `Telephone` ou `Téléphone`, `Adresse`, `Date de début`, `Date de fin`.',
+      '',
+      '**En-têtes optionnels** : `Type d\'identification`, `Numero d\'identification` / `Numéro d\'identification` (n° de pièce), `Numero d\'identification social` / `Numéro d\'identification social` (NASS), `Salaire`, `Cadre` (oui/non, 1/0, true/false… pour statut manager).',
+      '',
+      '**Résolution par nom** (pas d’UUID dans le fichier) : type de contrat et type d’identification sont cherchés parmi les réglages actifs. **`clientId`** n’est pas une colonne Excel.',
+      '',
+      '**Lignes** : données à partir de la ligne 2 ; lignes vides ignorées ; traitement plafonné à **500** lignes utiles. `isActive` sur les employés créés : valeurs par défaut côté API.',
+    ].join('\n'),
+  })
+  @ApiQuery({
+    name: 'clientId',
+    required: true,
+    description:
+      'UUID du client (entreprise cliente) : toutes les lignes importées y sont rattachées. Doit appartenir à la société du JWT.',
+    schema: { type: 'string', format: 'uuid' },
+    example: '00000000-0000-4000-8000-000000000001',
+  })
+  @ApiBody({
+    description:
+      'Corps **multipart** : une partie nommée **`file`** (fichier binaire `.xlsx`). Dans Swagger UI, utiliser « Try it out » puis le contrôle fichier pour `file`.',
+    schema: {
+      type: 'object',
+      required: ['file'],
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+          description:
+            'Classeur Excel Open XML (.xlsx). MIME attendu : application/vnd.openxmlformats-officedocument.spreadsheetml.sheet (ou nom de fichier se terminant par .xlsx).',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 201,
+    description:
+      'Import exécuté : compteurs et détail des créations / erreurs par numéro de ligne Excel.',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean', example: true },
+        message: {
+          type: 'string',
+          example: 'Import employés : 2 créé(s), 0 ligne(s) en erreur',
+        },
+        data: {
+          type: 'object',
+          properties: {
+            createdCount: { type: 'integer', example: 2 },
+            failedCount: { type: 'integer', example: 0 },
+            created: {
+              type: 'array',
+              description: 'Employés créés (même forme que GET employé)',
+              items: { type: 'object' },
+            },
+            errors: {
+              type: 'array',
+              description: 'Erreurs par ligne (numéro de ligne = feuille Excel)',
+              items: {
+                type: 'object',
+                properties: {
+                  row: { type: 'integer', example: 5 },
+                  message: { type: 'string', example: 'Type de contrat inconnu : « XYZ »' },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description:
+      'Fichier absent ou invalide, `clientId` invalide, client hors société JWT, utilisateur sans `companyId`, ou en-têtes Excel incomplets / classeur illisible.',
+  })
+  @ApiResponse({ status: 401, description: 'JWT manquant ou invalide' })
+  async importExcel(
+    @Query('clientId', ParseUUIDPipe) clientId: string,
+    @UploadedFile() file: EmployeeImportUploadedFile | undefined,
+    @CurrentUser() user: AuthUser,
+  ) {
+    const companyId = user.companyId;
+    if (!companyId) {
+      throw new BadRequestException('User must belong to a company');
+    }
+    if (!file?.buffer?.length) {
+      throw new BadRequestException('Fichier Excel requis (multipart, champ `file`)');
+    }
+    const nameOk = /\.xlsx$/i.test(file.originalname ?? '');
+    const mimeOk =
+      file.mimetype === XLSX_MIME ||
+      file.mimetype === 'application/octet-stream' ||
+      nameOk;
+    if (!mimeOk) {
+      throw new BadRequestException(
+        `Fichier .xlsx attendu (MIME ${XLSX_MIME} ou nom se terminant par .xlsx)`,
+      );
+    }
+    const data = await this.employeesService.importFromExcelBuffer(
+      file.buffer,
+      companyId,
+      clientId,
+    );
+    return {
+      success: true,
+      message: `Import employés : ${data.createdCount} créé(s), ${data.failedCount} ligne(s) en erreur`,
       data,
     };
   }
@@ -48,7 +214,7 @@ export class EmployeeController {
     },
   })
   async findByClient(@Param('clientId') clientId: string) {
-    const data = await this.employeeService.findByClient(clientId);
+    const data = await this.employeesService.findByClient(clientId);
 
     return {
       success: true,
@@ -76,7 +242,7 @@ export class EmployeeController {
     },
   })
   async findOne(@Param('id') id: string) {
-    const data = await this.employeeService.findOne(id);
+    const data = await this.employeesService.findOne(id);
 
     return {
       success: true,
@@ -86,8 +252,30 @@ export class EmployeeController {
   }
 
   @Patch(':id')
-  @ApiOperation({ summary: 'Update employee' })
+  @ApiOperation({
+    summary: 'Update employee',
+    description:
+      "Met à jour uniquement les champs de l'employé (`employees`). Les données contractuelles sont gérées via `/employee-contracts`.",
+  })
   @ApiParam({ name: 'id', type: String })
+  @ApiBody({
+    description: "Champs modifiables côté employé uniquement (pas de contrat).",
+    schema: {
+      type: 'object',
+      properties: {
+        clientId: { type: 'string', format: 'uuid' },
+        identificationTypeId: { type: 'string', format: 'uuid', nullable: true },
+        firstName: { type: 'string', example: 'Mamadou' },
+        lastName: { type: 'string', example: 'Ndiaye' },
+        email: { type: 'string', format: 'email', example: 'mamadou.ndiaye@entreprise.sn' },
+        phone: { type: 'string', example: '+221771234567' },
+        address: { type: 'string', example: 'Dakar, Plateau' },
+        socialInsuranceNumber: { type: 'string', example: '1 85 08 75 123 456 78' },
+        identityNumber: { type: 'string', example: 'AB1234567' },
+        isActive: { type: 'boolean', example: true },
+      },
+    },
+  })
   @ApiResponse({
     status: 200,
     description: 'Employee updated successfully',
@@ -104,7 +292,7 @@ export class EmployeeController {
     },
   })
   async update(@Param('id') id: string, @Body() dto: UpdateEmployeeDto) {
-    const data = await this.employeeService.update(id, dto);
+    const data = await this.employeesService.update(id, dto);
 
     return {
       success: true,
@@ -132,7 +320,7 @@ export class EmployeeController {
     },
   })
   async remove(@Param('id') id: string) {
-    const data = await this.employeeService.remove(id);
+    const data = await this.employeesService.remove(id);
 
     return {
       success: true,

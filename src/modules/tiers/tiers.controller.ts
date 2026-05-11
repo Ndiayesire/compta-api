@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Controller,
   Get,
   Post,
@@ -31,12 +32,16 @@ import {
 } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import type { AuthUser } from '../../common/types/auth-user.type';
+import { TiersExportJobsService } from './tiers-export-jobs.service';
 
 @ApiTags('tiers')
 @ApiBearerAuth('JWT')
 @Controller('tiers')
 export class TiersController {
-  constructor(private readonly tiersService: TiersService) {}
+  constructor(
+    private readonly tiersService: TiersService,
+    private readonly tiersExportJobsService: TiersExportJobsService,
+  ) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -100,9 +105,7 @@ export class TiersController {
   @ApiOperation({
     summary: 'État annuel des sommes versées (Excel DGID)',
     description:
-      'Télécharge un classeur **.xlsx** (corps binaire). Agrège les sommes sur **tout l’exercice**. ' +
-      'Exemples seed (`prisma/seed.cjs`) : `clientId` = `a0000021-0000-4000-8000-000000000001`, ' +
-      '`accountingYearId` = `a000002b-0000-4000-8000-000000000001`.',
+      'Télécharge un classeur **.xlsx** (corps binaire). Agrège les sommes sur **tout l’exercice**. '
   })
   @ApiParam({
     name: 'clientId',
@@ -160,14 +163,65 @@ export class TiersController {
     res.send(result.buffer);
   }
 
+  @Post(':clientId/xlsx/annual/jobs')
+  @ApiTags('Etats', 'tiers')
+  @ApiOperation({
+    summary: 'Créer un job asynchrone pour export annuel Excel',
+  })
+  @ApiQuery({
+    name: 'accountingYearId',
+    required: true,
+    type: String,
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Job annuel créé',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean', example: true },
+        message: { type: 'string', example: 'Annual export job created' },
+        data: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', example: '2a0d2ce6-3fea-4e42-8df2-fc0a7cb260d9' },
+            type: { type: 'string', example: 'annual' },
+            status: { type: 'string', example: 'pending' },
+          },
+        },
+      },
+    },
+  })
+  async createAnnualExportJob(
+    @Param('clientId') clientId: string,
+    @CurrentUser() user: AuthUser,
+    @Query('accountingYearId') accountingYearId: string,
+  ) {
+    const companyId = user.companyId;
+    if (!companyId) {
+      throw new BadRequestException('User must belong to a company');
+    }
+    if (!accountingYearId) {
+      throw new BadRequestException('accountingYearId is required');
+    }
+    const job = this.tiersExportJobsService.enqueueAnnual({
+      clientId,
+      companyId,
+      accountingYearId,
+    });
+    return {
+      success: true,
+      message: 'Annual export job created',
+      data: job,
+    };
+  }
+
   @Get(':clientId/xlsx')
   @ApiTags('Etats', 'tiers')
   @ApiOperation({
     summary: 'État trimestriel des sommes versées (Excel DGID)',
     description:
-      'Télécharge un classeur **.xlsx** (corps binaire). Filtre sur **exercice + trimestre**. ' +
-      'Exemples seed (`prisma/seed.cjs`) : `clientId` = `a0000021-…`, `accountingYearId` = `a000002b-…`, ' +
-      '`accountingQuarterId` = `a000002c-…` (Premier trimestre 2025).',
+      'Télécharge un classeur **.xlsx** (corps binaire). Filtre sur **exercice + trimestre**. '
   })
   @ApiParam({
     name: 'clientId',
@@ -235,32 +289,120 @@ export class TiersController {
     res.send(result.buffer);
   }
 
-  // PDF endpoint temporarily disabled (kept for later).
-  // @Get(':id/pdf')
-  // @ApiOperation({
-  //   summary:
-  //     'Télécharger le PDF « État trimestriel » (positionnement basé sur le classeur Excel)',
-  // })
-  // @ApiParam({ name: 'id', type: String })
-  // @ApiProduces('application/pdf')
-  // async exportPdf(
-  //   @Param('id') id: string,
-  //   @CurrentUser() user: AuthUser,
-  //   @Res({ passthrough: false }) res: Response,
-  // ) {
-  //   const companyId = user.companyId;
-  //   if (!companyId) {
-  //     throw new BadRequestException('User must belong to a company');
-  //   }
-  //   const buffer = await this.tiersService.renderTierPdf(id, companyId);
-  //   const filename = `tier-${id}.pdf`;
-  //   res.set({
-  //     'Content-Type': 'application/pdf',
-  //     'Content-Disposition': `attachment; filename="${filename}"`,
-  //   });
-  //   res.send(buffer);
-  // }
+  @Post(':clientId/xlsx/jobs')
+  @ApiTags('Etats', 'tiers')
+  @ApiOperation({
+    summary: 'Créer un job asynchrone pour export trimestriel Excel',
+  })
+  @ApiQuery({
+    name: 'accountingYearId',
+    required: true,
+    type: String,
+  })
+  @ApiQuery({
+    name: 'accountingQuarterId',
+    required: true,
+    type: String,
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Job trimestriel créé',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean', example: true },
+        message: { type: 'string', example: 'Quarterly export job created' },
+        data: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', example: '2a0d2ce6-3fea-4e42-8df2-fc0a7cb260d9' },
+            type: { type: 'string', example: 'quarterly' },
+            status: { type: 'string', example: 'pending' },
+          },
+        },
+      },
+    },
+  })
+  async createQuarterlyExportJob(
+    @Param('clientId') clientId: string,
+    @CurrentUser() user: AuthUser,
+    @Query('accountingYearId') accountingYearId: string,
+    @Query('accountingQuarterId') accountingQuarterId: string,
+  ) {
+    const companyId = user.companyId;
+    if (!companyId) {
+      throw new BadRequestException('User must belong to a company');
+    }
+    if (!accountingYearId || !accountingQuarterId) {
+      throw new BadRequestException(
+        'accountingYearId and accountingQuarterId are required',
+      );
+    }
+    const job = this.tiersExportJobsService.enqueueQuarterly({
+      clientId,
+      companyId,
+      accountingYearId,
+      accountingQuarterId,
+    });
+    return {
+      success: true,
+      message: 'Quarterly export job created',
+      data: job,
+    };
+  }
 
+  @Get('jobs/:jobId')
+  @ApiOperation({ summary: "Consulter l'etat d'un job d'export" })
+  @ApiResponse({
+    status: 200,
+    description: "État courant d'un job d'export",
+  })
+  async getExportJob(@Param('jobId') jobId: string) {
+    const data = this.tiersExportJobsService.getJob(jobId);
+    return {
+      success: true,
+      message: 'Export job fetched successfully',
+      data,
+    };
+  }
+
+  @Get('jobs/:jobId/download')
+  @ApiOperation({ summary: "Télécharger le fichier d'un job terminé" })
+  @ApiProduces(
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  )
+  @ApiOkResponse({
+    description: "Fichier Excel du job (.xlsx)",
+    content: {
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': {
+        schema: { type: 'string', format: 'binary' },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Job en cours ou en échec',
+  })
+  async downloadExportJob(
+    @Param('jobId') jobId: string,
+    @Res({ passthrough: false }) res: Response,
+  ) {
+    const job = this.tiersExportJobsService.getJob(jobId);
+    if (job.status === 'pending' || job.status === 'running') {
+      throw new ConflictException('Export job is still running');
+    }
+    if (job.status === 'failed') {
+      throw new ConflictException(
+        `Export job failed: ${job.error ?? 'unknown error'}`,
+      );
+    }
+    const file = this.tiersExportJobsService.getCompletedFile(jobId);
+    res.set({
+      'Content-Type': file.mimeType,
+      'Content-Disposition': `attachment; filename="${file.filename}"`,
+    });
+    res.send(file.buffer);
+  }
   @Get(':id')
   @ApiOperation({ summary: 'Get tier by ID' })
   @ApiParam({ name: 'id', type: String })

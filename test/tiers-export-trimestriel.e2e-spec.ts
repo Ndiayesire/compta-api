@@ -53,6 +53,7 @@ describe('GET /tiers/:clientId/xlsx (état trimestriel, e2e)', () => {
     const res = await request(app.getHttpServer())
       .get(url)
       .set('Authorization', `Bearer ${token}`)
+      .responseType('blob')
       .expect(200)
       .expect(
         'Content-Type',

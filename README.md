@@ -1,113 +1,105 @@
-# 🧾 Application de Gestion des Déclarations Fiscales
+# ComptaHub API
 
-![NestJS](https://img.shields.io/badge/NestJS-Backend-E0234E?logo=nestjs&logoColor=white)
-![MySQL](https://img.shields.io/badge/MySQL-Database-4479A1?logo=mysql&logoColor=white)
-![Prisma](https://img.shields.io/badge/Prisma-ORM-2D3748?logo=prisma&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
-![License](https://img.shields.io/badge/License-MIT-green.svg)
+API backend NestJS pour la gestion comptable et fiscale de cabinets et entreprises (contexte Afrique francophone).
 
----
+## Description
 
-## 📌 Description
+Le projet fournit une API modulaire avec authentification JWT, gestion multi-modules metier et generation d'etats Excel (DGID).
 
-Application **SaaS** moderne permettant aux entreprises de gérer facilement leurs déclarations fiscales (TVA, BRS, IS, etc.).
+Fonctionnalites principales:
 
-Elle automatise le calcul des impôts, la génération des déclarations et la gestion des documents comptables, tout en offrant une interface sécurisée et intuitive.
+- Authentification JWT (access + refresh)
+- Gestion des utilisateurs, societes, clients, tiers, employes et contrats
+- Modules settings (pays, regions, roles, permissions, devises, etc.)
+- Gestion documentaire (metadonnees)
+- Exports Excel trimestriels et annuels des sommes versees
+- Notifications et activites utilisateur
 
-### ✨ Fonctionnalités principales
+Note: l'export PDF des tiers n'est plus actif dans le code.
 
-- Gestion complète des clients, fournisseurs et employés
-- Calcul automatique des taxes et impôts
-- Génération automatique des déclarations fiscales
-- Création et téléchargement de PDF professionnels
-- Gestion centralisée des documents comptables
-- Système de notifications en temps réel
-- Authentification sécurisée (JWT Access + Refresh Tokens)
-- Architecture modulaire et hautement scalable
+## Stack technique
 
----
+- NestJS
+- TypeScript (strict)
+- Prisma ORM
+- MySQL / MariaDB
+- Swagger
+- Jest / Supertest
 
-## 🏗️ Stack Technique
+## Structure (resume)
 
-### Backend
-- **NestJS** (Framework Node.js progressif)
-- **MySQL** (Base de données relationnelle)
-- **Prisma ORM** (Type-safe)
-- **TypeScript**
-- **JWT Authentication**
-- **Swagger** (Documentation API interactive)
-- **Docker** (optionnel)
+```txt
+src/
+  common/
+  modules/
+    auth/
+    users/
+    company/
+    clients/
+    tiers/
+    employees/
+    employee-contracts/
+    documents/
+    activities/
+    notifications/
+    accounting-years/
+    accounting-quarters/
+    excel-reports/
+    settings/
+  main.ts
+prisma/
+```
 
-### Frontend (en cours de développement)
-- Vue.js **ou** React (choix à finaliser)
-
----
-
-## 🗂️ Structure du projet
+## Installation
 
 ```bash
-src/
-├── common/              # Guards, decorators, filters, interceptors, utils
-├── modules/
-│   ├── auth/
-│   ├── users/
-│   ├── roles/
-│   ├── permissions/
-│   ├── countries/
-│   ├── payment-types/
-│   ├── company/
-│   ├── clients/
-│   ├── invoices/
-│   ├── tax/                    # Module déclarations fiscales
-│   ├── documents/
-│   ├── notifications/
-│   └── settings/
-├── prisma/                     # Schema Prisma et migrations
-└── main.ts
-
----
-
-🚀 Installation
-Bash# 1. Cloner le projet
-git clone <url-du-repo>
-cd <nom-du-repo>
-
-# 2. Installer les dépendances
+# 1) Installer les dependances
 npm install
 
-# 3. Configurer Prisma et la base de données
+# 2) Generer Prisma
 npx prisma generate
+
+# 3) Appliquer les migrations
 npx prisma migrate dev
 
-# 4. Lancer le serveur en mode développement
+# 4) Lancer l'API en dev
 npm run start:dev
-L’API sera accessible sur : http://localhost:{{PORT}}
+```
 
-🔐 Variables d’environnement
-Crée un fichier .env à la racine du projet :
-envDATABASE_URL="mysql://utilisateur:motdepasse@localhost:3306/nom_de_la_base"
+API: `http://localhost:4230` (ou selon `PORT`).
 
-JWT_SECRET=votre_clé_secrète_jwt_très_longue_et_complexe
-JWT_REFRESH_SECRET=votre_clé_secrète_refresh_très_longue_et_complexe
-JWT_EXPIRES_IN=15m
-JWT_REFRESH_EXPIRES_IN=7d
+## Variables d'environnement
 
-PORT= ex: 4230
+Copier `.env.example` vers `.env`, puis renseigner au minimum:
+
+```env
+DATABASE_URL=
+JWT_SECRET=
+JWT_REFRESH_SECRET=
+NODE_ENV=development
+PORT=4230
 SWAGGER_ENABLED=true
+```
 
-📜 Scripts npm
-Bashnpm run start:dev      # Démarrage en développement (avec hot reload)
-npm run start          # Démarrage en mode production
-npm run build          # Compilation du projet
-npm run test           # Tests unitaires
-npm run test:e2e       # Tests end-to-end
-npm run prisma:generate # Générer le client Prisma
-npm run prisma:migrate  # Appliquer les migrations
+## Scripts utiles
 
-📚 Documentation API
-Une fois le serveur lancé, accédez à la documentation interactive Swagger :
-→ http://localhost:{{PORT}}/api/docs
+```bash
+npm run start:dev
+npm run build
+npm run test
+npm run test:e2e
+npm run seed
+```
 
-👨‍💻 Auteur
-Ndiaye Sire KANE
-Backend Developer – Spécialiste NestJS
+## Documentation API
+
+Swagger est expose sur la racine de l'application (voir `src/main.ts`):
+
+- `GET /`
+
+## Tests
+
+- Unitaires: `npm test`
+- End-to-end: `npm run test:e2e`
+
+La suite unitaire passe actuellement dans ce repo.

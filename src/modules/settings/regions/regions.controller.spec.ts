@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { RegionsController } from './regions.controller';
-import { RegionsService } from './region.service';
+import { RegionsService } from './regions.service';
 import { prismaMockProvider } from '../../../common/testing/prisma-mock';
 
 describe('RegionsController', () => {

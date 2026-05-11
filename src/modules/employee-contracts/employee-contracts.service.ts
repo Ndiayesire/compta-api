@@ -51,19 +51,33 @@ export class EmployeeContractsService {
   async create(dto: CreateEmployeeContractDto, companyId: string) {
     await this.assertEmployeeInCompany(dto.employeeId, companyId);
     await this.assertContractTypeExists(dto.contractTypeId);
+    const isActive = dto.isActive ?? true;
 
-    return this.prisma.employeeContractType.create({
-      data: {
-        employeeId: dto.employeeId,
-        contractTypeId: dto.contractTypeId,
-        startDate: new Date(dto.startDate),
-        endDate: new Date(dto.endDate),
-        jobTitle: dto.jobTitle,
-        ...(dto.salary !== undefined && { salary: dto.salary }),
-        isManager: dto.isManager ?? false,
-        isActive: dto.isActive ?? true,
-      },
-      include: contractInclude,
+    return this.prisma.$transaction(async (tx) => {
+      if (isActive) {
+        await tx.employeeContractType.updateMany({
+          where: {
+            employeeId: dto.employeeId,
+            deletedAt: null,
+            isActive: true,
+          },
+          data: { isActive: false },
+        });
+      }
+
+      return tx.employeeContractType.create({
+        data: {
+          employeeId: dto.employeeId,
+          contractTypeId: dto.contractTypeId,
+          startDate: new Date(dto.startDate),
+          endDate: new Date(dto.endDate),
+          jobTitle: dto.jobTitle,
+          ...(dto.salary !== undefined && { salary: dto.salary }),
+          isManager: dto.isManager ?? false,
+          isActive,
+        },
+        include: contractInclude,
+      });
     });
   }
 
@@ -119,7 +133,7 @@ export class EmployeeContractsService {
     dto: UpdateEmployeeContractDto,
     companyId: string,
   ) {
-    await this.findOne(id, companyId);
+    const current = await this.findOne(id, companyId);
 
     if (dto.employeeId) {
       await this.assertEmployeeInCompany(dto.employeeId, companyId);
@@ -154,10 +168,24 @@ export class EmployeeContractsService {
       }),
     };
 
-    return this.prisma.employeeContractType.update({
-      where: { id },
-      data,
-      include: contractInclude,
+    return this.prisma.$transaction(async (tx) => {
+      if (isActive === true) {
+        await tx.employeeContractType.updateMany({
+          where: {
+            employeeId: employeeId ?? current.employee.id,
+            deletedAt: null,
+            isActive: true,
+            NOT: { id },
+          },
+          data: { isActive: false },
+        });
+      }
+
+      return tx.employeeContractType.update({
+        where: { id },
+        data,
+        include: contractInclude,
+      });
     });
   }
 
