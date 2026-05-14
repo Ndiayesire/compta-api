@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { CreateTierDto } from './dto/create-tier.dto';
@@ -10,10 +6,7 @@ import { UpdateTierDto } from './dto/update-tier.dto';
 import { EtatAnnuelSommesVerseesExcelService } from '../excel-reports/services/etat-annuel-sommes-versees-excel.service';
 import { EtatTrimestrielSommesVerseesExcelService } from '../excel-reports/services/etat-trimestriel-sommes-versees-excel.service';
 import { TIER_EXPORT_INCLUDE } from './tiers-export.include';
-import {
-  buildSenegalAnnualFormData,
-  buildSenegalQuarterlyFormData,
-} from './tiers-senegal-form.data';
+import { buildSenegalAnnualFormData, buildSenegalQuarterlyFormData } from './tiers-senegal-form.data';
 import type { EtatAnnuelSommesVerseesFormData } from '../excel-reports/types/etat-annuel-sommes-versees.types';
 import type { EtatTrimestrielSommesVerseesFormData } from '../excel-reports/types/etat-trimestriel-sommes-versees.types';
 import { saveTierExcelToGenerations } from './tiers-generations.util';

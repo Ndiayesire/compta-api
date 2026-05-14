@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../../../prisma/prisma.service';
 import { CreateIdentificationTypeDto } from './dto/create-identification-type.dto';
 import { UpdateIdentificationTypeDto } from './dto/update-identification-type.dto';

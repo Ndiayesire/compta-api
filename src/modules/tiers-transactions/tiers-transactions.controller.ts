@@ -1,28 +1,8 @@
-import {
-  BadRequestException,
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  Query,
-  HttpCode,
-  HttpStatus,
-  UsePipes,
-  ValidationPipe,
-} from '@nestjs/common';
+import { BadRequestException, Controller, Get, Post, Body, Patch, Param, Delete, Query, HttpCode, HttpStatus, UsePipes, ValidationPipe } from '@nestjs/common';
 import { TiersTransactionsService } from './tiers-transactions.service';
 import { CreateTiersTransactionDto } from './dto/create-tiers-transaction.dto';
 import { UpdateTiersTransactionDto } from './dto/update-tiers-transaction.dto';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiParam,
-  ApiQuery,
-  ApiBearerAuth,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiParam, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import type { AuthUser } from '../../common/types/auth-user.type';
 

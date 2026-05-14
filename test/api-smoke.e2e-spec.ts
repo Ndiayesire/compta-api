@@ -1,14 +1,12 @@
+import * as fs from 'fs';
+import * as path from 'path';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import type { App } from 'supertest/types';
 import { AppModule } from '../src/app.module';
 import { E2E_SEED } from './helpers/e2e-seed';
-import {
-  assertSuccessEnvelope,
-  awaitTierExportJobDone,
-  loginSeedAdmin,
-} from './helpers/e2e-http';
+import { assertSuccessEnvelope, awaitTierExportJobDone, loginSeedAdmin } from './helpers/e2e-http';
 
 /**
  * Smoke e2e : une requête nominale par ressource (liste ou détail seed).
@@ -606,6 +604,89 @@ describe('API smoke e2e (tous modules)', () => {
       );
       assertSuccessEnvelope(finalRes);
       expect(finalRes.body?.data?.status).toBe('completed');
+    });
+  });
+
+  describe('balances & lignes (import Excel)', () => {
+    const exampleXlsx = path.join(
+      __dirname,
+      '..',
+      'src',
+      'assets',
+      'xlsx',
+      'balance-lines-import-example.xlsx',
+    );
+
+    it('GET /balances', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/balances')
+        .query({ clientId: E2E_SEED.clientDemo })
+        .set(authHeader())
+        .expect(200);
+      assertSuccessEnvelope(res);
+    });
+
+    it('POST /balances + import .xlsx + GET/PATCH balance-lines + DELETE', async () => {
+      const create = await request(app.getHttpServer())
+        .post('/balances')
+        .set(authHeader())
+        .send({
+          accountingYearId: E2E_SEED.accountingYearDemo,
+          clientId: E2E_SEED.clientDemo,
+          startDate: '2025-01-01T00:00:00.000Z',
+          endDate: '2025-03-31T00:00:00.000Z',
+          isActive: true,
+        })
+        .expect(201);
+      assertSuccessEnvelope(create, 201);
+      const balanceId = create.body?.data?.id as string;
+      expect(balanceId).toBeTruthy();
+
+      const oneBal = await request(app.getHttpServer())
+        .get(`/balances/${balanceId}`)
+        .set(authHeader())
+        .expect(200);
+      assertSuccessEnvelope(oneBal);
+
+      const xlsxBuf = fs.readFileSync(exampleXlsx);
+      const imp = await request(app.getHttpServer())
+        .post(`/balances/${balanceId}/balance-lines/import`)
+        .set(authHeader())
+        .attach(
+          'file',
+          xlsxBuf,
+          'balance-lines-import-example.xlsx',
+        )
+        .expect(201);
+      assertSuccessEnvelope(imp, 201);
+      expect(imp.body?.data?.createdCount).toBeGreaterThan(0);
+
+      const lines = await request(app.getHttpServer())
+        .get('/balance-lines')
+        .query({ balanceId })
+        .set(authHeader())
+        .expect(200);
+      assertSuccessEnvelope(lines);
+      const firstLine = lines.body?.data?.[0];
+      expect(firstLine?.id).toBeTruthy();
+
+      const lineDetail = await request(app.getHttpServer())
+        .get(`/balance-lines/${firstLine.id}`)
+        .set(authHeader())
+        .expect(200);
+      assertSuccessEnvelope(lineDetail);
+
+      const patched = await request(app.getHttpServer())
+        .patch(`/balance-lines/${firstLine.id}`)
+        .set(authHeader())
+        .send({ name: String(firstLine.name) })
+        .expect(200);
+      assertSuccessEnvelope(patched);
+
+      await request(app.getHttpServer())
+        .delete(`/balances/${balanceId}`)
+        .set(authHeader())
+        .expect(200);
     });
   });
 });

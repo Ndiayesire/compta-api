@@ -12,9 +12,9 @@ generator client {
 //////////////////////////////////////////////////////
 
 model PaymentMethodType {
-  id       String @id @default(uuid()) @map("payment_method_type_id")
-  name     String @map("payment_method_type_name")
-  code     String @map("payment_method_type_code")
+  id       String  @id @default(uuid()) @map("payment_method_type_id")
+  name     String  @map("payment_method_type_name")
+  code     String  @map("payment_method_type_code")
   isActive Boolean @default(true) @map("payment_method_type_is_active")
 
   paymentMethods PaymentMethod[]
@@ -23,11 +23,11 @@ model PaymentMethodType {
 }
 
 model PaymentMethod {
-  id       String @id @default(uuid()) @map("payment_method_id")
-  typeId   String @map("payment_method_type_id")
-  name     String @map("payment_method_name")
-  code     String @map("payment_method_code")
-  avatar   String @map("payment_method_avatar")
+  id       String  @id @default(uuid()) @map("payment_method_id")
+  typeId   String  @map("payment_method_type_id")
+  name     String  @map("payment_method_name")
+  code     String  @map("payment_method_code")
+  avatar   String  @map("payment_method_avatar")
   isActive Boolean @default(true) @map("payment_method_is_active")
 
   type PaymentMethodType @relation(fields: [typeId], references: [id])
@@ -82,7 +82,7 @@ model Country {
   callingCode String  @map("country_calling_code")
   isActive    Boolean @default(true) @map("country_is_active")
 
-  currency  Currency  @relation(fields: [currencyId], references: [id])
+  currency  Currency   @relation(fields: [currencyId], references: [id])
   regions   Region[]
   languages Language[]
   users     User[]
@@ -147,10 +147,10 @@ model LegalForm {
 }
 
 model IdentificationType {
-  id        String    @id @default(uuid()) @map("identification_type_id")
-  name      String    @map("identification_type_name")
-  code      String    @map("identification_type_code")
-  isActive  Boolean   @default(true) @map("identification_type_is_active")
+  id       String  @id @default(uuid()) @map("identification_type_id")
+  name     String  @map("identification_type_name")
+  code     String  @map("identification_type_code")
+  isActive Boolean @default(true) @map("identification_type_is_active")
 
   employees Employee[]
 
@@ -234,13 +234,13 @@ model User {
   languageId String @map("language_id")
   genderId   String @map("gender_id")
 
-  firstName String @map("user_first_name")
-  lastName  String @map("user_last_name")
-  email     String @unique @map("user_email")
-  phone     String @map("user_phone")
-  address   String @map("user_address")
-  password  String @map("user_password")
-  avatar    String @map("user_avatar")
+  firstName String  @map("user_first_name")
+  lastName  String  @map("user_last_name")
+  email     String  @unique @map("user_email")
+  phone     String  @map("user_phone")
+  address   String  @map("user_address")
+  password  String  @map("user_password")
+  avatar    String  @map("user_avatar")
   isActive  Boolean @default(true) @map("user_is_active")
 
   createdAt DateTime  @default(now()) @map("user_created_at")
@@ -248,9 +248,9 @@ model User {
   deletedAt DateTime? @map("user_deleted_at")
 
   /// Optional: add column `user_refresh_token` TEXT if missing from base DDL (JWT refresh).
-  refreshToken String? @map("user_refresh_token") @db.Text
+  refreshToken String?   @map("user_refresh_token") @db.Text
   /// Optional: add column `user_last_login_at` TIMESTAMP NULL if missing from base DDL.
-  lastLoginAt DateTime? @map("user_last_login_at")
+  lastLoginAt  DateTime? @map("user_last_login_at")
 
   role     Role     @relation(fields: [roleId], references: [id])
   country  Country  @relation(fields: [countryId], references: [id])
@@ -288,10 +288,10 @@ model Company {
   updatedAt DateTime  @updatedAt @map("company_updated_at")
   deletedAt DateTime? @map("company_deleted_at")
 
-  user      User      @relation(fields: [userId], references: [id])
-  country   Country   @relation(fields: [countryId], references: [id])
-  region    Region    @relation(fields: [regionId], references: [id])
-  legalForm LegalForm @relation(fields: [legalFormId], references: [id])
+  user      User       @relation(fields: [userId], references: [id])
+  country   Country    @relation(fields: [countryId], references: [id])
+  region    Region     @relation(fields: [regionId], references: [id])
+  legalForm LegalForm  @relation(fields: [legalFormId], references: [id])
   clients   Client[]
   documents Document[]
 
@@ -307,10 +307,10 @@ model Client {
   regionId    String @map("settings_region_id")
   legalFormId String @map("settings_legal_form_id")
 
-  name       String @map("client_name")
-  address    String @map("client_address")
-  postalCode String @map("client_postal_code")
-  ninea      String @map("client_ninea")
+  name       String  @map("client_name")
+  address    String  @map("client_address")
+  postalCode String  @map("client_postal_code")
+  ninea      String  @map("client_ninea")
   useTva     Boolean @default(true) @map("client_use_tva")
   meta       Json    @map("client_meta")
 
@@ -326,6 +326,8 @@ model Client {
 
   employees Employee[]
   tiers     Tier[]
+  balances  Balance[]
+  rentals   Rental[]
 
   @@index([companyId])
   @@index([userId])
@@ -333,26 +335,26 @@ model Client {
 }
 
 model Employee {
-  id                     String  @id @default(uuid()) @map("employee_id")
-  clientId               String  @map("client_id")
-  identificationTypeId   String? @map("identification_type_id")
+  id                   String  @id @default(uuid()) @map("employee_id")
+  clientId             String  @map("client_id")
+  identificationTypeId String? @map("identification_type_id")
 
-  firstName String @map("employee_first_name")
-  lastName  String @map("employee_last_name")
-  email     String @map("employee_email")
-  phone     String @map("employee_phone")
-  address   String @map("employee_address")
+  firstName String  @map("employee_first_name")
+  lastName  String  @map("employee_last_name")
+  email     String  @map("employee_email")
+  phone     String  @map("employee_phone")
+  address   String  @map("employee_address")
   isActive  Boolean @default(true) @map("employee_is_active")
 
   socialInsuranceNumber String? @map("employee_insurance_number")
-  identityNumber String? @map("employee_identity_number")
+  identityNumber        String? @map("employee_identity_number")
 
   createdAt DateTime  @default(now()) @map("employee_created_at")
   updatedAt DateTime  @updatedAt @map("employee_updated_at")
   deletedAt DateTime? @map("employee_deleted_at")
 
-  client                 Client                 @relation(fields: [clientId], references: [id])
-  identificationType     IdentificationType?    @relation(fields: [identificationTypeId], references: [id])
+  client                Client                 @relation(fields: [clientId], references: [id])
+  identificationType    IdentificationType?    @relation(fields: [identificationTypeId], references: [id])
   employeeContractTypes EmployeeContractType[]
 
   @@index([clientId])
@@ -368,8 +370,8 @@ model EmployeeContractType {
   startDate DateTime @map("employee_contract_type_start_date")
   endDate   DateTime @map("employee_contract_type_end_date")
   jobTitle  String   @map("employee_contract_type_job_title")
-  salary Float? @map("employee_contract_type_salary")
-  isManager Boolean @default(false) @map("employee_contract_type_is_manager")
+  salary    Float?   @map("employee_contract_type_salary")
+  isManager Boolean  @default(false) @map("employee_contract_type_is_manager")
   isActive  Boolean  @default(true) @map("employee_contract_type_is_active")
 
   createdAt DateTime  @default(now()) @map("employee_contract_type_created_at")
@@ -421,6 +423,7 @@ model AccountingYear {
   deletedAt DateTime? @map("accounting_year_deleted_at")
 
   quarters AccountingQuarter[]
+  balances Balance[]
 
   @@map("accounting_years")
 }
@@ -440,6 +443,87 @@ model AccountingQuarter {
 
   @@index([accountingYearId])
   @@map("accounting_quarters")
+}
+
+//////////////////////////////////////////////////////
+// BALANCES (balance comptable par exercice / client)
+//////////////////////////////////////////////////////
+
+model Balance {
+  id               String    @id @default(uuid()) @map("balance_id")
+  accountingYearId String    @map("accounting_year_id")
+  clientId         String    @map("client_id")
+  startDate        DateTime  @map("balance_start_date") @db.Date
+  endDate          DateTime  @map("balance_end_date") @db.Date
+  isActive         Boolean   @default(true) @map("balance_is_active")
+  createdAt        DateTime  @default(now()) @map("balance_created_at")
+  updatedAt        DateTime  @updatedAt @map("balance_updated_at")
+  deletedAt        DateTime? @map("balance_deleted_at")
+
+  accountingYear AccountingYear @relation(fields: [accountingYearId], references: [id])
+  client         Client         @relation(fields: [clientId], references: [id])
+  lines          BalanceLine[]
+
+  @@index([accountingYearId])
+  @@index([clientId])
+  @@map("balances")
+}
+
+model BalanceLine {
+  id              String    @id @default(uuid()) @map("balance_line_id")
+  balanceId       String    @map("balance_id")
+  number          String    @map("balance_line_number") @db.VarChar(255)
+  name            String    @map("balance_line_name") @db.VarChar(255)
+  previousSold    Decimal   @map("balance_line_previous_sold") @db.Decimal(12, 2)
+  previousIsDebit Boolean   @default(false) @map("balance_line_previous_is_debit")
+  debit           Decimal   @map("balance_line_debit") @db.Decimal(12, 2)
+  credit          Decimal   @map("balance_line_credit") @db.Decimal(12, 2)
+  currentSold     Decimal   @map("balance_line_current_sold") @db.Decimal(12, 2)
+  currentIsDebit  Boolean   @default(false) @map("balance_line_current_is_debit")
+  createdAt       DateTime  @default(now()) @map("balance_line_created_at")
+  updatedAt       DateTime  @updatedAt @map("balance_line_updated_at")
+  deletedAt       DateTime? @map("balance_line_deleted_at")
+
+  balance Balance @relation(fields: [balanceId], references: [id])
+
+  @@index([balanceId])
+  @@map("balance_lines")
+}
+
+//////////////////////////////////////////////////////
+// LOCATIONS (loyers / biens)
+//////////////////////////////////////////////////////
+
+model RentalUsage {
+  id       String  @id @default(uuid()) @map("rental_usage_id")
+  name     String  @map("rental_usage_name") @db.VarChar(255)
+  isActive Boolean @default(true) @map("rental_usage_is_active")
+
+  rentals Rental[]
+
+  @@map("rental_usages")
+}
+
+model Rental {
+  id            String    @id @default(uuid()) @map("rental_id")
+  clientId      String    @map("client_id")
+  rentalUsageId String    @map("rental_usage_id")
+  name          String    @map("rental_name") @db.VarChar(255)
+  address       String    @map("rental_address") @db.VarChar(255)
+  owner         String    @map("rental_owner") @db.VarChar(255)
+  useTax        Boolean   @default(true) @map("rental_use_tax")
+  value         Decimal   @map("rental_value") @db.Decimal(12, 2)
+  meta          Json      @map("rental_meta")
+  createdAt     DateTime  @default(now()) @map("rental_created_at")
+  updatedAt     DateTime  @updatedAt @map("rental_updated_at")
+  deletedAt     DateTime? @map("rental_deleted_at")
+
+  client      Client      @relation(fields: [clientId], references: [id])
+  rentalUsage RentalUsage @relation(fields: [rentalUsageId], references: [id])
+
+  @@index([clientId])
+  @@index([rentalUsageId])
+  @@map("rentals")
 }
 
 /// Configuration clé/valeur (ex. bornes trimestres). Table SQL `meta`.
@@ -518,16 +602,16 @@ model Document {
 //////////////////////////////////////////////////////
 
 model Activity {
-  id        String    @id @default(uuid()) @map("activity_id")
-  userId    String    @map("user_id")
-  title     String    @map("activity_title")
-  styleClass String   @map("activity_class")
-  icon      String    @map("activity_icon")
-  desc      String    @map("activity_desc")
-  meta      Json      @map("activity_meta")
-  createdAt DateTime  @default(now()) @map("activity_created_at")
-  updatedAt DateTime  @updatedAt @map("activity_updated_at")
-  deletedAt DateTime? @map("activity_deleted_at")
+  id         String    @id @default(uuid()) @map("activity_id")
+  userId     String    @map("user_id")
+  title      String    @map("activity_title")
+  styleClass String    @map("activity_class")
+  icon       String    @map("activity_icon")
+  desc       String    @map("activity_desc")
+  meta       Json      @map("activity_meta")
+  createdAt  DateTime  @default(now()) @map("activity_created_at")
+  updatedAt  DateTime  @updatedAt @map("activity_updated_at")
+  deletedAt  DateTime? @map("activity_deleted_at")
 
   user User @relation(fields: [userId], references: [id])
 
@@ -536,18 +620,18 @@ model Activity {
 }
 
 model Notification {
-  id        String    @id @default(uuid()) @map("notification_id")
-  userId    String    @map("user_id")
-  title     String    @map("notification_title")
-  desc      String    @map("notification_desc") @db.Text
-  styleClass String   @map("notification_class")
-  icon      String    @map("notification_icon")
-  isRead    Boolean   @default(false) @map("notification_is_read")
-  link      String    @map("notification_link")
-  meta      Json      @map("notification_meta")
-  createdAt DateTime  @default(now()) @map("notification_created_at")
-  updatedAt DateTime  @updatedAt @map("notification_updated_at")
-  deletedAt DateTime? @map("notification_deleted_at")
+  id         String    @id @default(uuid()) @map("notification_id")
+  userId     String    @map("user_id")
+  title      String    @map("notification_title")
+  desc       String    @map("notification_desc") @db.Text
+  styleClass String    @map("notification_class")
+  icon       String    @map("notification_icon")
+  isRead     Boolean   @default(false) @map("notification_is_read")
+  link       String    @map("notification_link")
+  meta       Json      @map("notification_meta")
+  createdAt  DateTime  @default(now()) @map("notification_created_at")
+  updatedAt  DateTime  @updatedAt @map("notification_updated_at")
+  deletedAt  DateTime? @map("notification_deleted_at")
 
   user User @relation(fields: [userId], references: [id])
 

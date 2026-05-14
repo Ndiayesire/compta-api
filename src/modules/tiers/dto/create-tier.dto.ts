@@ -1,11 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsString,
-  IsNotEmpty,
-  IsOptional,
-  IsBoolean,
-  IsObject,
-} from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsBoolean, IsObject } from 'class-validator';
 
 export class CreateTierDto {
   @ApiProperty({ description: 'Tier type ID (settings)', example: 'uuid' })
@@ -35,7 +29,11 @@ export class CreateTierDto {
   @IsString()
   reference: string;
 
-  @ApiPropertyOptional({ example: {} })
+  @ApiPropertyOptional({
+    example: { beneficiaryAddress: 'VDN, Dakar' },
+    description:
+      'Métadonnées libres (objet JSON). Ex. **beneficiaryAddress** : adresse du bénéficiaire pour les impressions / formulaires (ex. états DGID Sénégal).',
+  })
   @IsObject()
   @IsOptional()
   meta?: Record<string, unknown>;

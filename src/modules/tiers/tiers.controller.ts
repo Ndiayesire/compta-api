@@ -1,35 +1,9 @@
-import {
-  BadRequestException,
-  ConflictException,
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  Patch,
-  Delete,
-  HttpCode,
-  HttpStatus,
-  UsePipes,
-  ValidationPipe,
-  Res,
-  Query,
-} from '@nestjs/common';
+import { BadRequestException, ConflictException, Controller, Get, Post, Body, Param, Patch, Delete, HttpCode, HttpStatus, UsePipes, ValidationPipe, Res, Query } from '@nestjs/common';
 import type { Response } from 'express';
 import { TiersService } from './tiers.service';
 import { CreateTierDto } from './dto/create-tier.dto';
 import { UpdateTierDto } from './dto/update-tier.dto';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiParam,
-  ApiBearerAuth,
-  ApiProduces,
-  ApiQuery,
-  ApiOkResponse,
-  ApiBadRequestResponse,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth, ApiProduces, ApiQuery, ApiOkResponse, ApiBadRequestResponse } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import type { AuthUser } from '../../common/types/auth-user.type';
 import { TiersExportJobsService } from './tiers-export-jobs.service';
@@ -49,7 +23,7 @@ export class TiersController {
   @ApiOperation({
     summary: 'Create a tier for a client of your company',
     description:
-      'Links a `tiers` row to `client_id` and `tier_type_id`.',
+      'Links a `tiers` row to `client_id` and `tier_type_id`. Le champ **meta** peut inclure **beneficiaryAddress** (ex. adresse pour impressions / formulaires DGID).',
   })
   @ApiResponse({ status: 201, description: 'Tier created' })
   @ApiResponse({ status: 400, description: 'Invalid client or tier type' })

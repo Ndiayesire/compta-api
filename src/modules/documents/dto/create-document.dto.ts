@@ -1,13 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsString,
-  IsNotEmpty,
-  IsOptional,
-  IsUUID,
-  IsNumber,
-  Min,
-  IsObject,
-} from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsUUID, IsNumber, Min, IsObject } from 'class-validator';
 
 export class CreateDocumentDto {
   @ApiProperty({ description: 'Document category ID' })

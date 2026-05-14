@@ -1,8 +1,8 @@
 {
   "info": {
-    "_postman_id": "a1b2c3d4-e5f6-7890-abcd-comptaapi01",
+    "_postman_id": "f7c8c001-0000-4000-8000-000000000001",
     "name": "Insta Compta API",
-    "description": "NestJS **compta-api** — collection alignée sur les modules montés dans `AppModule`. Rapports Excel DGID : dossier **Financial Report**.\n\n**JSON HTTP vs MySQL** : les corps de requête utilisent les **DTO camelCase** (`countryId`, `regionId`, `legalFormId`, `categoryId`, `typeId`, `identificationTypeId`, `tierTypeId`, …). En base, Prisma mappe vers des colonnes courtes (`country_id`, `category_id`, `type_id`, etc.) — ne pas les confondre avec les clés JSON.\n\n**Variables** : `baseUrl` (ex. `http://localhost:4230`), `accessToken`, `refreshToken`. La collection utilise l’auth **Bearer** au niveau collection : après **Auth → Login**, copier `accessToken` / `refreshToken` dans les variables.\n\n**Auth** : `POST /auth/login` est public. **`POST /auth/register` exige un JWT** (guard global) — utiliser un compte déjà connecté (ex. admin seed). `GET /health` est public.\n\n**Périmètres** : la plupart des routes métier filtrent par **société** (`companyId` du JWT) ou par **utilisateur** (activities, notifications). Les tables **settings** (pays, rôles, etc.) sont globales.\n\n**Corps JSON** : les requêtes `POST`/`PATCH` listent **tous les champs du DTO** (y compris optionnels) pour faciliter les essais — retirer ou adapter les clés non voulues.\n\n**Dossiers** : App · Auth · Users · Company · Clients · **Employees** (`POST /employees` JSON, **`POST /employees/import`** fichier `.xlsx` **form-data** `file`) · Employee contracts · Tiers · **Financial Report** (exports Excel / PDF DGID) · **Accounting years** · **Accounting quarters** · **App meta** · **Tiers transactions** · Documents · Activities · Notifications · Settings (Countries, Regions, Currencies, Legal forms, Document categories, Identification types, Genders, Languages, Payment methods, Contract types, Tier types, Permissions, Roles).\n\n**Variables seed** (`prisma/seed.cjs`) : `clientId`, `companyId`, `userId` (admin), `employeeId`, `employeeContractId`, `tierId`, `documentId`, `activityId`, `notificationId`, `accountingYearId`, `accountingQuarterId`, `tiersTransactionId`, et références settings (`countryId`, `regionId`, …). Préremplies pour tests après `npm run seed`.",
+    "description": "NestJS **compta-api** — collection alignée sur les modules montés dans `AppModule`. Rapports Excel DGID : dossier **Financial Report**.\n\n**JSON HTTP vs MySQL** : les corps de requête utilisent les **DTO camelCase** (`countryId`, `regionId`, `legalFormId`, `categoryId`, `typeId`, `identificationTypeId`, `tierTypeId`, …). En base, Prisma mappe vers des colonnes courtes (`country_id`, `category_id`, `type_id`, etc.) — ne pas les confondre avec les clés JSON.\n\n**Variables** : `baseUrl` (ex. `http://localhost:4230`), `accessToken`, `refreshToken`. La collection utilise l’auth **Bearer** au niveau collection : après **Auth → Login**, copier `accessToken` / `refreshToken` dans les variables.\n\n**Auth** : `POST /auth/login` est public. **`POST /auth/register` exige un JWT** (guard global) — utiliser un compte déjà connecté (ex. admin seed). `GET /health` est public.\n\n**Périmètres** : la plupart des routes métier filtrent par **société** (`companyId` du JWT) ou par **utilisateur** (activities, notifications). Les tables **settings** (pays, rôles, etc.) sont globales.\n\n**Corps JSON** : les requêtes `POST`/`PATCH` listent **tous les champs du DTO** (y compris optionnels) pour faciliter les essais — retirer ou adapter les clés non voulues.\n\n**Dossiers** : App · Auth · Users · Company · Clients · **Employees** (`POST /employees` JSON, **`POST /employees/import`** fichier `.xlsx` **form-data** `file`) · Employee contracts · Tiers · **Financial Report** (exports Excel / PDF DGID) · **Accounting years** · **Balances** (`/balances`, `/balance-lines`, import `.xlsx` **8 colonnes**, `balanceId` en URL ; infobulles sur les en-têtes du modèle généré) · **Accounting quarters** · **App meta** · **Tiers transactions** · Documents · Activities · Notifications · Settings (Countries, Regions, Currencies, Legal forms, Document categories, Identification types, Genders, Languages, Payment methods, Contract types, Tier types, Permissions, Roles).\n\n**Variables seed** (`prisma/seed.cjs`) : `clientId`, `companyId`, `userId` (admin), `employeeId`, `employeeContractId`, `tierId`, `documentId`, `activityId`, `notificationId`, `accountingYearId`, `accountingQuarterId`, `tiersTransactionId`, `balanceId`, `balanceLineId` (vides par défaut — remplir après création / import balance), et références settings (`countryId`, `regionId`, …). Préremplies pour tests après `npm run seed`.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -22,6 +22,8 @@
     { "key": "notificationId", "value": "a0000027-0000-4000-8000-000000000001", "description": "seed notificationDemo" },
     { "key": "accountingYearId", "value": "a000002b-0000-4000-8000-000000000001", "description": "seed accountingYearDemo" },
     { "key": "accountingQuarterId", "value": "a000002c-0000-4000-8000-000000000001", "description": "seed accountingQ1 (Premier Trimestre 2025)" },
+    { "key": "balanceId", "value": "", "description": "UUID balance — POST /balances puis copier data.id" },
+    { "key": "balanceLineId", "value": "", "description": "UUID ligne — import (data.created[0].id) ou GET /balance-lines" },
     { "key": "tiersTransactionId", "value": "a0000030-0000-4000-8000-000000000001", "description": "seed tiersTxDemo" },
     { "key": "roleIdAdmin", "value": "a0000015-0000-4000-8000-000000000001", "description": "seed roleAdmin" },
     { "key": "roleIdUser", "value": "a0000016-0000-4000-8000-000000000001", "description": "seed roleUser" },
@@ -241,7 +243,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Client Test\",\n  \"address\": \"Dakar\",\n  \"postalCode\": \"12500\",\n  \"ninea\": \"SN999888777\",\n  \"countryId\": \"{{countryId}}\",\n  \"regionId\": \"{{regionId}}\",\n  \"legalFormId\": \"{{legalFormId}}\",\n  \"useTva\": true,\n  \"meta\": {}\n}"
+              "raw": "{\n  \"name\": \"Client Test\",\n  \"address\": \"Dakar\",\n  \"postalCode\": \"12500\",\n  \"ninea\": \"SN999888777\",\n  \"countryId\": \"{{countryId}}\",\n  \"regionId\": \"{{regionId}}\",\n  \"legalFormId\": \"{{legalFormId}}\",\n  \"useTva\": true,\n  \"meta\": {\n    \"bp\": \"BP 12500 Dakar\"\n  }\n}"
             },
             "url": "{{baseUrl}}/clients"
           }
@@ -253,7 +255,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Client Avec Contact\",\n  \"address\": \"Thiès\",\n  \"postalCode\": \"14000\",\n  \"ninea\": \"SN111222333\",\n  \"countryId\": \"{{countryId}}\",\n  \"regionId\": \"{{regionId}}\",\n  \"legalFormId\": \"{{legalFormId}}\",\n  \"useTva\": true,\n  \"meta\": {},\n  \"user\": {\n    \"email\": \"contact.client@example.com\",\n    \"password\": \"SecurePass12\",\n    \"roleId\": \"{{roleIdUser}}\",\n    \"countryId\": \"{{countryId}}\",\n    \"regionId\": \"{{regionId}}\",\n    \"languageId\": \"{{languageId}}\",\n    \"genderId\": \"{{genderId}}\",\n    \"firstName\": \"Aminata\",\n    \"lastName\": \"Diop\",\n    \"phone\": \"+221770123456\",\n    \"address\": \"Thiès\",\n    \"avatar\": \"\",\n    \"isActive\": true\n  }\n}"
+              "raw": "{\n  \"name\": \"Client Avec Contact\",\n  \"address\": \"Thiès\",\n  \"postalCode\": \"14000\",\n  \"ninea\": \"SN111222333\",\n  \"countryId\": \"{{countryId}}\",\n  \"regionId\": \"{{regionId}}\",\n  \"legalFormId\": \"{{legalFormId}}\",\n  \"useTva\": true,\n  \"meta\": {\n    \"bp\": \"BP 12500 Dakar\"\n  },\n  \"user\": {\n    \"email\": \"contact.client@example.com\",\n    \"password\": \"SecurePass12\",\n    \"roleId\": \"{{roleIdUser}}\",\n    \"countryId\": \"{{countryId}}\",\n    \"regionId\": \"{{regionId}}\",\n    \"languageId\": \"{{languageId}}\",\n    \"genderId\": \"{{genderId}}\",\n    \"firstName\": \"Aminata\",\n    \"lastName\": \"Diop\",\n    \"phone\": \"+221770123456\",\n    \"address\": \"Thiès\",\n    \"avatar\": \"\",\n    \"isActive\": true\n  }\n}"
             },
             "url": "{{baseUrl}}/clients"
           }
@@ -273,7 +275,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Client Test MAJ\",\n  \"address\": \"Dakar\",\n  \"postalCode\": \"12500\",\n  \"ninea\": \"SN999888777\",\n  \"countryId\": \"{{countryId}}\",\n  \"regionId\": \"{{regionId}}\",\n  \"legalFormId\": \"{{legalFormId}}\",\n  \"useTva\": true,\n  \"meta\": {}\n}"
+              "raw": "{\n  \"name\": \"Client Test MAJ\",\n  \"address\": \"Dakar\",\n  \"postalCode\": \"12500\",\n  \"ninea\": \"SN999888777\",\n  \"countryId\": \"{{countryId}}\",\n  \"regionId\": \"{{regionId}}\",\n  \"legalFormId\": \"{{legalFormId}}\",\n  \"useTva\": true,\n  \"meta\": {\n    \"bp\": \"BP 12500 Dakar\"\n  }\n}"
             },
             "url": "{{baseUrl}}/clients/{{clientId}}"
           }
@@ -405,7 +407,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"tierTypeId\": \"{{tierTypeId}}\",\n  \"clientId\": \"{{clientId}}\",\n  \"name\": \"Client démo\",\n  \"ninea\": \"SN888777666\",\n  \"useTva\": true,\n  \"reference\": \"TIER-DEMO-001\",\n  \"meta\": {},\n  \"isActive\": true\n}"
+              "raw": "{\n  \"tierTypeId\": \"{{tierTypeId}}\",\n  \"clientId\": \"{{clientId}}\",\n  \"name\": \"Client démo\",\n  \"ninea\": \"SN888777666\",\n  \"useTva\": true,\n  \"reference\": \"TIER-DEMO-001\",\n  \"meta\": {\n    \"beneficiaryAddress\": \"VDN, Dakar\"\n  },\n  \"isActive\": true\n}"
             },
             "url": "{{baseUrl}}/tiers"
           }
@@ -429,7 +431,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"tierTypeId\": \"{{tierTypeId}}\",\n  \"clientId\": \"{{clientId}}\",\n  \"name\": \"Tier MAJ\",\n  \"ninea\": \"SN888777666\",\n  \"useTva\": true,\n  \"reference\": \"TIER-DEMO-002\",\n  \"meta\": {},\n  \"isActive\": true\n}"
+              "raw": "{\n  \"tierTypeId\": \"{{tierTypeId}}\",\n  \"clientId\": \"{{clientId}}\",\n  \"name\": \"Tier MAJ\",\n  \"ninea\": \"SN888777666\",\n  \"useTva\": true,\n  \"reference\": \"TIER-DEMO-002\",\n  \"meta\": {\n    \"beneficiaryAddress\": \"VDN, Dakar\"\n  },\n  \"isActive\": true\n}"
             },
             "url": "{{baseUrl}}/tiers/{{tierId}}"
           }
@@ -538,6 +540,132 @@
         {
           "name": "Delete (soft)",
           "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/accounting-years/{{accountingYearId}}" }
+        }
+      ]
+    },
+    {
+      "name": "Balances",
+      "id": "b0000200-0000-4000-8000-000000000001",
+      "description": "**Balances** (`/balances`) et **lignes** (`/balance-lines`). **Import** : `POST /balances/{{balanceId}}/balance-lines/import` — body **form-data**, clé **`file`**, `.xlsx` (1ʳᵉ feuille, **8 en-têtes** reconnus ; pas de `balance_id` dans le fichier). `balanceId` **uniquement** dans l’URL. Modèle : `npm run generate:balance-lines-import-example` → `src/assets/xlsx/balance-lines-import-example.xlsx` (infobulles sur les en-têtes).",
+      "item": [
+        {
+          "name": "Create balance",
+          "id": "b0000201-0000-4000-8000-000000000001",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accountingYearId\": \"{{accountingYearId}}\",\n  \"clientId\": \"{{clientId}}\",\n  \"startDate\": \"2025-01-01T00:00:00.000Z\",\n  \"endDate\": \"2025-03-31T00:00:00.000Z\",\n  \"isActive\": true\n}"
+            },
+            "url": "{{baseUrl}}/balances",
+            "description": "`201` — copier `data.id` dans la variable `balanceId`."
+          }
+        },
+        {
+          "name": "List balances",
+          "id": "b0000202-0000-4000-8000-000000000002",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/balances?clientId={{clientId}}",
+            "description": "Query `clientId` optionnel (client de la société JWT)."
+          }
+        },
+        {
+          "name": "Get balance by id",
+          "id": "b0000203-0000-4000-8000-000000000003",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/balances/{{balanceId}}",
+            "description": "Renseigner `balanceId` (variable collection)."
+          }
+        },
+        {
+          "name": "Update balance",
+          "id": "b0000204-0000-4000-8000-000000000004",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isActive\": true\n}"
+            },
+            "url": "{{baseUrl}}/balances/{{balanceId}}"
+          }
+        },
+        {
+          "name": "Import balance lines (Excel .xlsx)",
+          "id": "b0000205-0000-4000-8000-000000000005",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": [],
+                  "disabled": false,
+                  "description": "`.xlsx` : 8 colonnes (Numéro de compte, Libellé, Débit N-1, Crédit N-1, Mouvement débit, Mouvement crédit, Débit N, Crédit N — synonymes acceptés)."
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/balances/{{balanceId}}/balance-lines/import",
+            "description": "**Étapes Postman**\n1. **Variables** : `baseUrl`, `balanceId` (UUID retourné par **Create balance**), puis **Auth → Login** → copier `data.accessToken` dans `accessToken`.\n2. Onglet **Body** → **form-data** : une ligne **`file`** en type **File**.\n3. **Select Files** → choisir `balance-lines-import-example.xlsx` (ou autre `.xlsx` aux **8 en-têtes** reconnus).\n4. **Send** — attendre `201`.\n\n**Réponse** : `data.createdCount`, `data.failedCount`, `data.created[]`, `data.errors[]` (numéro de ligne Excel + message)."
+          }
+        },
+        {
+          "name": "List balance lines",
+          "id": "b0000206-0000-4000-8000-000000000006",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/balance-lines?balanceId={{balanceId}}",
+            "description": "Query **`balanceId`** obligatoire."
+          }
+        },
+        {
+          "name": "Get balance line by id",
+          "id": "b0000207-0000-4000-8000-000000000007",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/balance-lines/{{balanceLineId}}"
+          }
+        },
+        {
+          "name": "Update balance line",
+          "id": "b0000208-0000-4000-8000-000000000008",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Libellé mis à jour\"\n}"
+            },
+            "url": "{{baseUrl}}/balance-lines/{{balanceLineId}}"
+          }
+        },
+        {
+          "name": "Delete balance line (soft)",
+          "id": "b0000209-0000-4000-8000-000000000009",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/balance-lines/{{balanceLineId}}"
+          }
+        },
+        {
+          "name": "Delete balance (soft)",
+          "id": "b000020a-0000-4000-8000-00000000000a",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/balances/{{balanceId}}"
+          }
         }
       ]
     },

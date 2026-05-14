@@ -1,10 +1,4 @@
-import {
-  IsString,
-  IsOptional,
-  IsBoolean,
-  IsObject,
-  ValidateNested,
-} from 'class-validator';
+import { IsString, IsOptional, IsBoolean, IsObject, ValidateNested } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { CreateClientUserDto } from './create-client-user.dto';
@@ -43,7 +37,11 @@ export class CreateClientDto {
   @IsOptional()
   useTva?: boolean;
 
-  @ApiPropertyOptional({ description: 'Arbitrary JSON metadata', example: {} })
+  @ApiPropertyOptional({
+    description:
+      'Métadonnées libres (objet JSON). Ex. **bp** : boîte postale du client pour les impressions / formulaires (ex. états DGID, déclarant).',
+    example: { bp: 'BP 12500 Dakar' },
+  })
   @IsObject()
   @IsOptional()
   meta?: Record<string, unknown>;

@@ -53,7 +53,7 @@ async function bootstrap() {
     .addTag('clients', 'Client management')
     .addTag(
       'employees',
-      'Employés : CRUD et import Excel (.xlsx) sur `POST /employees/import` avec `clientId` en query.',
+      'Employés : CRUD et import Excel (.xlsx).',
     )
     .addTag('employee-contracts', 'Employee contracts')
     .addTag('contract-types', 'Contract Type management')
@@ -65,6 +65,16 @@ async function bootstrap() {
     .addTag('accounting-quarters', 'Accounting quarters')
     .addTag('app-meta', 'Key/value meta table')
     .addTag('tiers-transactions', 'Tier transaction lines')
+    .addTag('rental-usages', 'Catalogue `rental_usages`')
+    .addTag('rentals', 'Locations')
+    .addTag(
+      'balances',
+      'Balances par client et exercice. **Import lignes** : `POST /balances/{balanceId}/balance-lines/import` (multipart `.xlsx`, sans colonne balance).',
+    )
+    .addTag(
+      'balance-lines',
+      'Lecture / mise à jour / suppression de lignes. Création en masse via import sous le tag **balances**.',
+    )
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

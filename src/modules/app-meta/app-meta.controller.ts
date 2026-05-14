@@ -1,26 +1,8 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  HttpCode,
-  HttpStatus,
-  UsePipes,
-  ValidationPipe,
-  ParseIntPipe,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, UsePipes, ValidationPipe, ParseIntPipe } from '@nestjs/common';
 import { AppMetaService } from './app-meta.service';
 import { CreateAppMetaDto } from './dto/create-app-meta.dto';
 import { UpdateAppMetaDto } from './dto/update-app-meta.dto';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiParam,
-  ApiBearerAuth,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
 
 @ApiTags('app-meta')
 @ApiBearerAuth('JWT')

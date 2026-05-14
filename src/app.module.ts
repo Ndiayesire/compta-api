@@ -34,6 +34,9 @@ import { AccountingYearsModule } from './modules/accounting-years/accounting-yea
 import { AccountingQuartersModule } from './modules/accounting-quarters/accounting-quarters.module';
 import { AppMetaModule } from './modules/app-meta/app-meta.module';
 import { TiersTransactionsModule } from './modules/tiers-transactions/tiers-transactions.module';
+import { RentalUsagesModule } from './modules/rental-usages/rental-usages.module';
+import { RentalsModule } from './modules/rentals/rentals.module';
+import { BalancesModule } from './modules/balances/balances.module';
 import { HttpLatencyInterceptor } from './common/interceptors/http-latency/http-latency.interceptor';
 // import { MailerModule } from './modules/mailer/mailer.module';
 
@@ -63,6 +66,9 @@ import { HttpLatencyInterceptor } from './common/interceptors/http-latency/http-
     AccountingQuartersModule,
     AppMetaModule,
     TiersTransactionsModule,
+    RentalUsagesModule,
+    RentalsModule,
+    BalancesModule,
     DocumentsModule,
     ActivitiesModule,
     NotificationsModule,

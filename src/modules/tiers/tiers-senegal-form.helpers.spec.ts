@@ -1,9 +1,5 @@
 import type { AccountingQuarter } from '@prisma/client';
-import {
-  readDeclarantBpFromClient,
-  splitDeclarantAddress,
-  trimestreLibelleForExcel,
-} from './tiers-senegal-form.helpers';
+import { readDeclarantBpFromClient, splitDeclarantAddress, trimestreLibelleForExcel } from './tiers-senegal-form.helpers';
 
 describe('tiers-senegal-form.helpers', () => {
   describe('trimestreLibelleForExcel', () => {

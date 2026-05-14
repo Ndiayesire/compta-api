@@ -17,7 +17,7 @@ export class ClientsController {
   @ApiOperation({
     summary: 'Create a new client for the current company',
     description:
-      'If `user` is omitted, `client.user_id` is the authenticated user. If `user` is provided, that user is created and linked as the client contact (same pattern as company registration).',
+      'If `user` is omitted, `client.user_id` is the authenticated user. If `user` is provided, that user is created and linked as the client contact (same pattern as company registration). Le champ **meta** peut inclure **bp** (boîte postale, ex. pour formulaires DGID).',
   })
   @ApiBody({ type: CreateClientDto })
   @ApiResponse({ status: 201, description: 'Client created successfully' })
@@ -50,7 +50,11 @@ export class ClientsController {
   @Patch(':id')
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
-  @ApiOperation({ summary: 'Update a client (companyId not modifiable)' })
+  @ApiOperation({
+    summary: 'Update a client (companyId not modifiable)',
+    description:
+      'Champs partiels. **meta** peut inclure **bp** (boîte postale), comme à la création.',
+  })
   async update(
     @Param('id') id: string,
     @Body() dto: UpdateClientDto,

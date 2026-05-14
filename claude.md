@@ -1,5 +1,6 @@
 La documentation projet est dans **[`CLAUDE.md`](./CLAUDE.md)** (fichier canonique à la racine pour les assistants et l’équipe).
-cabinets d’expertise comptable en Afrique francophone. Trois acteurs principaux : Admin/Comptable, Client entreprise, Utilisateur interne (consultant).
+
+**Contexte** : plateforme pour cabinets d’expertise comptable en Afrique francophone. Trois acteurs principaux : Admin/Comptable, Client entreprise, Utilisateur interne (consultant).
 
 ## Stack Technique
 - Langage : TypeScript strict partout
@@ -47,13 +48,21 @@ cabinets d’expertise comptable en Afrique francophone. Trois acteurs principau
 | Core | `auth` | `/auth` — login public ; **register protégé JWT** |
 | Core | `users` | `/users` |
 | Core | `company` | `/company` |
-| Métier | `clients` | `/clients` — création avec `user` optionnel |
-| Métier | `employees` | `/employees` |
+| Métier | `clients` | `/clients` — création avec `user` optionnel ; **`meta`** JSON (ex. **`bp`** boîte postale — Swagger / Postman) |
+| Métier | `employees` | `/employees` — import Excel `POST /employees/import?clientId=` (multipart `file`) |
 | Métier | `employee-contracts` | `/employee-contracts` — contrats salarié (`employee_contract_types`), scope société |
-| Métier | `tiers` | `/tiers` — scope société via client |
+| Métier | `tiers` | `/tiers` — scope société via client ; **`meta`** (ex. **`beneficiaryAddress`**) ; exports Excel **DGID** (`/tiers/:clientId/...`, jobs async) |
+| Métier | `tiers-transactions` | `/tiers-transactions` — filtre `tierId` |
+| Métier | `balances` | `/balances` — client + exercice ; **`POST /balances/:balanceId/balance-lines/import`** (`.xlsx`, `balanceId` en URL uniquement) |
+| Métier | (lignes) | `/balance-lines` — query **`balanceId`** obligatoire pour la liste |
 | Métier | `documents` | `/documents` — métadonnées ; `companyId` = JWT |
+| Métier | `rental-usages` | `/rental-usages` |
+| Métier | `rentals` | `/rentals` |
 | Perso | `activities` | `/activities` — scope **utilisateur** JWT |
 | Perso | `notifications` | `/notifications` — scope **utilisateur** ; `GET .../unread` avant `:id` |
+| Réf. | `accounting-years` | `/accounting-years` |
+| Réf. | `accounting-quarters` | `/accounting-quarters` |
+| App | `app-meta` | `/app-meta` |
 | Settings | `countries`, `regions`, `currency` | `/countries`, `/regions`, `/currencies` |
 | Settings | `legal-forms` | `/legal-forms` |
 | Settings | `document-categories` | `/document-categories` |
@@ -68,6 +77,17 @@ cabinets d’expertise comptable en Afrique francophone. Trois acteurs principau
 ### Clients : création et `user_id`
 - **Sans** objet `user` : `clients.user_id` = utilisateur JWT.
 - **Avec** `user` imbriqué : création utilisateur + lien — email déjà pris → conflit (`409` / message métier).
+- **`meta`** (JSON optionnel) : ex. **`bp`** (`"BP 12500 Dakar"`) pour boîte postale sur impressions / formulaires (DGID, etc.) — voir Swagger et Postman.
+
+### Tiers : `meta`
+- JSON libre ; clé courante **`beneficiaryAddress`** pour les états / formulaires (exports Excel DGID côté module `tiers`) — exemples Swagger + Postman.
+
+### Balances : import Excel des lignes
+- **8 colonnes** obligatoires en ligne 1 (ordre libre, synonymes FR ou abréviations type `cpte` / `MVT DEB`) : compte, libellé, débit/crédit N-1, mouvements débit/crédit, débit/crédit N.
+- **`balanceId` uniquement dans l’URL** (`POST /balances/:balanceId/balance-lines/import`) — pas de colonne balance dans le fichier.
+- Montants : espaces milliers, virgule décimale ; max **500** lignes utiles (cf. `balance-line-excel-import.ts`).
+- **Modèle** : `src/assets/xlsx/balance-lines-import-example.xlsx` — régénération : `node scripts/generate-balance-lines-import-example.cjs` (infobulles Excel sur les en-têtes, pas une colonne importée).
+- **Tests** : `balance-line-excel-import.spec.ts` ; smoke e2e « balances & lignes » dans `test/api-smoke.e2e-spec.ts`.
 
 ### Documents
 - Enregistrement des champs fichier : `name`, `path`, `mimeType`, `size`, `meta` ; pas d’upload multipart dans ce module par défaut.
@@ -103,13 +123,14 @@ Pour la comptabilité, la pipeline est centrée sur :
 - `npm run test`
 - `npm run test:e2e`
 - `npm run lint`
+- Exemple import lignes de balance : `node scripts/generate-balance-lines-import-example.cjs` → `src/assets/xlsx/balance-lines-import-example.xlsx`
 
 ## API / outillage
 - **Swagger** : UI sur `GET /` (voir `src/main.ts`), schéma Bearer JWT.
 - **Postman** : `postman/Insta-Compta-API.postman_collection.json`
-  - Variables : `baseUrl`, `accessToken`, `refreshToken`
+  - Variables : `baseUrl`, `accessToken`, `refreshToken`, IDs seed (`clientId`, `accountingYearId`, …), **`balanceId`**, **`balanceLineId`** (après création / import), `exportJobId` (jobs export tiers).
   - Auth collection : Bearer `{{accessToken}}`
-  - Dossiers alignés sur les routes montées (voir description intégrée dans la collection).
+  - Dossiers alignés sur les routes (dont **Balances**, **Financial Report** / DGID) — descriptions dans la collection.
 
 ## Chronologie des versions
 ### 2026-03-24
@@ -137,6 +158,13 @@ Pour la comptabilité, la pipeline est centrée sur :
 ### 2026-04-16
 - Migration Prisma `20260417160000_shorten_fk_column_names` : renommage des colonnes FK en MySQL (chemins data-safe), alignées sur `schema.prisma` (`@map`).
 - Documentation : distinction explicite colonnes SQL vs propriétés JSON API ; module `identification-types` listé dans l’inventaire des routes.
+
+### 2026-05
+- **Balances** : tables `balances`, `balance_lines` ; API + **import `.xlsx`** (8 colonnes, `balanceId` en URL) ; script + fichier d’exemple avec infobulles sur les en-têtes ; tests unitaires + smoke e2e.
+- **Locations** : `rental_usages`, `rentals` (CRUD API).
+- **Exercices / trimestres** : modules `accounting-years`, `accounting-quarters` ; **app-meta** ; **tiers-transactions**.
+- **Clients / tiers** : exemples **`meta`** (`bp`, `beneficiaryAddress`) dans Swagger et Postman.
+- **Postman** : dossier Balances, variables `balanceId` / `balanceLineId`, `_postman_id` sur les requêtes concernées.
 
 ### À venir (piste)
 - Facturation / tax en flux complet si besoin
