@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "f7c8c001-0000-4000-8000-000000000001",
     "name": "Insta Compta API",
-    "description": "NestJS **compta-api** — collection alignée sur les modules montés dans `AppModule`. Rapports Excel DGID : dossier **Financial Report**.\n\n**JSON HTTP vs MySQL** : les corps de requête utilisent les **DTO camelCase** (`countryId`, `regionId`, `legalFormId`, `categoryId`, `typeId`, `identificationTypeId`, `tierTypeId`, …). En base, Prisma mappe vers des colonnes courtes (`country_id`, `category_id`, `type_id`, etc.) — ne pas les confondre avec les clés JSON.\n\n**Variables** : `baseUrl` (ex. `http://localhost:4230`), `accessToken`, `refreshToken`. La collection utilise l’auth **Bearer** au niveau collection : après **Auth → Login**, copier `accessToken` / `refreshToken` dans les variables.\n\n**Auth** : `POST /auth/login` est public. **`POST /auth/register` exige un JWT** (guard global) — utiliser un compte déjà connecté (ex. admin seed). `GET /health` est public.\n\n**Périmètres** : la plupart des routes métier filtrent par **société** (`companyId` du JWT) ou par **utilisateur** (activities, notifications). Les tables **settings** (pays, rôles, etc.) sont globales.\n\n**Corps JSON** : les requêtes `POST`/`PATCH` listent **tous les champs du DTO** (y compris optionnels) pour faciliter les essais — retirer ou adapter les clés non voulues.\n\n**Dossiers** : App · Auth · Users · Company · Clients · **Employees** (`POST /employees` JSON, **`POST /employees/import`** fichier `.xlsx` **form-data** `file`) · Employee contracts · Tiers · **Financial Report** (exports Excel / PDF DGID) · **Accounting years** · **Balances** (`/balances`, `/balance-lines`, import `.xlsx` **8 colonnes**, `balanceId` en URL ; infobulles sur les en-têtes du modèle généré) · **Accounting quarters** · **App meta** · **Tiers transactions** · Documents · Activities · Notifications · Settings (Countries, Regions, Currencies, Legal forms, Document categories, Identification types, Genders, Languages, Payment methods, Contract types, Tier types, Permissions, Roles).\n\n**Variables seed** (`prisma/seed.cjs`) : `clientId`, `companyId`, `userId` (admin), `employeeId`, `employeeContractId`, `tierId`, `documentId`, `activityId`, `notificationId`, `accountingYearId`, `accountingQuarterId`, `tiersTransactionId`, `balanceId`, `balanceLineId` (vides par défaut — remplir après création / import balance), et références settings (`countryId`, `regionId`, …). Préremplies pour tests après `npm run seed`.",
+    "description": "NestJS **compta-api** — collection alignée sur les modules montés dans `AppModule`. Rapports Excel DGID : dossier **Financial Report**.\n\n**JSON HTTP vs MySQL** : les corps de requête utilisent les **DTO camelCase** (`countryId`, `regionId`, `legalFormId`, `categoryId`, `typeId`, `identificationTypeId`, `tierTypeId`, …). En base, Prisma mappe vers des colonnes courtes (`country_id`, `category_id`, `type_id`, etc.) — ne pas les confondre avec les clés JSON.\n\n**Variables** : `baseUrl` (ex. `http://localhost:4230`), `accessToken`, `refreshToken`. La collection utilise l’auth **Bearer** au niveau collection : après **Auth → Login**, copier `accessToken` / `refreshToken` dans les variables.\n\n**Auth** : `POST /auth/login` est public. **`POST /auth/register` exige un JWT** (guard global) — utiliser un compte déjà connecté (ex. admin seed). `GET /health` est public.\n\n**Périmètres** : la plupart des routes métier filtrent par **société** (`companyId` du JWT) ou par **utilisateur** (activities, notifications). Les tables **settings** (pays, rôles, etc.) sont globales.\n\n**Corps JSON** : les requêtes `POST`/`PATCH` listent **tous les champs du DTO** (y compris optionnels) pour faciliter les essais — retirer ou adapter les clés non voulues.\n\n**Dossiers** : App · Auth · Users · Company · Clients · **Employees** (`POST /employees` JSON, **`POST /employees/import`** fichier `.xlsx` **form-data** `file`) · Employee contracts · Tiers · **Financial Report** (exports Excel / PDF DGID) · **Accounting years** · **Balances** (`/balances`, `/balance-lines`, import `.xlsx` **8 colonnes**, `balanceId` en URL ; infobulles sur les en-têtes du modèle généré) · **Rental usages** (`/rental-usages`, catalogue global) · **Rentals** (`/rentals`, société JWT ; query `clientId` optionnel) · **Accounting quarters** · **App meta** · **Tiers transactions** · Documents · Activities · Notifications · Settings (Countries, Regions, Currencies, Legal forms, Document categories, Identification types, Genders, Languages, Payment methods, Contract types, Tier types, Permissions, Roles).\n\n**Variables seed** (`prisma/seed.cjs`) : `clientId`, `companyId`, `userId` (admin), `employeeId`, `employeeContractId`, `tierId`, `documentId`, `activityId`, `notificationId`, `accountingYearId`, `accountingQuarterId`, `tiersTransactionId`, `balanceId`, `balanceLineId` (vides par défaut — remplir après création / import balance), `rentalUsageId`, `rentalId` (créer un usage puis une location), et références settings (`countryId`, `regionId`, …). Préremplies pour tests après `npm run seed`.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -24,6 +24,8 @@
     { "key": "accountingQuarterId", "value": "a000002c-0000-4000-8000-000000000001", "description": "seed accountingQ1 (Premier Trimestre 2025)" },
     { "key": "balanceId", "value": "", "description": "UUID balance — POST /balances puis copier data.id" },
     { "key": "balanceLineId", "value": "", "description": "UUID ligne — import (data.created[0].id) ou GET /balance-lines" },
+    { "key": "rentalUsageId", "value": "", "description": "UUID type d'usage location — GET /rental-usages ou POST Rental usages → Create" },
+    { "key": "rentalId", "value": "", "description": "UUID location — POST /rentals puis copier data.id" },
     { "key": "tiersTransactionId", "value": "a0000030-0000-4000-8000-000000000001", "description": "seed tiersTxDemo" },
     { "key": "roleIdAdmin", "value": "a0000015-0000-4000-8000-000000000001", "description": "seed roleAdmin" },
     { "key": "roleIdUser", "value": "a0000016-0000-4000-8000-000000000001", "description": "seed roleUser" },
@@ -665,6 +667,142 @@
             "method": "DELETE",
             "header": [],
             "url": "{{baseUrl}}/balances/{{balanceId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Rental usages",
+      "id": "r0000100-0000-4000-8000-000000000001",
+      "description": "**Catalogue global** (`rental_usages`) — pas de filtre société. Référencé par `POST /rentals` (`rentalUsageId`).",
+      "item": [
+        {
+          "name": "Create rental usage",
+          "id": "r0000101-0000-4000-8000-000000000001",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Bureau\",\n  \"isActive\": true\n}"
+            },
+            "url": "{{baseUrl}}/rental-usages",
+            "description": "`201` — copier `data.id` dans la variable `rentalUsageId`."
+          }
+        },
+        {
+          "name": "List rental usages",
+          "id": "r0000102-0000-4000-8000-000000000002",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/rental-usages"
+          }
+        },
+        {
+          "name": "Get rental usage by id",
+          "id": "r0000103-0000-4000-8000-000000000003",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/rental-usages/{{rentalUsageId}}"
+          }
+        },
+        {
+          "name": "Update rental usage",
+          "id": "r0000104-0000-4000-8000-000000000004",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Bureau (MAJ)\",\n  \"isActive\": true\n}"
+            },
+            "url": "{{baseUrl}}/rental-usages/{{rentalUsageId}}"
+          }
+        },
+        {
+          "name": "Delete rental usage",
+          "id": "r0000105-0000-4000-8000-000000000005",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/rental-usages/{{rentalUsageId}}",
+            "description": "Échoue si des locations actives référencent encore ce type."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Rentals",
+      "id": "r0000200-0000-4000-8000-000000000001",
+      "description": "**Locations** (`/rentals`) — `clientId` doit être un client de la société du JWT. **`rentalUsageId`** : voir dossier **Rental usages**.",
+      "item": [
+        {
+          "name": "Create rental",
+          "id": "r0000201-0000-4000-8000-000000000001",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clientId\": \"{{clientId}}\",\n  \"rentalUsageId\": \"{{rentalUsageId}}\",\n  \"name\": \"Local Plateau\",\n  \"address\": \"12 av. Bourguiba\",\n  \"owner\": \"M. Diop\",\n  \"useTax\": true,\n  \"value\": 250000.5,\n  \"meta\": {}\n}"
+            },
+            "url": "{{baseUrl}}/rentals",
+            "description": "`201` — copier `data.id` dans `rentalId`. Renseigner `rentalUsageId` (créer un type via **Rental usages** si besoin)."
+          }
+        },
+        {
+          "name": "List rentals",
+          "id": "r0000202-0000-4000-8000-000000000002",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/rentals",
+            "description": "Toutes les locations de la société (JWT)."
+          }
+        },
+        {
+          "name": "List rentals by client",
+          "id": "r0000203-0000-4000-8000-000000000003",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/rentals?clientId={{clientId}}",
+            "description": "Filtre optionnel `clientId`."
+          }
+        },
+        {
+          "name": "Get rental by id",
+          "id": "r0000204-0000-4000-8000-000000000004",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/rentals/{{rentalId}}"
+          }
+        },
+        {
+          "name": "Update rental",
+          "id": "r0000205-0000-4000-8000-000000000005",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rentalUsageId\": \"{{rentalUsageId}}\",\n  \"name\": \"Local Plateau (MAJ)\",\n  \"address\": \"12 av. Bourguiba\",\n  \"owner\": \"M. Diop\",\n  \"useTax\": true,\n  \"value\": 260000,\n  \"meta\": {}\n}"
+            },
+            "url": "{{baseUrl}}/rentals/{{rentalId}}",
+            "description": "`clientId` ne peut pas être modifié via ce DTO."
+          }
+        },
+        {
+          "name": "Delete rental (soft)",
+          "id": "r0000206-0000-4000-8000-000000000006",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/rentals/{{rentalId}}",
+            "description": "Renseigne `rental_deleted_at`."
           }
         }
       ]
