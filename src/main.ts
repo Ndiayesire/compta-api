@@ -67,14 +67,8 @@ async function bootstrap() {
     .addTag('tiers-transactions', 'Tier transaction lines')
     .addTag('rental-usages', 'Catalogue `rental_usages`')
     .addTag('rentals', 'Locations')
-    .addTag(
-      'balances',
-      'Balances par client et exercice. **Import lignes** : `POST /balances/{balanceId}/balance-lines/import` (multipart `.xlsx`, sans colonne balance).',
-    )
-    .addTag(
-      'balance-lines',
-      'Lecture / mise à jour / suppression de lignes. Création en masse via import sous le tag **balances**.',
-    )
+    .addTag('balances', 'Balances par client et exercice. Import lignes.')
+    .addTag('balance-lines', 'Lecture / mise à jour / suppression de lignes. Création en masse via import sous le tag **balances**.')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
