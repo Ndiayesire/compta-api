@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 /**
  * Seeds all Prisma models (reference data + one demo chain: company → client → employee → contract → tier).
- * Inclut exercices/trimestres comptables (`accounting_years`, `accounting_quarters`), `meta`, ligne `tiers_transactions` démo.
+ * Inclut exercices/trimestres comptables (`accounting_years`, `accounting_quarters`), `meta`, ligne `tiers_transactions` démo,
+ * opérations fiscales (`deduction_types`, `property_nature_types`, `providers`, `op_turnovers`, `op_turnover_stamps`, `op_local_purchases`).
  * Référence inclut notamment les types de pièce d'identité (`settings_identification_type`).
  * Idempotent: fixed UUIDs + upsert.
  *
@@ -89,6 +90,14 @@ const I = {
   tiersTxDemo3: 'a0000036-0000-4000-8000-000000000001',
   tiersTxDemo4: 'a0000037-0000-4000-8000-000000000001',
   tiersTxDemo5: 'a0000038-0000-4000-8000-000000000001',
+  deductionTypeStd: 'a0000039-0000-4000-8000-000000000001',
+  propertyNatureMerch: 'a000003a-0000-4000-8000-000000000001',
+  propertyNatureOther: 'a000003b-0000-4000-8000-000000000001',
+  providerDemo: 'a000003c-0000-4000-8000-000000000001',
+  providerDemo2: 'a000003d-0000-4000-8000-000000000001',
+  opTurnoverDemo: 'a000003e-0000-4000-8000-000000000001',
+  opTurnoverStampDemo: 'a000003f-0000-4000-8000-000000000001',
+  opLocalPurchaseDemo: 'a0000040-0000-4000-8000-000000000001',
 };
 
 const DEFAULT_ADMIN_PASSWORD = process.env.SEED_ADMIN_PASSWORD || 'Admin123!dev';
@@ -363,6 +372,29 @@ async function seedReferenceData() {
       where: { id: it.id },
       create: { ...it, isActive: true },
       update: { name: it.name, code: it.code, isActive: true },
+    });
+  }
+
+  const deductionTypes = [
+    { id: I.deductionTypeStd, code: 'STD', name: 'Déduction standard' },
+  ];
+  for (const dt of deductionTypes) {
+    await prisma.deductionType.upsert({
+      where: { id: dt.id },
+      create: { ...dt, isActive: true },
+      update: { name: dt.name, code: dt.code, isActive: true, deletedAt: null },
+    });
+  }
+
+  const propertyNatureTypes = [
+    { id: I.propertyNatureMerch, code: '1', name: 'MARCHANDISES' },
+    { id: I.propertyNatureOther, code: '2', name: 'AUTRES MARCHANDISES' },
+  ];
+  for (const pnt of propertyNatureTypes) {
+    await prisma.propertyNatureType.upsert({
+      where: { id: pnt.id },
+      create: { ...pnt, isActive: true },
+      update: { name: pnt.name, code: pnt.code, isActive: true, deletedAt: null },
     });
   }
 }
@@ -874,6 +906,118 @@ async function seedDemoChain(seedUserId) {
     },
     update: {
       meta: { seeded: true },
+    },
+  });
+
+  await prisma.provider.upsert({
+    where: { id: I.providerDemo },
+    create: {
+      id: I.providerDemo,
+      ninea: 'SN555666777',
+      cofi: 'COFI-DEMO-001',
+      name: 'Fournisseur démo Dakar',
+      address: 'Zone industriale, Dakar',
+    },
+    update: {
+      ninea: 'SN555666777',
+      cofi: 'COFI-DEMO-001',
+      name: 'Fournisseur démo Dakar',
+      address: 'Zone industriale, Dakar',
+      deletedAt: null,
+    },
+  });
+
+  await prisma.provider.upsert({
+    where: { id: I.providerDemo2 },
+    create: {
+      id: I.providerDemo2,
+      ninea: 'SN666777888',
+      cofi: 'COFI-DEMO-002',
+      name: 'Fournisseur démo Thiès',
+      address: 'Thiès',
+    },
+    update: {
+      ninea: 'SN666777888',
+      cofi: 'COFI-DEMO-002',
+      name: 'Fournisseur démo Thiès',
+      address: 'Thiès',
+      deletedAt: null,
+    },
+  });
+
+  await prisma.opTurnover.upsert({
+    where: { id: I.opTurnoverDemo },
+    create: {
+      id: I.opTurnoverDemo,
+      clientId: I.clientDemo,
+      number: 'CA-SEED-2025-Q1',
+      date: new Date('2025-03-31T00:00:00.000Z'),
+      net: 1000000,
+      tax: 180000,
+      total: 1180000,
+    },
+    update: {
+      clientId: I.clientDemo,
+      number: 'CA-SEED-2025-Q1',
+      date: new Date('2025-03-31T00:00:00.000Z'),
+      net: 1000000,
+      tax: 180000,
+      total: 1180000,
+      deletedAt: null,
+    },
+  });
+
+  await prisma.opTurnoverStamp.upsert({
+    where: { id: I.opTurnoverStampDemo },
+    create: {
+      id: I.opTurnoverStampDemo,
+      opTurnoverId: I.opTurnoverDemo,
+      date: new Date('2025-03-31T00:00:00.000Z'),
+      net: 967600,
+      tax: 212400,
+      total: 1180000,
+      amount: { lines: [{ label: 'CA T1', value: 1180000 }] },
+      amountDeduction: { lines: [{ label: 'Déduction', value: 0 }] },
+    },
+    update: {
+      opTurnoverId: I.opTurnoverDemo,
+      date: new Date('2025-03-31T00:00:00.000Z'),
+      net: 967600,
+      tax: 212400,
+      total: 1180000,
+      amount: { lines: [{ label: 'CA T1', value: 1180000 }] },
+      amountDeduction: { lines: [{ label: 'Déduction', value: 0 }] },
+      deletedAt: null,
+    },
+  });
+
+  await prisma.opLocalPurchase.upsert({
+    where: { id: I.opLocalPurchaseDemo },
+    create: {
+      id: I.opLocalPurchaseDemo,
+      providerId: I.providerDemo,
+      deductionTypeId: I.deductionTypeStd,
+      propertyNatureTypeId: I.propertyNatureMerch,
+      month: new Date('2025-01-01T00:00:00.000Z'),
+      year: new Date('2025-01-01T00:00:00.000Z'),
+      net: 500000,
+      tax: 90000,
+      taxDeduction: 50000,
+      total: 590000,
+      prorata: { rate: 1, note: 'seed demo' },
+    },
+    update: {
+      providerId: I.providerDemo,
+      deductionTypeId: I.deductionTypeStd,
+      propertyNatureTypeId: I.propertyNatureMerch,
+      month: new Date('2025-01-01T00:00:00.000Z'),
+      year: new Date('2025-01-01T00:00:00.000Z'),
+      net: 500000,
+      tax: 90000,
+      taxDeduction: 50000,
+      total: 590000,
+      prorata: { rate: 1, note: 'seed demo' },
+      deletedAt: null,
     },
   });
 }
