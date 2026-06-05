@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, HttpCode, HttpStatus} from '@nestjs/common';
+﻿import { Controller, Get, Post, Patch, Delete, Body, Param, HttpCode, HttpStatus} from '@nestjs/common';
 import { LegalFormsService } from './legal-forms.service';
 import { CreateLegalFormDto } from './dto/create-legal-form.dto';
 import { UpdateLegalFormDto } from './dto/update-legal-form.dto';

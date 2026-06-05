@@ -69,6 +69,12 @@ async function bootstrap() {
     .addTag('rentals', 'Locations')
     .addTag('balances', 'Balances par client et exercice. Import lignes.')
     .addTag('balance-lines', 'Lecture / mise à jour / suppression de lignes. Création en masse via import sous le tag **balances**.')
+    .addTag('deduction-types', 'Types de déduction (achats locaux)')
+    .addTag('property-nature-types', 'Natures de biens (achats locaux)')
+    .addTag('providers', 'Fournisseurs')
+    .addTag('op-turnovers', 'Chiffres d’affaires par client')
+    .addTag('op-turnover-stamps', 'Timbres / versions de CA')
+    .addTag('op-local-purchases', 'Achats locaux')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

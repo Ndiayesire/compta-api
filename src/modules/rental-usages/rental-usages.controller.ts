@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, UsePipes, ValidationPipe } from '@nestjs/common';
+﻿import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, UsePipes, ValidationPipe } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiParam, ApiBearerAuth, ApiBody, ApiResponse } from '@nestjs/swagger';
 import { RentalUsagesService } from './rental-usages.service';
 import { CreateRentalUsageDto } from './dto/create-rental-usage.dto';
@@ -15,14 +15,14 @@ export class RentalUsagesController {
   @HttpCode(HttpStatus.CREATED)
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   @ApiOperation({
-    summary: 'Créer un type d’usage location (catalogue)',
+    summary: 'CrÃ©er un type dâ€™usage location (catalogue)',
     description:
-      'Table `rental_usages` : référencé par `rentals.rental_usage_id`. Pas de scope société.',
+      'Table `rental_usages` : rÃ©fÃ©rencÃ© par `rentals.rental_usage_id`. Pas de scope sociÃ©tÃ©.',
   })
   @ApiBody({ type: CreateRentalUsageDto })
   @ApiResponse({
     status: HttpStatus.CREATED,
-    description: 'Type créé',
+    description: 'Type crÃ©Ã©',
     schema: API_ENVELOPE_SCHEMA,
   })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Validation' })
@@ -37,7 +37,7 @@ export class RentalUsagesController {
 
   @Get()
   @ApiOperation({
-    summary: 'Lister les types d’usage',
+    summary: 'Lister les types dâ€™usage',
     description: 'Tri par nom ascendant.',
   })
   @ApiResponse({
@@ -55,7 +55,7 @@ export class RentalUsagesController {
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Détail d’un type d’usage' })
+  @ApiOperation({ summary: 'DÃ©tail dâ€™un type dâ€™usage' })
   @ApiParam({ name: 'id', description: 'UUID `rental_usage_id`', type: String })
   @ApiResponse({
     status: HttpStatus.OK,
@@ -73,7 +73,7 @@ export class RentalUsagesController {
 
   @Patch(':id')
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
-  @ApiOperation({ summary: 'Mettre à jour un type d’usage' })
+  @ApiOperation({ summary: 'Mettre Ã  jour un type dâ€™usage' })
   @ApiParam({ name: 'id', type: String })
   @ApiBody({ type: UpdateRentalUsageDto })
   @ApiResponse({ status: HttpStatus.OK, schema: API_ENVELOPE_SCHEMA })
@@ -89,9 +89,9 @@ export class RentalUsagesController {
 
   @Delete(':id')
   @ApiOperation({
-    summary: 'Supprimer un type d’usage',
+    summary: 'Supprimer un type dâ€™usage',
     description:
-      'Impossible s’il existe des enregistrements `rentals` avec `deleted_at` null pointant vers ce type.',
+      'Impossible sâ€™il existe des enregistrements `rentals` avec `deleted_at` null pointant vers ce type.',
   })
   @ApiParam({ name: 'id', type: String })
   @ApiResponse({ status: HttpStatus.OK, schema: API_ENVELOPE_SCHEMA })
@@ -101,7 +101,7 @@ export class RentalUsagesController {
   })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
-    description: 'Encore référencé par des locations actives',
+    description: 'Encore rÃ©fÃ©rencÃ© par des locations actives',
   })
   async remove(@Param('id') id: string) {
     const data = await this.rentalUsagesService.remove(id);

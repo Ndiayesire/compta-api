@@ -37,6 +37,11 @@ import { TiersTransactionsModule } from './modules/tiers-transactions/tiers-tran
 import { RentalUsagesModule } from './modules/rental-usages/rental-usages.module';
 import { RentalsModule } from './modules/rentals/rentals.module';
 import { BalancesModule } from './modules/balances/balances.module';
+import { DeductionTypesModule } from './modules/settings/deduction-types/deduction-types.module';
+import { PropertyNatureTypesModule } from './modules/settings/property-nature-types/property-nature-types.module';
+import { ProvidersModule } from './modules/providers/providers.module';
+import { OpTurnoversModule } from './modules/op-turnovers/op-turnovers.module';
+import { OpLocalPurchasesModule } from './modules/op-local-purchases/op-local-purchases.module';
 import { HttpLatencyInterceptor } from './common/interceptors/http-latency/http-latency.interceptor';
 // import { MailerModule } from './modules/mailer/mailer.module';
 
@@ -69,6 +74,11 @@ import { HttpLatencyInterceptor } from './common/interceptors/http-latency/http-
     RentalUsagesModule,
     RentalsModule,
     BalancesModule,
+    DeductionTypesModule,
+    PropertyNatureTypesModule,
+    ProvidersModule,
+    OpTurnoversModule,
+    OpLocalPurchasesModule,
     DocumentsModule,
     ActivitiesModule,
     NotificationsModule,

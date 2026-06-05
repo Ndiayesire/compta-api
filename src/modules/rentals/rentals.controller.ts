@@ -1,4 +1,4 @@
-import { BadRequestException, Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, UsePipes, ValidationPipe, Query } from '@nestjs/common';
+﻿import { BadRequestException, Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, UsePipes, ValidationPipe, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiParam, ApiBearerAuth, ApiQuery, ApiBody, ApiResponse } from '@nestjs/swagger';
 import { RentalsService } from './rentals.service';
 import { CreateRentalDto } from './dto/create-rental.dto';
@@ -17,9 +17,9 @@ export class RentalsController {
   @HttpCode(HttpStatus.CREATED)
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   @ApiOperation({
-    summary: 'Créer une location / bien',
+    summary: 'CrÃ©er une location / bien',
     description:
-      '`client_id` doit appartenir à la société du JWT. `rental_usage_id` doit exister. `value` : montant décimal (12,2). `meta` : JSON libre.',
+      '`client_id` doit appartenir Ã  la sociÃ©tÃ© du JWT. `rental_usage_id` doit exister. `value` : montant dÃ©cimal (12,2). `meta` : JSON libre.',
   })
   @ApiBody({ type: CreateRentalDto })
   @ApiResponse({
@@ -28,7 +28,7 @@ export class RentalsController {
   })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
-    description: 'Client hors société, usage invalide, ou utilisateur sans société',
+    description: 'Client hors sociÃ©tÃ©, usage invalide, ou utilisateur sans sociÃ©tÃ©',
   })
   async create(@Body() dto: CreateRentalDto, @CurrentUser() user: AuthUser) {
     const companyId = user.companyId;
@@ -45,20 +45,20 @@ export class RentalsController {
 
   @Get()
   @ApiOperation({
-    summary: 'Lister les locations de la société',
+    summary: 'Lister les locations de la sociÃ©tÃ©',
     description:
-      'Filtre optionnel `clientId` : UUID d’un client de votre `company_id`.',
+      'Filtre optionnel `clientId` : UUID dâ€™un client de votre `company_id`.',
   })
   @ApiQuery({
     name: 'clientId',
     required: false,
-    description: 'UUID client (doit être dans votre société)',
+    description: 'UUID client (doit Ãªtre dans votre sociÃ©tÃ©)',
     example: 'a0000021-0000-4000-8000-000000000001',
   })
   @ApiResponse({ status: HttpStatus.OK, schema: API_ENVELOPE_SCHEMA })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
-    description: 'Utilisateur sans société',
+    description: 'Utilisateur sans sociÃ©tÃ©',
   })
   async findAll(
     @CurrentUser() user: AuthUser,
@@ -77,13 +77,13 @@ export class RentalsController {
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Détail d’une location' })
+  @ApiOperation({ summary: 'DÃ©tail dâ€™une location' })
   @ApiParam({ name: 'id', description: 'UUID `rental_id`', type: String })
   @ApiResponse({ status: HttpStatus.OK, schema: API_ENVELOPE_SCHEMA })
-  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Inconnue ou hors société' })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Inconnue ou hors sociÃ©tÃ©' })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
-    description: 'Utilisateur sans société',
+    description: 'Utilisateur sans sociÃ©tÃ©',
   })
   async findOne(@Param('id') id: string, @CurrentUser() user: AuthUser) {
     const companyId = user.companyId;
@@ -101,14 +101,14 @@ export class RentalsController {
   @Patch(':id')
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   @ApiOperation({
-    summary: 'Mettre à jour une location',
-    description: 'Le `client_id` ne peut pas être modifié via ce DTO.',
+    summary: 'Mettre Ã  jour une location',
+    description: 'Le `client_id` ne peut pas Ãªtre modifiÃ© via ce DTO.',
   })
   @ApiParam({ name: 'id', type: String })
   @ApiBody({ type: UpdateRentalDto })
   @ApiResponse({ status: HttpStatus.OK, schema: API_ENVELOPE_SCHEMA })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Inconnue' })
-  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Données invalides' })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'DonnÃ©es invalides' })
   async update(
     @Param('id') id: string,
     @Body() dto: UpdateRentalDto,

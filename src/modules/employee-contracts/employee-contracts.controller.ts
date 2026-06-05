@@ -1,4 +1,4 @@
-import { BadRequestException, Controller, Get, Post, Body, Param, Patch, Delete, HttpCode, HttpStatus, UsePipes, ValidationPipe } from '@nestjs/common';
+﻿import { BadRequestException, Controller, Get, Post, Body, Param, Patch, Delete, HttpCode, HttpStatus, UsePipes, ValidationPipe } from '@nestjs/common';
 import { EmployeeContractsService } from './employee-contracts.service';
 import { CreateEmployeeContractDto } from './dto/create-employee-contract.dto';
 import { UpdateEmployeeContractDto } from './dto/update-employee-contract.dto';
@@ -28,7 +28,7 @@ export class EmployeeContractsController {
   @ApiOperation({
     summary: 'Create an employee contract row (employee_contract_types)',
     description:
-      "Si `isActive=true`, ce contrat devient l'unique contrat actif de l'employé et les autres contrats actifs passent automatiquement à `isActive=false`.",
+      "Si `isActive=true`, ce contrat devient l'unique contrat actif de l'employÃ© et les autres contrats actifs passent automatiquement Ã  `isActive=false`.",
   })
   @ApiResponse({ status: 201, description: 'Created' })
   async create(
@@ -95,7 +95,7 @@ export class EmployeeContractsController {
   @ApiResponse({
     status: 200,
     description:
-      "Contrat mis à jour. Si `isActive=true`, les autres contrats actifs du même employé sont désactivés automatiquement.",
+      "Contrat mis Ã  jour. Si `isActive=true`, les autres contrats actifs du mÃªme employÃ© sont dÃ©sactivÃ©s automatiquement.",
   })
   @ApiParam({ name: 'id', type: String })
   async update(

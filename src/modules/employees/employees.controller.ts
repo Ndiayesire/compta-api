@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, ParseUUIDPipe, Patch, Delete, Query, UseInterceptors, UploadedFile, BadRequestException, HttpCode, HttpStatus } from '@nestjs/common';
+﻿import { Controller, Get, Post, Body, Param, ParseUUIDPipe, Patch, Delete, Query, UseInterceptors, UploadedFile, BadRequestException, HttpCode, HttpStatus } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { EmployeesService } from './employees.service';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
@@ -26,7 +26,7 @@ export class EmployeesController {
   @ApiOperation({
     summary: 'Create employee',
     description:
-      "Crée l'employé puis son contrat courant dans `employee_contract_types` (contractTypeId, dates, poste, salaire, manager).",
+      "CrÃ©e l'employÃ© puis son contrat courant dans `employee_contract_types` (contractTypeId, dates, poste, salaire, manager).",
   })
   @ApiResponse({
     status: 201,
@@ -51,32 +51,32 @@ export class EmployeesController {
   )
   @ApiConsumes('multipart/form-data')
   @ApiOperation({
-    summary: 'Importer des employés depuis un Excel (.xlsx)',
+    summary: 'Importer des employÃ©s depuis un Excel (.xlsx)',
     description: [
-      '**Requête** : `multipart/form-data` avec le champ **`file`** (classeur `.xlsx`, max 5 Mo). **Query obligatoire** : `clientId` (UUID du client entreprise) — doit exister et appartenir à la **société du JWT**.',
+      '**RequÃªte** : `multipart/form-data` avec le champ **`file`** (classeur `.xlsx`, max 5 Mo). **Query obligatoire** : `clientId` (UUID du client entreprise) â€” doit exister et appartenir Ã  la **sociÃ©tÃ© du JWT**.',
       '',
-      '**Feuille** : uniquement la **1ʳᵉ feuille**. **Ligne 1** = libellés de colonnes. Les colonnes sont reconnues par **texte d’en-tête** (normalisation : accents / casse / espaces) — **l’ordre des colonnes est libre**.',
+      '**Feuille** : uniquement la **1Ê³áµ‰ feuille**. **Ligne 1** = libellÃ©s de colonnes. Les colonnes sont reconnues par **texte dâ€™en-tÃªte** (normalisation : accents / casse / espaces) â€” **lâ€™ordre des colonnes est libre**.',
       '',
-      '**En-têtes obligatoires** (au moins une variante reconnue) : `Type de contrat`, `Prenom` ou `Prénom`, `Nom`, `Poste`, `Email`, `Telephone` ou `Téléphone`, `Adresse`, `Date de début`, `Date de fin`.',
+      '**En-tÃªtes obligatoires** (au moins une variante reconnue) : `Type de contrat`, `Prenom` ou `PrÃ©nom`, `Nom`, `Poste`, `Email`, `Telephone` ou `TÃ©lÃ©phone`, `Adresse`, `Date de dÃ©but`, `Date de fin`.',
       '',
-      '**En-têtes optionnels** : `Type d\'identification`, `Numero d\'identification` / `Numéro d\'identification` (n° de pièce), `Numero d\'identification social` / `Numéro d\'identification social` (NASS), `Salaire`, `Cadre` (oui/non, 1/0, true/false… pour statut manager).',
+      '**En-tÃªtes optionnels** : `Type d\'identification`, `Numero d\'identification` / `NumÃ©ro d\'identification` (nÂ° de piÃ¨ce), `Numero d\'identification social` / `NumÃ©ro d\'identification social` (NASS), `Salaire`, `Cadre` (oui/non, 1/0, true/falseâ€¦ pour statut manager).',
       '',
-      '**Résolution par nom** (pas d’UUID dans le fichier) : type de contrat et type d’identification sont cherchés parmi les réglages actifs. **`clientId`** n’est pas une colonne Excel.',
+      '**RÃ©solution par nom** (pas dâ€™UUID dans le fichier) : type de contrat et type dâ€™identification sont cherchÃ©s parmi les rÃ©glages actifs. **`clientId`** nâ€™est pas une colonne Excel.',
       '',
-      '**Lignes** : données à partir de la ligne 2 ; lignes vides ignorées ; traitement plafonné à **500** lignes utiles. `isActive` sur les employés créés : valeurs par défaut côté API.',
+      '**Lignes** : donnÃ©es Ã  partir de la ligne 2 ; lignes vides ignorÃ©es ; traitement plafonnÃ© Ã  **500** lignes utiles. `isActive` sur les employÃ©s crÃ©Ã©s : valeurs par dÃ©faut cÃ´tÃ© API.',
     ].join('\n'),
   })
   @ApiQuery({
     name: 'clientId',
     required: true,
     description:
-      'UUID du client (entreprise cliente) : toutes les lignes importées y sont rattachées. Doit appartenir à la société du JWT.',
+      'UUID du client (entreprise cliente) : toutes les lignes importÃ©es y sont rattachÃ©es. Doit appartenir Ã  la sociÃ©tÃ© du JWT.',
     schema: { type: 'string', format: 'uuid' },
     example: '00000000-0000-4000-8000-000000000001',
   })
   @ApiBody({
     description:
-      'Corps **multipart** : une partie nommée **`file`** (fichier binaire `.xlsx`). Dans Swagger UI, utiliser « Try it out » puis le contrôle fichier pour `file`.',
+      'Corps **multipart** : une partie nommÃ©e **`file`** (fichier binaire `.xlsx`). Dans Swagger UI, utiliser Â« Try it out Â» puis le contrÃ´le fichier pour `file`.',
     schema: {
       type: 'object',
       required: ['file'],
@@ -93,14 +93,14 @@ export class EmployeesController {
   @ApiResponse({
     status: 201,
     description:
-      'Import exécuté : compteurs et détail des créations / erreurs par numéro de ligne Excel.',
+      'Import exÃ©cutÃ© : compteurs et dÃ©tail des crÃ©ations / erreurs par numÃ©ro de ligne Excel.',
     schema: {
       type: 'object',
       properties: {
         success: { type: 'boolean', example: true },
         message: {
           type: 'string',
-          example: 'Import employés : 2 créé(s), 0 ligne(s) en erreur',
+          example: 'Import employÃ©s : 2 crÃ©Ã©(s), 0 ligne(s) en erreur',
         },
         data: {
           type: 'object',
@@ -109,17 +109,17 @@ export class EmployeesController {
             failedCount: { type: 'integer', example: 0 },
             created: {
               type: 'array',
-              description: 'Employés créés (même forme que GET employé)',
+              description: 'EmployÃ©s crÃ©Ã©s (mÃªme forme que GET employÃ©)',
               items: { type: 'object' },
             },
             errors: {
               type: 'array',
-              description: 'Erreurs par ligne (numéro de ligne = feuille Excel)',
+              description: 'Erreurs par ligne (numÃ©ro de ligne = feuille Excel)',
               items: {
                 type: 'object',
                 properties: {
                   row: { type: 'integer', example: 5 },
-                  message: { type: 'string', example: 'Type de contrat inconnu : « XYZ »' },
+                  message: { type: 'string', example: 'Type de contrat inconnu : Â« XYZ Â»' },
                 },
               },
             },
@@ -131,7 +131,7 @@ export class EmployeesController {
   @ApiResponse({
     status: 400,
     description:
-      'Fichier absent ou invalide, `clientId` invalide, client hors société JWT, utilisateur sans `companyId`, ou en-têtes Excel incomplets / classeur illisible.',
+      'Fichier absent ou invalide, `clientId` invalide, client hors sociÃ©tÃ© JWT, utilisateur sans `companyId`, ou en-tÃªtes Excel incomplets / classeur illisible.',
   })
   @ApiResponse({ status: 401, description: 'JWT manquant ou invalide' })
   async importExcel(
@@ -163,7 +163,7 @@ export class EmployeesController {
     );
     return {
       success: true,
-      message: `Import employés : ${data.createdCount} créé(s), ${data.failedCount} ligne(s) en erreur`,
+      message: `Import employÃ©s : ${data.createdCount} crÃ©Ã©(s), ${data.failedCount} ligne(s) en erreur`,
       data,
     };
   }
@@ -231,11 +231,11 @@ export class EmployeesController {
   @ApiOperation({
     summary: 'Update employee',
     description:
-      "Met à jour uniquement les champs de l'employé (`employees`). Les données contractuelles sont gérées via `/employee-contracts`.",
+      "Met Ã  jour uniquement les champs de l'employÃ© (`employees`). Les donnÃ©es contractuelles sont gÃ©rÃ©es via `/employee-contracts`.",
   })
   @ApiParam({ name: 'id', type: String })
   @ApiBody({
-    description: "Champs modifiables côté employé uniquement (pas de contrat).",
+    description: "Champs modifiables cÃ´tÃ© employÃ© uniquement (pas de contrat).",
     schema: {
       type: 'object',
       properties: {

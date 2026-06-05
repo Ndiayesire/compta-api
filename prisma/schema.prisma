@@ -324,10 +324,11 @@ model Client {
   region    Region    @relation(fields: [regionId], references: [id])
   legalForm LegalForm @relation(fields: [legalFormId], references: [id])
 
-  employees Employee[]
-  tiers     Tier[]
-  balances  Balance[]
-  rentals   Rental[]
+  employees    Employee[]
+  tiers        Tier[]
+  balances     Balance[]
+  rentals      Rental[]
+  opTurnovers  OpTurnover[]
 
   @@index([companyId])
   @@index([userId])
@@ -555,6 +556,117 @@ model TiersTransaction {
   @@index([tierId])
   @@index([transactionId])
   @@map("tiers_transactions")
+}
+
+//////////////////////////////////////////////////////
+// OPÉRATIONS FISCALES (update_4)
+//////////////////////////////////////////////////////
+
+model DeductionType {
+  id        String    @id @default(uuid()) @map("deduction_type_id")
+  code      String    @map("deduction_type_code") @db.VarChar(255)
+  name      String    @map("deduction_type_name") @db.VarChar(255)
+  isActive  Boolean   @default(true) @map("deduction_type_is_active")
+  createdAt DateTime  @default(now()) @map("deduction_type_created_at")
+  updatedAt DateTime  @updatedAt @map("deduction_type_updated_at")
+  deletedAt DateTime? @map("deduction_type_deleted_at")
+
+  localPurchases OpLocalPurchase[]
+
+  @@map("deduction_types")
+}
+
+model PropertyNatureType {
+  id        String    @id @default(uuid()) @map("property_nature_type_id")
+  code      String    @map("property_nature_type_code") @db.VarChar(255)
+  name      String    @map("property_nature_type_name") @db.VarChar(255)
+  isActive  Boolean   @default(true) @map("property_nature_type_is_active")
+  createdAt DateTime  @default(now()) @map("property_nature_type_created_at")
+  updatedAt DateTime  @updatedAt @map("property_nature_type_updated_at")
+  deletedAt DateTime? @map("property_nature_type_deleted_at")
+
+  localPurchases OpLocalPurchase[]
+
+  @@map("property_nature_types")
+}
+
+model Provider {
+  id        String    @id @default(uuid()) @map("provider_id")
+  ninea     String    @map("provider_ninea") @db.VarChar(255)
+  cofi      String    @map("provider_cofi") @db.VarChar(255)
+  name      String    @map("provider_name") @db.VarChar(255)
+  address   String    @map("provider_address") @db.VarChar(255)
+  createdAt DateTime  @default(now()) @map("provider_created_at")
+  updatedAt DateTime  @updatedAt @map("provider_updated_at")
+  deletedAt DateTime? @map("provider_deleted_at")
+
+  localPurchases OpLocalPurchase[]
+
+  @@map("providers")
+}
+
+model OpTurnover {
+  id        String    @id @default(uuid()) @map("op_turnover_id")
+  clientId  String    @map("client_id")
+  number    String    @map("op_turnover_number") @db.VarChar(255)
+  date      DateTime  @map("op_turnover_date") @db.Date
+  net       Decimal   @map("op_turnover_net") @db.Decimal(12, 2)
+  tax       Decimal   @map("op_turnover_tax") @db.Decimal(12, 2)
+  total     Decimal   @map("op_turnover_total") @db.Decimal(12, 2)
+  createdAt DateTime  @default(now()) @map("op_turnover_created_at")
+  updatedAt DateTime  @updatedAt @map("op_turnover_updated_at")
+  deletedAt DateTime? @map("op_turnover_deleted_at")
+
+  client Client            @relation(fields: [clientId], references: [id])
+  stamps OpTurnoverStamp[]
+
+  @@index([clientId])
+  @@map("op_turnovers")
+}
+
+model OpTurnoverStamp {
+  id              String    @id @default(uuid()) @map("op_turnover_stamp_id")
+  opTurnoverId    String    @map("op_turnover_id")
+  date            DateTime  @map("op_turnover_stamp_date") @db.Date
+  net             Decimal   @map("op_turnover_stamp_net") @db.Decimal(12, 2)
+  tax             Decimal   @map("op_turnover_stamp_tax") @db.Decimal(12, 2)
+  total           Decimal   @map("op_turnover_stamp_total") @db.Decimal(12, 2)
+  amount          Json      @map("op_turnover_stamp_amount")
+  amountDeduction Json      @map("op_turnover_stamp_amount_deduction")
+  createdAt       DateTime  @default(now()) @map("op_turnover_stamp_created_at")
+  updatedAt       DateTime  @updatedAt @map("op_turnover_stamp_updated_at")
+  deletedAt       DateTime? @map("op_turnover_stamp_deleted_at")
+
+  opTurnover OpTurnover @relation(fields: [opTurnoverId], references: [id])
+
+  @@index([opTurnoverId])
+  @@map("op_turnover_stamps")
+}
+
+model OpLocalPurchase {
+  id                   String    @id @default(uuid()) @map("op_local_purchase_id")
+  providerId           String    @map("provider_id")
+  deductionTypeId      String    @map("deduction_type_id")
+  propertyNatureTypeId String    @map("property_nature_type_id")
+  month                DateTime  @map("op_local_purchase_month") @db.Date
+  year                 DateTime  @map("op_local_purchase_year") @db.Date
+  net                  Decimal   @map("op_local_purchase_net") @db.Decimal(12, 2)
+  tax                  Decimal   @map("op_local_purchase_tax") @db.Decimal(12, 2)
+  taxDeduction         Decimal   @map("op_local_purchase_tax_deduction") @db.Decimal(12, 2)
+  total                Decimal   @map("op_local_purchase_total") @db.Decimal(12, 2)
+  prorata              Json      @map("op_local_purchase_prorata")
+  createdAt            DateTime  @default(now()) @map("op_local_purchase_created_at")
+  updatedAt            DateTime  @updatedAt @map("op_local_purchase_updated_at")
+  deletedAt            DateTime? @map("op_local_purchase_deleted_at")
+
+  provider           Provider           @relation(fields: [providerId], references: [id])
+  deductionType      DeductionType      @relation(fields: [deductionTypeId], references: [id])
+  propertyNatureType PropertyNatureType @relation(fields: [propertyNatureTypeId], references: [id])
+
+  @@index([providerId])
+  @@index([deductionTypeId])
+  @@index([propertyNatureTypeId])
+  @@map("op_local_purchases")
 }
 
 //////////////////////////////////////////////////////

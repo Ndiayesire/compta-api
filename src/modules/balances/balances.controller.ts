@@ -1,4 +1,4 @@
-import { BadRequestException, Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, UsePipes, ValidationPipe, Query, UseInterceptors, UploadedFile, ParseUUIDPipe } from '@nestjs/common';
+﻿import { BadRequestException, Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, UsePipes, ValidationPipe, Query, UseInterceptors, UploadedFile, ParseUUIDPipe } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiOperation, ApiParam, ApiBearerAuth, ApiQuery, ApiBody, ApiResponse, ApiConsumes } from '@nestjs/swagger';
 import { BalancesService } from './balances.service';
@@ -27,9 +27,9 @@ export class BalancesController {
   @HttpCode(HttpStatus.CREATED)
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   @ApiOperation({
-    summary: 'Créer une balance',
+    summary: 'CrÃ©er une balance',
     description:
-      'Lie `accounting_year_id` + `client_id` (client de la société JWT). Les dates `startDate` / `endDate` doivent être **strictement** dans l’exercice et `startDate < endDate`.',
+      'Lie `accounting_year_id` + `client_id` (client de la sociÃ©tÃ© JWT). Les dates `startDate` / `endDate` doivent Ãªtre **strictement** dans lâ€™exercice et `startDate < endDate`.',
   })
   @ApiBody({ type: CreateBalanceDto })
   @ApiResponse({
@@ -38,7 +38,7 @@ export class BalancesController {
   })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
-    description: 'Client hors société, exercice inconnu, dates invalides, ou sans société',
+    description: 'Client hors sociÃ©tÃ©, exercice inconnu, dates invalides, ou sans sociÃ©tÃ©',
   })
   async create(@Body() dto: CreateBalanceDto, @CurrentUser() user: AuthUser) {
     const companyId = user.companyId;
@@ -65,19 +65,19 @@ export class BalancesController {
   @ApiOperation({
     summary: 'Importer des lignes de balance depuis Excel (.xlsx)',
     description: [
-      '**Multipart** : champ **`file`** (`.xlsx`, max 5 Mo). **`balanceId`** dans l’URL — **aucune colonne balance_id** dans le fichier.',
+      '**Multipart** : champ **`file`** (`.xlsx`, max 5 Mo). **`balanceId`** dans lâ€™URL â€” **aucune colonne balance_id** dans le fichier.',
       '',
-      '**Feuille** : 1ʳᵉ feuille, **ligne 1 = 8 en-têtes** (noms reconnus par synonymes, **ordre des colonnes libre**). Données à partir de la ligne 2 ; lignes vides ignorées ; max **500** lignes utiles.',
+      '**Feuille** : 1Ê³áµ‰ feuille, **ligne 1 = 8 en-tÃªtes** (noms reconnus par synonymes, **ordre des colonnes libre**). DonnÃ©es Ã  partir de la ligne 2 ; lignes vides ignorÃ©es ; max **500** lignes utiles.',
       '',
-      '**Les 8 colonnes** (ex. balance auxiliaire) : `Numéro de compte`, `Libellé`, `Débit N-1`, `Crédit N-1`, `Mouvement débit`, `Mouvement crédit`, `Débit N`, `Crédit N` — abréviations encore acceptées (`cpte`, `MVT DEB`, …) ; ordre libre.',
-      'Les paires **Débit N-1 / Crédit N-1** et **Débit N / Crédit N** déterminent le solde net et le sens (débiteur si débit > crédit). Montants vides = 0.',
+      '**Les 8 colonnes** (ex. balance auxiliaire) : `NumÃ©ro de compte`, `LibellÃ©`, `DÃ©bit N-1`, `CrÃ©dit N-1`, `Mouvement dÃ©bit`, `Mouvement crÃ©dit`, `DÃ©bit N`, `CrÃ©dit N` â€” abrÃ©viations encore acceptÃ©es (`cpte`, `MVT DEB`, â€¦) ; ordre libre.',
+      'Les paires **DÃ©bit N-1 / CrÃ©dit N-1** et **DÃ©bit N / CrÃ©dit N** dÃ©terminent le solde net et le sens (dÃ©biteur si dÃ©bit > crÃ©dit). Montants vides = 0.',
       '',
-      '**Remarque** : l’identifiant de balance est **uniquement** dans l’URL (jamais dans le fichier). Dans les cellules montant, les **espaces** (séparateurs de milliers) et la **virgule** décimale sont acceptés. Le fichier modèle d’exemple comporte des **infobulles** (notes Excel) sur chaque en-tête : survolez la cellule pour lire l’aide. Modèle : `src/assets/xlsx/balance-lines-import-example.xlsx` (régénérer avec `npm run generate:balance-lines-import-example`).',
+      '**Remarque** : lâ€™identifiant de balance est **uniquement** dans lâ€™URL (jamais dans le fichier). Dans les cellules montant, les **espaces** (sÃ©parateurs de milliers) et la **virgule** dÃ©cimale sont acceptÃ©s. Le fichier modÃ¨le dâ€™exemple comporte des **infobulles** (notes Excel) sur chaque en-tÃªte : survolez la cellule pour lire lâ€™aide. ModÃ¨le : `src/assets/xlsx/balance-lines-import-example.xlsx` (rÃ©gÃ©nÃ©rer avec `npm run generate:balance-lines-import-example`).',
     ].join('\n'),
   })
   @ApiParam({
     name: 'balanceId',
-    description: 'UUID de la balance (client de votre société)',
+    description: 'UUID de la balance (client de votre sociÃ©tÃ©)',
     schema: { type: 'string', format: 'uuid' },
   })
   @ApiBody({
@@ -95,12 +95,12 @@ export class BalancesController {
   })
   @ApiResponse({
     status: HttpStatus.CREATED,
-    description: 'Import : compteurs + lignes créées + erreurs par n° de ligne Excel',
+    description: 'Import : compteurs + lignes crÃ©Ã©es + erreurs par nÂ° de ligne Excel',
     schema: API_ENVELOPE_SCHEMA,
   })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
-    description: 'Fichier manquant / invalide, en-têtes incomplets, balance hors société',
+    description: 'Fichier manquant / invalide, en-tÃªtes incomplets, balance hors sociÃ©tÃ©',
   })
   async importBalanceLines(
     @Param('balanceId', ParseUUIDPipe) balanceId: string,
@@ -133,15 +133,15 @@ export class BalancesController {
     );
     return {
       success: true,
-      message: `Import lignes de balance : ${data.createdCount} créée(s), ${data.failedCount} ligne(s) en erreur`,
+      message: `Import lignes de balance : ${data.createdCount} crÃ©Ã©e(s), ${data.failedCount} ligne(s) en erreur`,
       data,
     };
   }
 
   @Get()
   @ApiOperation({
-    summary: 'Lister les balances de la société',
-    description: 'Filtre optionnel par `clientId` (UUID client de votre société).',
+    summary: 'Lister les balances de la sociÃ©tÃ©',
+    description: 'Filtre optionnel par `clientId` (UUID client de votre sociÃ©tÃ©).',
   })
   @ApiQuery({
     name: 'clientId',
@@ -152,7 +152,7 @@ export class BalancesController {
   @ApiResponse({ status: HttpStatus.OK, schema: API_ENVELOPE_SCHEMA })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
-    description: 'Utilisateur sans société',
+    description: 'Utilisateur sans sociÃ©tÃ©',
   })
   async findAll(
     @CurrentUser() user: AuthUser,
@@ -174,10 +174,10 @@ export class BalancesController {
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Détail d’une balance' })
+  @ApiOperation({ summary: 'DÃ©tail dâ€™une balance' })
   @ApiParam({ name: 'id', description: 'UUID `balance_id`', type: String })
   @ApiResponse({ status: HttpStatus.OK, schema: API_ENVELOPE_SCHEMA })
-  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Inconnue ou hors société' })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Inconnue ou hors sociÃ©tÃ©' })
   async findOne(@Param('id') id: string, @CurrentUser() user: AuthUser) {
     const companyId = user.companyId;
     if (!companyId) {
@@ -194,9 +194,9 @@ export class BalancesController {
   @Patch(':id')
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   @ApiOperation({
-    summary: 'Mettre à jour une balance',
+    summary: 'Mettre Ã  jour une balance',
     description:
-      'Champs partiels : dates, `isActive`. L’exercice et le client ne changent pas. Les dates restent dans l’exercice d’origine.',
+      'Champs partiels : dates, `isActive`. Lâ€™exercice et le client ne changent pas. Les dates restent dans lâ€™exercice dâ€™origine.',
   })
   @ApiParam({ name: 'id', type: String })
   @ApiBody({ type: UpdateBalanceDto })

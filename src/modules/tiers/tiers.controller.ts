@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, Controller, Get, Post, Body, Param, Patch, Delete, HttpCode, HttpStatus, UsePipes, ValidationPipe, Res, Query } from '@nestjs/common';
+﻿import { BadRequestException, ConflictException, Controller, Get, Post, Body, Param, Patch, Delete, HttpCode, HttpStatus, UsePipes, ValidationPipe, Res, Query } from '@nestjs/common';
 import type { Response } from 'express';
 import { TiersService } from './tiers.service';
 import { CreateTierDto } from './dto/create-tier.dto';
@@ -77,14 +77,14 @@ export class TiersController {
   @Get(':clientId/xlsx/annual')
   @ApiTags('Etats', 'tiers')
   @ApiOperation({
-    summary: 'État annuel des sommes versées (Excel DGID)',
+    summary: 'Ã‰tat annuel des sommes versÃ©es (Excel DGID)',
     description:
-      'Télécharge un classeur **.xlsx** (corps binaire). Agrège les sommes sur **tout l’exercice**. '
+      'TÃ©lÃ©charge un classeur **.xlsx** (corps binaire). AgrÃ¨ge les sommes sur **tout lâ€™exercice**. '
   })
   @ApiParam({
     name: 'clientId',
     type: String,
-    description: 'UUID du client (appartenant à votre société)',
+    description: 'UUID du client (appartenant Ã  votre sociÃ©tÃ©)',
     example: 'a0000021-0000-4000-8000-000000000001',
   })
   @ApiProduces(
@@ -94,7 +94,7 @@ export class TiersController {
     name: 'accountingYearId',
     required: true,
     description:
-      "Identifiant de l'exercice comptable (agrégation sur toute la période)",
+      "Identifiant de l'exercice comptable (agrÃ©gation sur toute la pÃ©riode)",
     type: String,
     example: 'a000002b-0000-4000-8000-000000000001',
   })
@@ -108,7 +108,7 @@ export class TiersController {
   })
   @ApiBadRequestResponse({
     description:
-      '`accountingYearId` manquant, utilisateur sans société, ou client / exercice invalide',
+      '`accountingYearId` manquant, utilisateur sans sociÃ©tÃ©, ou client / exercice invalide',
   })
   async exportAnnualExcel(
     @Param('clientId') clientId: string,
@@ -140,7 +140,7 @@ export class TiersController {
   @Post(':clientId/xlsx/annual/jobs')
   @ApiTags('Etats', 'tiers')
   @ApiOperation({
-    summary: 'Créer un job asynchrone pour export annuel Excel',
+    summary: 'CrÃ©er un job asynchrone pour export annuel Excel',
   })
   @ApiQuery({
     name: 'accountingYearId',
@@ -149,7 +149,7 @@ export class TiersController {
   })
   @ApiResponse({
     status: 201,
-    description: 'Job annuel créé',
+    description: 'Job annuel crÃ©Ã©',
     schema: {
       type: 'object',
       properties: {
@@ -193,14 +193,14 @@ export class TiersController {
   @Get(':clientId/xlsx')
   @ApiTags('Etats', 'tiers')
   @ApiOperation({
-    summary: 'État trimestriel des sommes versées (Excel DGID)',
+    summary: 'Ã‰tat trimestriel des sommes versÃ©es (Excel DGID)',
     description:
-      'Télécharge un classeur **.xlsx** (corps binaire). Filtre sur **exercice + trimestre**. '
+      'TÃ©lÃ©charge un classeur **.xlsx** (corps binaire). Filtre sur **exercice + trimestre**. '
   })
   @ApiParam({
     name: 'clientId',
     type: String,
-    description: 'UUID du client (appartenant à votre société)',
+    description: 'UUID du client (appartenant Ã  votre sociÃ©tÃ©)',
     example: 'a0000021-0000-4000-8000-000000000001',
   })
   @ApiProduces(
@@ -230,7 +230,7 @@ export class TiersController {
   })
   @ApiBadRequestResponse({
     description:
-      '`accountingYearId` / `accountingQuarterId` manquants, utilisateur sans société, ou données invalides',
+      '`accountingYearId` / `accountingQuarterId` manquants, utilisateur sans sociÃ©tÃ©, ou donnÃ©es invalides',
   })
   async exportExcel(
     @Param('clientId') clientId: string,
@@ -266,7 +266,7 @@ export class TiersController {
   @Post(':clientId/xlsx/jobs')
   @ApiTags('Etats', 'tiers')
   @ApiOperation({
-    summary: 'Créer un job asynchrone pour export trimestriel Excel',
+    summary: 'CrÃ©er un job asynchrone pour export trimestriel Excel',
   })
   @ApiQuery({
     name: 'accountingYearId',
@@ -280,7 +280,7 @@ export class TiersController {
   })
   @ApiResponse({
     status: 201,
-    description: 'Job trimestriel créé',
+    description: 'Job trimestriel crÃ©Ã©',
     schema: {
       type: 'object',
       properties: {
@@ -329,7 +329,7 @@ export class TiersController {
   @ApiOperation({ summary: "Consulter l'etat d'un job d'export" })
   @ApiResponse({
     status: 200,
-    description: "État courant d'un job d'export",
+    description: "Ã‰tat courant d'un job d'export",
   })
   async getExportJob(@Param('jobId') jobId: string) {
     const data = this.tiersExportJobsService.getJob(jobId);
@@ -341,7 +341,7 @@ export class TiersController {
   }
 
   @Get('jobs/:jobId/download')
-  @ApiOperation({ summary: "Télécharger le fichier d'un job terminé" })
+  @ApiOperation({ summary: "TÃ©lÃ©charger le fichier d'un job terminÃ©" })
   @ApiProduces(
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   )
@@ -355,7 +355,7 @@ export class TiersController {
   })
   @ApiResponse({
     status: 409,
-    description: 'Job en cours ou en échec',
+    description: 'Job en cours ou en Ã©chec',
   })
   async downloadExportJob(
     @Param('jobId') jobId: string,
