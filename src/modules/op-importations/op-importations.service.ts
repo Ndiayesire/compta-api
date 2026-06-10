@@ -1,17 +1,18 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../prisma/prisma.service';
-import { CreateOpLocalPurchaseDto } from './dto/create-op-local-purchase.dto';
-import { UpdateOpLocalPurchaseDto } from './dto/update-op-local-purchase.dto';
+import { CreateOpImportationDto } from './dto/create-op-importation.dto';
+import { UpdateOpImportationDto } from './dto/update-op-importation.dto';
 
-const purchaseInclude = {
+const importationInclude = {
   tier: true,
+  country: true,
   deductionType: true,
   propertyNatureType: true,
-} satisfies Prisma.OpLocalPurchaseInclude;
+} satisfies Prisma.OpImportationInclude;
 
 @Injectable()
-export class OpLocalPurchasesService {
+export class OpImportationsService {
   constructor(private readonly prisma: PrismaService) {}
 
   private async assertTier(id: string) {
@@ -20,6 +21,16 @@ export class OpLocalPurchasesService {
     });
     if (!row) {
       throw new BadRequestException('Invalid tier');
+    }
+    return row;
+  }
+
+  private async assertCountry(id: string) {
+    const row = await this.prisma.country.findFirst({
+      where: { id, isActive: true },
+    });
+    if (!row) {
+      throw new BadRequestException('Invalid country');
     }
     return row;
   }
@@ -44,79 +55,89 @@ export class OpLocalPurchasesService {
     return row;
   }
 
-  async create(dto: CreateOpLocalPurchaseDto) {
+  async create(dto: CreateOpImportationDto) {
     await this.assertTier(dto.tierId);
+    await this.assertCountry(dto.countryId);
     await this.assertDeductionType(dto.deductionTypeId);
     await this.assertPropertyNatureType(dto.propertyNatureTypeId);
-    return this.prisma.opLocalPurchase.create({
+    return this.prisma.opImportation.create({
       data: {
         tierId: dto.tierId,
+        countryId: dto.countryId,
         deductionTypeId: dto.deductionTypeId,
         propertyNatureTypeId: dto.propertyNatureTypeId,
-        month: new Date(dto.month),
-        year: new Date(dto.year),
-        net: new Prisma.Decimal(String(dto.net)),
-        tax: new Prisma.Decimal(String(dto.tax)),
-        taxDeduction: new Prisma.Decimal(String(dto.taxDeduction)),
-        total: new Prisma.Decimal(String(dto.total)),
-        prorata: dto.prorata as Prisma.InputJsonValue,
-      },
-      include: purchaseInclude,
-    });
-  }
-
-  async findAll(tierId?: string) {
-    return this.prisma.opLocalPurchase.findMany({
-      where: {
-        deletedAt: null,
-        ...(tierId ? { tierId } : {}),
-      },
-      include: purchaseInclude,
-      orderBy: { createdAt: 'desc' },
-    });
-  }
-
-  async findOne(id: string) {
-    const row = await this.prisma.opLocalPurchase.findFirst({
-      where: { id, deletedAt: null },
-      include: purchaseInclude,
-    });
-    if (!row) {
-      throw new NotFoundException('Op local purchase not found');
-    }
-    return row;
-  }
-
-  async update(id: string, dto: UpdateOpLocalPurchaseDto) {
-    await this.findOne(id);
-    if (dto.tierId) await this.assertTier(dto.tierId);
-    if (dto.deductionTypeId) await this.assertDeductionType(dto.deductionTypeId);
-    if (dto.propertyNatureTypeId) await this.assertPropertyNatureType(dto.propertyNatureTypeId);
-    return this.prisma.opLocalPurchase.update({
-      where: { id },
-      data: {
-        ...(dto.tierId !== undefined ? { tierId: dto.tierId } : {}),
-        ...(dto.deductionTypeId !== undefined ? { deductionTypeId: dto.deductionTypeId } : {}),
-        ...(dto.propertyNatureTypeId !== undefined
-          ? { propertyNatureTypeId: dto.propertyNatureTypeId }
-          : {}),
-        ...(dto.month !== undefined ? { month: new Date(dto.month) } : {}),
-        ...(dto.year !== undefined ? { year: new Date(dto.year) } : {}),
+        code: dto.code,
+        month: dto.month,
+        year: dto.year,
+        date: new Date(dto.date),
         ...(dto.net !== undefined ? { net: new Prisma.Decimal(String(dto.net)) } : {}),
         ...(dto.tax !== undefined ? { tax: new Prisma.Decimal(String(dto.tax)) } : {}),
         ...(dto.taxDeduction !== undefined
           ? { taxDeduction: new Prisma.Decimal(String(dto.taxDeduction)) }
           : {}),
         ...(dto.total !== undefined ? { total: new Prisma.Decimal(String(dto.total)) } : {}),
-        ...(dto.prorata !== undefined ? { prorata: dto.prorata as Prisma.InputJsonValue } : {}),
+        ...(dto.prorata !== undefined ? { prorata: new Prisma.Decimal(String(dto.prorata)) } : {}),
       },
-      include: purchaseInclude,
+      include: importationInclude,
+    });
+  }
+
+  async findAll(tierId?: string) {
+    return this.prisma.opImportation.findMany({
+      where: {
+        deletedAt: null,
+        ...(tierId ? { tierId } : {}),
+      },
+      include: importationInclude,
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async findOne(id: string) {
+    const row = await this.prisma.opImportation.findFirst({
+      where: { id, deletedAt: null },
+      include: importationInclude,
+    });
+    if (!row) {
+      throw new NotFoundException('Op importation not found');
+    }
+    return row;
+  }
+
+  async update(id: string, dto: UpdateOpImportationDto) {
+    await this.findOne(id);
+    if (dto.tierId) await this.assertTier(dto.tierId);
+    if (dto.countryId) await this.assertCountry(dto.countryId);
+    if (dto.deductionTypeId) await this.assertDeductionType(dto.deductionTypeId);
+    if (dto.propertyNatureTypeId) await this.assertPropertyNatureType(dto.propertyNatureTypeId);
+    return this.prisma.opImportation.update({
+      where: { id },
+      data: {
+        ...(dto.tierId !== undefined ? { tierId: dto.tierId } : {}),
+        ...(dto.countryId !== undefined ? { countryId: dto.countryId } : {}),
+        ...(dto.deductionTypeId !== undefined ? { deductionTypeId: dto.deductionTypeId } : {}),
+        ...(dto.propertyNatureTypeId !== undefined
+          ? { propertyNatureTypeId: dto.propertyNatureTypeId }
+          : {}),
+        ...(dto.code !== undefined ? { code: dto.code } : {}),
+        ...(dto.month !== undefined ? { month: dto.month } : {}),
+        ...(dto.year !== undefined ? { year: dto.year } : {}),
+        ...(dto.date !== undefined ? { date: new Date(dto.date) } : {}),
+        ...(dto.net !== undefined ? { net: new Prisma.Decimal(String(dto.net)) } : {}),
+        ...(dto.tax !== undefined ? { tax: new Prisma.Decimal(String(dto.tax)) } : {}),
+        ...(dto.taxDeduction !== undefined
+          ? { taxDeduction: new Prisma.Decimal(String(dto.taxDeduction)) }
+          : {}),
+        ...(dto.total !== undefined ? { total: new Prisma.Decimal(String(dto.total)) } : {}),
+        ...(dto.prorata !== undefined ? { prorata: new Prisma.Decimal(String(dto.prorata)) } : {}),
+      },
+      include: importationInclude,
     });
   }
 
   async remove(id: string) {
     await this.findOne(id);
-    return this.prisma.opLocalPurchase.update({
+    return this.prisma.opImportation.update({
       where: { id },
       data: { deletedAt: new Date() },
     });

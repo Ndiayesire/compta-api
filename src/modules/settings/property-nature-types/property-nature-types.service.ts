@@ -72,11 +72,14 @@ export class PropertyNatureTypesService {
 
   async remove(id: string) {
     await this.findOne(id);
-    const used = await this.prisma.opLocalPurchase.count({
+    const usedLocal = await this.prisma.opLocalPurchase.count({
       where: { propertyNatureTypeId: id, deletedAt: null },
     });
-    if (used > 0) {
-      throw new BadRequestException('Cannot delete property nature type while local purchases reference it');
+    const usedImport = await this.prisma.opImportation.count({
+      where: { propertyNatureTypeId: id, deletedAt: null },
+    });
+    if (usedLocal > 0 || usedImport > 0) {
+      throw new BadRequestException('Cannot delete property nature type while purchases or importations reference it');
     }
     return this.prisma.propertyNatureType.update({
       where: { id },

@@ -2,7 +2,7 @@
 /**
  * Seeds all Prisma models (reference data + one demo chain: company → client → employee → contract → tier).
  * Inclut exercices/trimestres comptables (`accounting_years`, `accounting_quarters`), `meta`, ligne `tiers_transactions` démo,
- * opérations fiscales (`deduction_types`, `property_nature_types`, `providers`, `op_turnovers`, `op_turnover_stamps`, `op_local_purchases`).
+ * opérations fiscales (`deduction_types`, `property_nature_types`, `op_turnovers`, `op_turnover_stamps`, `op_local_purchases`, suspensions/importations/exportations/retenues/redevances/exonérations).
  * Référence inclut notamment les types de pièce d'identité (`settings_identification_type`).
  * Idempotent: fixed UUIDs + upsert.
  *
@@ -93,11 +93,15 @@ const I = {
   deductionTypeStd: 'a0000039-0000-4000-8000-000000000001',
   propertyNatureMerch: 'a000003a-0000-4000-8000-000000000001',
   propertyNatureOther: 'a000003b-0000-4000-8000-000000000001',
-  providerDemo: 'a000003c-0000-4000-8000-000000000001',
-  providerDemo2: 'a000003d-0000-4000-8000-000000000001',
   opTurnoverDemo: 'a000003e-0000-4000-8000-000000000001',
   opTurnoverStampDemo: 'a000003f-0000-4000-8000-000000000001',
   opLocalPurchaseDemo: 'a0000040-0000-4000-8000-000000000001',
+  opSuspensionDemo: 'a0000041-0000-4000-8000-000000000001',
+  opImportationDemo: 'a0000042-0000-4000-8000-000000000001',
+  opExportationDemo: 'a0000043-0000-4000-8000-000000000001',
+  opRetainDemo: 'a0000044-0000-4000-8000-000000000001',
+  opRoyaltyDemo: 'a0000045-0000-4000-8000-000000000001',
+  opExemptionDemo: 'a0000046-0000-4000-8000-000000000001',
 };
 
 const DEFAULT_ADMIN_PASSWORD = process.env.SEED_ADMIN_PASSWORD || 'Admin123!dev';
@@ -909,42 +913,6 @@ async function seedDemoChain(seedUserId) {
     },
   });
 
-  await prisma.provider.upsert({
-    where: { id: I.providerDemo },
-    create: {
-      id: I.providerDemo,
-      ninea: 'SN555666777',
-      cofi: 'COFI-DEMO-001',
-      name: 'Fournisseur démo Dakar',
-      address: 'Zone industriale, Dakar',
-    },
-    update: {
-      ninea: 'SN555666777',
-      cofi: 'COFI-DEMO-001',
-      name: 'Fournisseur démo Dakar',
-      address: 'Zone industriale, Dakar',
-      deletedAt: null,
-    },
-  });
-
-  await prisma.provider.upsert({
-    where: { id: I.providerDemo2 },
-    create: {
-      id: I.providerDemo2,
-      ninea: 'SN666777888',
-      cofi: 'COFI-DEMO-002',
-      name: 'Fournisseur démo Thiès',
-      address: 'Thiès',
-    },
-    update: {
-      ninea: 'SN666777888',
-      cofi: 'COFI-DEMO-002',
-      name: 'Fournisseur démo Thiès',
-      address: 'Thiès',
-      deletedAt: null,
-    },
-  });
-
   await prisma.opTurnover.upsert({
     where: { id: I.opTurnoverDemo },
     create: {
@@ -995,7 +963,7 @@ async function seedDemoChain(seedUserId) {
     where: { id: I.opLocalPurchaseDemo },
     create: {
       id: I.opLocalPurchaseDemo,
-      providerId: I.providerDemo,
+      tierId: I.tierDemo2,
       deductionTypeId: I.deductionTypeStd,
       propertyNatureTypeId: I.propertyNatureMerch,
       month: new Date('2025-01-01T00:00:00.000Z'),
@@ -1007,7 +975,7 @@ async function seedDemoChain(seedUserId) {
       prorata: { rate: 1, note: 'seed demo' },
     },
     update: {
-      providerId: I.providerDemo,
+      tierId: I.tierDemo2,
       deductionTypeId: I.deductionTypeStd,
       propertyNatureTypeId: I.propertyNatureMerch,
       month: new Date('2025-01-01T00:00:00.000Z'),
@@ -1019,6 +987,110 @@ async function seedDemoChain(seedUserId) {
       prorata: { rate: 1, note: 'seed demo' },
       deletedAt: null,
     },
+  });
+
+  await prisma.opSuspension.upsert({
+    where: { id: I.opSuspensionDemo },
+    create: {
+      id: I.opSuspensionDemo,
+      tierId: I.tierDemo2,
+      code: 'SUSP-SEED-2025-01',
+      date: new Date('2025-01-15T00:00:00.000Z'),
+      month: 1,
+      year: 2025,
+      net: 100000,
+      tax: 18000,
+      total: 118000,
+      visaDate: new Date('2025-01-20T00:00:00.000Z'),
+      visaNumber: 'VISA-SEED-001',
+    },
+    update: { deletedAt: null },
+  });
+
+  await prisma.opImportation.upsert({
+    where: { id: I.opImportationDemo },
+    create: {
+      id: I.opImportationDemo,
+      tierId: I.tierDemo2,
+      countryId: I.countrySn,
+      deductionTypeId: I.deductionTypeStd,
+      propertyNatureTypeId: I.propertyNatureMerch,
+      code: 'IMP-SEED-2025-01',
+      month: 1,
+      year: 2025,
+      date: new Date('2025-01-10T00:00:00.000Z'),
+      net: 200000,
+      tax: 36000,
+      taxDeduction: 20000,
+      total: 236000,
+      prorata: 1,
+    },
+    update: { deletedAt: null },
+  });
+
+  await prisma.opExportation.upsert({
+    where: { id: I.opExportationDemo },
+    create: {
+      id: I.opExportationDemo,
+      tierId: I.tierDemo,
+      countryId: I.countrySn,
+      code: 'EXP-SEED-2025-01',
+      month: 1,
+      year: 2025,
+      date: new Date('2025-01-12T00:00:00.000Z'),
+      net: 150000,
+      tax: 27000,
+      taxDeduction: 15000,
+      total: 177000,
+      prorata: 1,
+    },
+    update: { deletedAt: null },
+  });
+
+  await prisma.opRetain.upsert({
+    where: { id: I.opRetainDemo },
+    create: {
+      id: I.opRetainDemo,
+      tierId: I.tierDemo2,
+      code: 'RET-SEED-2025-01',
+      date: new Date('2025-01-25T00:00:00.000Z'),
+      month: 1,
+      year: 2025,
+      base: 50000,
+      rate: 5,
+      amount: 2500,
+    },
+    update: { deletedAt: null },
+  });
+
+  await prisma.opRoyalty.upsert({
+    where: { id: I.opRoyaltyDemo },
+    create: {
+      id: I.opRoyaltyDemo,
+      tierId: I.tierDemo2,
+      code: 'ROY-SEED-2025-01',
+      date: new Date('2025-01-28T00:00:00.000Z'),
+      month: 1,
+      year: 2025,
+      base: 80000,
+      rate: 10,
+      amount: 8000,
+    },
+    update: { deletedAt: null },
+  });
+
+  await prisma.opExemption.upsert({
+    where: { id: I.opExemptionDemo },
+    create: {
+      id: I.opExemptionDemo,
+      tierId: I.tierDemo,
+      code: 'EXO-SEED-2025-01',
+      month: 1,
+      year: 2025,
+      amount: 25000,
+      desc: 'Exonération démo seed',
+    },
+    update: { deletedAt: null },
   });
 }
 

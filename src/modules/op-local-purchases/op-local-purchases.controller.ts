@@ -24,10 +24,10 @@ export class OpLocalPurchasesController {
 
   @Get()
   @ApiOperation({ summary: 'Lister les achats locaux' })
-  @ApiQuery({ name: 'providerId', required: false, type: String })
+  @ApiQuery({ name: 'tierId', required: false, type: String })
   @ApiResponse({ status: HttpStatus.OK, schema: API_ENVELOPE_SCHEMA })
-  async findAll(@Query('providerId') providerId?: string) {
-    const data = await this.opLocalPurchasesService.findAll(providerId);
+  async findAll(@Query('tierId') tierId?: string) {
+    const data = await this.opLocalPurchasesService.findAll(tierId);
     return { success: true, message: 'Op local purchases retrieved successfully', data };
   }
 

@@ -72,11 +72,14 @@ export class DeductionTypesService {
 
   async remove(id: string) {
     await this.findOne(id);
-    const used = await this.prisma.opLocalPurchase.count({
+    const usedLocal = await this.prisma.opLocalPurchase.count({
       where: { deductionTypeId: id, deletedAt: null },
     });
-    if (used > 0) {
-      throw new BadRequestException('Cannot delete deduction type while local purchases reference it');
+    const usedImport = await this.prisma.opImportation.count({
+      where: { deductionTypeId: id, deletedAt: null },
+    });
+    if (usedLocal > 0 || usedImport > 0) {
+      throw new BadRequestException('Cannot delete deduction type while purchases or importations reference it');
     }
     return this.prisma.deductionType.update({
       where: { id },

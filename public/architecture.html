@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Insta Compta API — Architecture</title>
+  <link rel="icon" href="/public/favicon.ico" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0c1222;
+      --panel: #111827;
+      --panel2: #1a2336;
+      --line: #2a3548;
+      --text: #e8edf5;
+      --muted: #8b9cb5;
+      --accent: #38bdf8;
+      --accent2: #f97316;
+      --ok: #4ade80;
+      --scroll-thumb: #3a4d63;
+      --scroll-thumb-hover: #4a90b8;
+      --scroll-track: transparent;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* Scrollbars — discret, thème sombre */
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: var(--scroll-thumb) var(--scroll-track);
+    }
+    *::-webkit-scrollbar {
+      width: 7px;
+      height: 7px;
+    }
+    *::-webkit-scrollbar-track {
+      background: var(--scroll-track);
+    }
+    *::-webkit-scrollbar-thumb {
+      background: var(--scroll-thumb);
+      border-radius: 99px;
+      border: 2px solid transparent;
+      background-clip: padding-box;
+    }
+    *::-webkit-scrollbar-thumb:hover {
+      background: var(--scroll-thumb-hover);
+      border: 2px solid transparent;
+      background-clip: padding-box;
+    }
+    *::-webkit-scrollbar-thumb:active {
+      background: var(--accent);
+    }
+    *::-webkit-scrollbar-corner {
+      background: transparent;
+    }
+    *::-webkit-scrollbar-button,
+    *::-webkit-scrollbar-button:single-button {
+      display: none;
+      width: 0;
+      height: 0;
+    }
+    html {
+      color-scheme: dark;
+      height: 100%;
+    }
+    html, body { height: 100%; overflow: hidden; }
+    body {
+      font-family: "IBM Plex Sans", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code, pre { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+
+    .hdr {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.7rem 1.1rem;
+      background: var(--panel);
+      border-bottom: 1px solid var(--line);
+    }
+    .hdr h1 { font-size: 1rem; font-weight: 600; letter-spacing: -0.02em; }
+    .hdr-meta { margin-left: auto; font-size: 0.75rem; color: var(--muted); }
+    .hdr input {
+      width: 220px;
+      padding: 0.45rem 0.7rem;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: var(--bg);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.8rem;
+    }
+    .hdr input:focus { outline: 2px solid rgba(56, 189, 248, 0.35); border-color: var(--accent); }
+
+    .layout {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      min-height: 0;
+    }
+    @media (max-width: 960px) {
+      .layout { grid-template-columns: 1fr; grid-template-rows: 1fr auto; }
+      html, body { overflow: auto; height: auto; min-height: 100%; }
+    }
+
+    /* Panneau gauche — diagramme */
+    .canvas-wrap {
+      position: relative;
+      min-height: 0;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 20% 30%, rgba(56, 189, 248, 0.06) 0%, transparent 45%),
+        radial-gradient(circle at 80% 70%, rgba(249, 115, 22, 0.05) 0%, transparent 40%),
+        var(--bg);
+    }
+    .canvas-wrap::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--line) 1px, transparent 1px);
+      background-size: 28px 28px;
+      opacity: 0.35;
+      pointer-events: none;
+    }
+    #arch-canvas {
+      position: relative;
+      z-index: 1;
+      height: 100%;
+      padding: 1rem 1.1rem 1.25rem;
+      overflow-y: auto;
+    }
+
+    .canvas-empty {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 0.75rem;
+      color: var(--muted);
+      padding: 2rem;
+    }
+    .canvas-empty svg { opacity: 0.5; }
+    .canvas-empty h2 { font-size: 1.1rem; color: var(--text); font-weight: 600; }
+    .canvas-empty p { font-size: 0.82rem; max-width: 360px; line-height: 1.5; }
+
+    .stack-global {
+      max-width: 720px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .stack-layer {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 0.75rem;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: rgba(17, 24, 39, 0.85);
+      backdrop-filter: blur(4px);
+    }
+    .stack-layer .lbl {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--lc, var(--accent));
+    }
+    .stack-layer .body strong { font-size: 0.95rem; display: block; margin-bottom: 0.2rem; }
+    .stack-layer .body span { font-size: 0.78rem; color: var(--muted); }
+    .stack-conn {
+      text-align: center;
+      color: var(--line);
+      font-size: 1rem;
+      padding: 0.1rem 0;
+    }
+
+    .mod-diagram { width: 100%; max-width: none; }
+    .mod-split {
+      display: grid;
+      grid-template-columns: minmax(200px, 240px) minmax(0, 1fr);
+      gap: 0.85rem;
+      align-items: stretch;
+      min-height: calc(100vh - 11rem);
+    }
+    @media (max-width: 1100px) {
+      .mod-split { grid-template-columns: minmax(180px, 220px) minmax(0, 1fr); }
+    }
+    @media (max-width: 900px) {
+      .mod-split { grid-template-columns: 1fr; min-height: 0; }
+    }
+    .mod-head {
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.85rem;
+      border-bottom: 1px solid var(--line);
+    }
+    .mod-head .zone {
+      display: inline-block;
+      font-size: 0.62rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 0.18rem 0.5rem;
+      border-radius: 4px;
+      margin-bottom: 0.45rem;
+    }
+    .mod-head h2 { font-size: 1.35rem; font-weight: 700; letter-spacing: -0.03em; }
+    .mod-head .route { font-size: 0.82rem; color: var(--muted); margin-top: 0.3rem; }
+    .mod-head .route code { color: var(--accent); }
+
+    .flow-lane {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      position: relative;
+      max-width: 240px;
+      flex-shrink: 0;
+    }
+    .flow-node {
+      position: relative;
+      padding: 0.65rem 0.75rem 0.65rem 2.75rem;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: var(--panel2);
+      cursor: pointer;
+      transition: border-color 0.12s, box-shadow 0.12s, background 0.12s;
+    }
+    .flow-node[data-snippet]:hover,
+    .flow-node[data-snippet].code-active {
+      border-color: var(--nc, var(--accent));
+      box-shadow: 0 0 0 1px color-mix(in srgb, var(--nc, var(--accent)) 35%, transparent);
+      background: rgba(56, 189, 248, 0.04);
+    }
+    .flow-node::before {
+      content: attr(data-n);
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 1.5rem;
+      height: 1.5rem;
+      border-radius: 50%;
+      background: var(--nc, var(--accent));
+      color: #0c1222;
+      font-size: 0.72rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .flow-node .kind {
+      font-size: 0.62rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--nc, var(--accent));
+      margin-bottom: 0.2rem;
+    }
+    .flow-node .title { font-size: 0.92rem; font-weight: 600; }
+    .flow-node .sub { font-size: 0.75rem; color: var(--muted); margin-top: 0.25rem; line-height: 1.45; }
+    .flow-tags { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.45rem; }
+    .flow-tags code {
+      font-size: 0.65rem;
+      padding: 0.15rem 0.4rem;
+      border-radius: 5px;
+      background: var(--bg);
+      border: 1px solid var(--line);
+      color: #cbd5e1;
+    }
+    .flow-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.2rem 0;
+      color: var(--line);
+    }
+    .flow-link::after {
+      content: '';
+      width: 2px;
+      height: 18px;
+      background: linear-gradient(var(--nc, var(--accent)), transparent);
+      border-radius: 2px;
+    }
+    .mod-note {
+      margin-top: 1rem;
+      padding: 0.65rem 0.85rem;
+      border-radius: 10px;
+      border-left: 3px solid var(--accent2);
+      background: rgba(249, 115, 22, 0.08);
+      font-size: 0.78rem;
+      color: #fdba74;
+    }
+    .mod-guard {
+      margin-top: 0.75rem;
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    .code-panel {
+      position: sticky;
+      top: 0;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: #0a0f1a;
+      overflow: hidden;
+      min-height: calc(100vh - 11rem);
+      max-height: calc(100vh - 5rem);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+    .code-panel-head {
+      padding: 0.55rem 0.75rem;
+      border-bottom: 1px solid var(--line);
+      background: var(--panel2);
+      flex-shrink: 0;
+    }
+    .code-panel-head .code-lbl {
+      font-size: 0.58rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--accent);
+      margin-bottom: 0.2rem;
+    }
+    .code-panel-head .code-file {
+      font-size: 0.68rem;
+      color: var(--muted);
+      word-break: break-all;
+    }
+    .code-panel-body {
+      flex: 1;
+      overflow: auto;
+      padding: 0.75rem;
+    }
+    .code-panel-body pre {
+      margin: 0;
+      font-size: 0.74rem;
+      line-height: 1.6;
+      color: #d6deeb;
+      white-space: pre;
+      overflow-x: auto;
+    }
+    .code-panel-body code { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+    .hl-kw { color: #c792ea; font-weight: 500; }
+    .hl-str { color: #c3e88d; }
+    .hl-cmt { color: #546e7a; font-style: italic; }
+    .hl-dec { color: #ffcb6b; }
+    .hl-typ { color: #82aaff; }
+    .hl-fn { color: #82aaff; }
+    .hl-num { color: #f78c6c; }
+    .hl-prisma { color: #89ddff; }
+    .hl-http { color: #c3e88d; font-weight: 700; }
+    .hl-path { color: #89ddff; }
+    .hl-key { color: #f07178; }
+    .hl-bool { color: #ff9cac; }
+    .hl-model { color: #ffcb6b; font-weight: 600; }
+    .hl-field { color: #c5cae9; }
+    .code-panel-hint {
+      padding: 1.5rem 1rem;
+      text-align: center;
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .code-panel-hint strong { color: var(--text); display: block; margin-bottom: 0.35rem; }
+
+    /* Panneau droit — modules */
+    .picker {
+      background: linear-gradient(180deg, #0e1525 0%, var(--panel) 100%);
+      border-left: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow: hidden;
+      box-shadow: inset 8px 0 24px rgba(0, 0, 0, 0.15);
+    }
+    .picker-head {
+      padding: 0.85rem 0.9rem 0.65rem;
+      border-bottom: 1px solid var(--line);
+      flex-shrink: 0;
+      background: rgba(17, 24, 39, 0.6);
+    }
+    .picker-head h2 {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin-bottom: 0.55rem;
+    }
+    .picker-kpis {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.35rem;
+    }
+    .kpi {
+      padding: 0.4rem 0.35rem;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: var(--panel2);
+      text-align: center;
+    }
+    .kpi strong {
+      display: block;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.1;
+    }
+    .kpi span {
+      font-size: 0.55rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+    }
+    .kpi.hl strong { color: var(--accent); }
+
+    .zone-tabs {
+      display: flex;
+      gap: 0.35rem;
+      padding: 0.6rem 0.75rem;
+      border-bottom: 1px solid var(--line);
+      flex-shrink: 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .zone-tabs::-webkit-scrollbar { display: none; }
+    .ztab {
+      flex-shrink: 0;
+      font-size: 0.68rem;
+      font-weight: 600;
+      padding: 0.38rem 0.7rem;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: var(--panel2);
+      color: var(--muted);
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .ztab .zdot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--zc, var(--accent));
+      opacity: 0.5;
+    }
+    .ztab .zcnt {
+      font-size: 0.58rem;
+      opacity: 0.7;
+      font-weight: 500;
+    }
+    .ztab:hover {
+      color: var(--text);
+      border-color: color-mix(in srgb, var(--zc, var(--accent)) 50%, var(--line));
+      background: color-mix(in srgb, var(--zc, var(--accent)) 8%, var(--panel2));
+    }
+    .ztab.on {
+      color: #fff;
+      border-color: var(--zc, var(--accent));
+      background: color-mix(in srgb, var(--zc, var(--accent)) 22%, var(--panel2));
+      box-shadow: 0 0 20px color-mix(in srgb, var(--zc, var(--accent)) 25%, transparent);
+    }
+    .ztab.on .zdot { opacity: 1; box-shadow: 0 0 6px var(--zc); }
+
+    .tile-grid {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 0.65rem 0.75rem 1.1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      align-items: stretch;
+    }
+
+    .tile {
+      position: relative;
+      flex-shrink: 0;
+      width: 100%;
+      min-height: 3.25rem;
+      padding: 0.6rem 0.7rem 0.6rem 0.85rem;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: linear-gradient(135deg, var(--panel2) 0%, rgba(17, 24, 39, 0.9) 100%);
+      cursor: pointer;
+      text-align: left;
+      font-family: inherit;
+      color: inherit;
+      transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s, background 0.15s;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      line-height: 1.35;
+    }
+    .tile::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--zc, var(--accent));
+      opacity: 0.35;
+      transition: opacity 0.15s, width 0.15s;
+    }
+    .tile:hover {
+      border-color: color-mix(in srgb, var(--zc, var(--accent)) 55%, var(--line));
+      transform: translateX(2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.28);
+    }
+    .tile:hover::before { opacity: 1; width: 4px; }
+    .tile.on {
+      border-color: var(--zc, var(--accent));
+      box-shadow: 0 0 0 1px color-mix(in srgb, var(--zc, var(--accent)) 40%, transparent), 0 8px 24px rgba(0, 0, 0, 0.35);
+      background: linear-gradient(135deg, color-mix(in srgb, var(--zc, var(--accent)) 12%, var(--panel2)) 0%, var(--panel2) 100%);
+    }
+    .tile.on::before { opacity: 1; width: 4px; }
+
+    .tile-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      min-width: 0;
+    }
+    .tile-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.4rem;
+      margin-bottom: 0.35rem;
+    }
+    .tile-zone {
+      font-size: 0.58rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 0.18rem 0.45rem;
+      border-radius: 4px;
+      background: color-mix(in srgb, var(--zc, var(--accent)) 15%, transparent);
+      color: var(--zc, var(--accent));
+      flex-shrink: 0;
+      line-height: 1.2;
+    }
+    .tile-route {
+      font-family: "IBM Plex Mono", ui-monospace, monospace;
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: #67e8f9;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-align: right;
+      flex: 1;
+      min-width: 0;
+      line-height: 1.3;
+    }
+    .tile-sub {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      margin-top: 0.35rem;
+      min-width: 0;
+      line-height: 1.3;
+    }
+    .tile-ctrl {
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: #e2e8f0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex-shrink: 1;
+      min-width: 0;
+    }
+    .tile-dot { color: var(--muted); font-size: 0.6rem; flex-shrink: 0; }
+    .tile-foot {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.25rem;
+      align-items: center;
+    }
+    .tile-svc {
+      font-family: "IBM Plex Mono", ui-monospace, monospace;
+      font-size: 0.64rem;
+      color: #86efac;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex-shrink: 1;
+      min-width: 0;
+    }
+    .tile-badge {
+      font-size: 0.55rem;
+      color: var(--muted);
+      padding: 0.12rem 0.35rem;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--line);
+    }
+
+    #arch-preview {
+      position: fixed;
+      z-index: 90;
+      width: min(480px, calc(100vw - 360px));
+      max-height: min(70vh, 560px);
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: #0a0f1a;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+      pointer-events: none;
+      opacity: 0;
+      transform: translateX(8px);
+      transition: opacity 0.15s, transform 0.15s;
+    }
+    #arch-preview.show { opacity: 1; transform: translateX(0); }
+    #arch-preview .prev-head {
+      padding: 0.45rem 0.65rem;
+      border-bottom: 1px solid var(--line);
+      background: var(--panel2);
+    }
+    #arch-preview .prev-head strong {
+      display: block;
+      font-size: 0.68rem;
+      color: var(--text);
+      margin-bottom: 0.15rem;
+    }
+    #arch-preview .prev-head span {
+      font-size: 0.6rem;
+      color: var(--muted);
+      font-family: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    #arch-preview pre {
+      margin: 0;
+      padding: 0.65rem 0.75rem;
+      font-size: 0.62rem;
+      line-height: 1.5;
+      overflow: auto;
+      max-height: calc(min(70vh, 560px) - 3rem);
+      color: #d6deeb;
+    }
+
+    .tile-empty {
+      padding: 2rem 1rem;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.8rem;
+      border: 1px dashed var(--line);
+      border-radius: 12px;
+    }
+
+    .flow-node.is-controller { cursor: help; }
+    .flow-node.is-controller:hover,
+    .flow-node.is-controller.hi {
+      border-color: var(--nc, var(--accent));
+      box-shadow: 0 0 0 1px color-mix(in srgb, var(--nc, var(--accent)) 40%, transparent);
+    }
+    .flow-node.hi-related {
+      border-color: var(--ok);
+      background: rgba(74, 222, 128, 0.06);
+    }
+    .flow-node.hi-related .kind { color: var(--ok); }
+    .flow-hover-tip {
+      display: none;
+      margin-top: 0.45rem;
+      padding: 0.45rem 0.55rem;
+      border-radius: 8px;
+      background: rgba(74, 222, 128, 0.1);
+      border: 1px solid rgba(74, 222, 128, 0.25);
+      font-size: 0.72rem;
+    }
+    .flow-hover-tip strong {
+      display: block;
+      font-size: 0.58rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--ok);
+      margin-bottom: 0.25rem;
+    }
+    .flow-hover-tip code {
+      font-size: 0.68rem;
+      color: #86efac;
+      margin-right: 0.35rem;
+    }
+    .flow-node.is-controller:hover .flow-hover-tip,
+    .flow-node.is-controller.hi .flow-hover-tip { display: block; }
+
+    #arch-tooltip {
+      position: fixed;
+      z-index: 100;
+      max-width: 280px;
+      padding: 0.55rem 0.7rem;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+      font-size: 0.72rem;
+      pointer-events: none;
+      opacity: 0;
+      transform: translateY(4px);
+      transition: opacity 0.12s, transform 0.12s;
+    }
+    #arch-tooltip.show { opacity: 1; transform: translateY(0); }
+    #arch-tooltip .tip-lbl {
+      font-size: 0.58rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--accent);
+      margin-bottom: 0.3rem;
+    }
+    #arch-tooltip .tip-lbl.svc { color: var(--ok); margin-top: 0.35rem; }
+    #arch-tooltip code {
+      display: inline-block;
+      font-size: 0.65rem;
+      padding: 0.1rem 0.35rem;
+      margin: 0.1rem 0.2rem 0 0;
+      border-radius: 4px;
+      background: var(--bg);
+      border: 1px solid var(--line);
+      color: #cbd5e1;
+    }
+    #arch-tooltip code.svc { color: #86efac; border-color: rgba(74, 222, 128, 0.3); }
+
+    .err { padding: 2rem; color: #f87171; text-align: center; font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+  <header class="hdr">
+    <h1>Insta Compta API</h1>
+    <input type="search" id="arch-q" placeholder="Filtrer modules…" autocomplete="off" />
+    <p class="hdr-meta"><a href="/">Swagger</a> · NestJS · Prisma · MySQL</p>
+  </header>
+
+  <div class="layout">
+    <section class="canvas-wrap" aria-label="Diagramme architecture">
+      <div id="arch-canvas"></div>
+    </section>
+
+    <aside class="picker" aria-label="Modules par zone">
+      <div class="picker-head">
+        <h2>Modules API</h2>
+        <div class="picker-kpis" id="arch-stats"></div>
+      </div>
+      <div class="zone-tabs" id="arch-tabs"></div>
+      <div class="tile-grid" id="arch-tiles"></div>
+    </aside>
+  </div>
+
+  <div id="arch-preview" hidden aria-live="polite"></div>
+  <div id="arch-tooltip" role="tooltip" hidden></div>
+  <script src="architecture.js"></script>
+</body>
+</html>

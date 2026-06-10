@@ -39,9 +39,14 @@ import { RentalsModule } from './modules/rentals/rentals.module';
 import { BalancesModule } from './modules/balances/balances.module';
 import { DeductionTypesModule } from './modules/settings/deduction-types/deduction-types.module';
 import { PropertyNatureTypesModule } from './modules/settings/property-nature-types/property-nature-types.module';
-import { ProvidersModule } from './modules/providers/providers.module';
 import { OpTurnoversModule } from './modules/op-turnovers/op-turnovers.module';
 import { OpLocalPurchasesModule } from './modules/op-local-purchases/op-local-purchases.module';
+import { OpSuspensionsModule } from './modules/op-suspensions/op-suspensions.module';
+import { OpImportationsModule } from './modules/op-importations/op-importations.module';
+import { OpExportationsModule } from './modules/op-exportations/op-exportations.module';
+import { OpRetainsModule } from './modules/op-retains/op-retains.module';
+import { OpRoyaltiesModule } from './modules/op-royalties/op-royalties.module';
+import { OpExemptionsModule } from './modules/op-exemptions/op-exemptions.module';
 import { HttpLatencyInterceptor } from './common/interceptors/http-latency/http-latency.interceptor';
 // import { MailerModule } from './modules/mailer/mailer.module';
 
@@ -76,9 +81,14 @@ import { HttpLatencyInterceptor } from './common/interceptors/http-latency/http-
     BalancesModule,
     DeductionTypesModule,
     PropertyNatureTypesModule,
-    ProvidersModule,
     OpTurnoversModule,
     OpLocalPurchasesModule,
+    OpSuspensionsModule,
+    OpImportationsModule,
+    OpExportationsModule,
+    OpRetainsModule,
+    OpRoyaltiesModule,
+    OpExemptionsModule,
     DocumentsModule,
     ActivitiesModule,
     NotificationsModule,

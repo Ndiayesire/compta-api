@@ -85,9 +85,11 @@ model Country {
   currency  Currency   @relation(fields: [currencyId], references: [id])
   regions   Region[]
   languages Language[]
-  users     User[]
-  companies Company[]
-  clients   Client[]
+  users          User[]
+  companies      Company[]
+  clients        Client[]
+  opImportations OpImportation[]
+  opExportations OpExportation[]
 
   @@index([currencyId])
   @@map("settings_countries")
@@ -407,6 +409,13 @@ model Tier {
   client   Client   @relation(fields: [clientId], references: [id])
 
   tiersTransactions TiersTransaction[]
+  localPurchases    OpLocalPurchase[]
+  suspensions       OpSuspension[]
+  importations      OpImportation[]
+  exportations      OpExportation[]
+  retains           OpRetain[]
+  royalties         OpRoyalty[]
+  exemptions        OpExemption[]
 
   @@index([tierTypeId])
   @@index([clientId])
@@ -572,6 +581,7 @@ model DeductionType {
   deletedAt DateTime? @map("deduction_type_deleted_at")
 
   localPurchases OpLocalPurchase[]
+  importations   OpImportation[]
 
   @@map("deduction_types")
 }
@@ -586,23 +596,9 @@ model PropertyNatureType {
   deletedAt DateTime? @map("property_nature_type_deleted_at")
 
   localPurchases OpLocalPurchase[]
+  importations   OpImportation[]
 
   @@map("property_nature_types")
-}
-
-model Provider {
-  id        String    @id @default(uuid()) @map("provider_id")
-  ninea     String    @map("provider_ninea") @db.VarChar(255)
-  cofi      String    @map("provider_cofi") @db.VarChar(255)
-  name      String    @map("provider_name") @db.VarChar(255)
-  address   String    @map("provider_address") @db.VarChar(255)
-  createdAt DateTime  @default(now()) @map("provider_created_at")
-  updatedAt DateTime  @updatedAt @map("provider_updated_at")
-  deletedAt DateTime? @map("provider_deleted_at")
-
-  localPurchases OpLocalPurchase[]
-
-  @@map("providers")
 }
 
 model OpTurnover {
@@ -645,7 +641,7 @@ model OpTurnoverStamp {
 
 model OpLocalPurchase {
   id                   String    @id @default(uuid()) @map("op_local_purchase_id")
-  providerId           String    @map("provider_id")
+  tierId               String    @map("tier_id")
   deductionTypeId      String    @map("deduction_type_id")
   propertyNatureTypeId String    @map("property_nature_type_id")
   month                DateTime  @map("op_local_purchase_month") @db.Date
@@ -659,14 +655,150 @@ model OpLocalPurchase {
   updatedAt            DateTime  @updatedAt @map("op_local_purchase_updated_at")
   deletedAt            DateTime? @map("op_local_purchase_deleted_at")
 
-  provider           Provider           @relation(fields: [providerId], references: [id])
+  tier               Tier               @relation(fields: [tierId], references: [id])
   deductionType      DeductionType      @relation(fields: [deductionTypeId], references: [id])
   propertyNatureType PropertyNatureType @relation(fields: [propertyNatureTypeId], references: [id])
 
-  @@index([providerId])
+  @@index([tierId])
   @@index([deductionTypeId])
   @@index([propertyNatureTypeId])
   @@map("op_local_purchases")
+}
+
+model OpSuspension {
+  id         String    @id @default(uuid()) @map("op_suspension_id")
+  tierId     String    @map("tier_id")
+  code       String    @map("op_suspension_code") @db.VarChar(255)
+  date       DateTime  @map("op_suspension_date") @db.Date
+  month      Int       @map("op_suspension_month")
+  year       Int       @map("op_suspension_year")
+  net        Decimal   @map("op_suspension_net") @db.Decimal(12, 2)
+  tax        Decimal   @map("op_suspension_tax") @db.Decimal(12, 2)
+  total      Decimal   @map("op_suspension_total") @db.Decimal(12, 2)
+  visaDate   DateTime  @map("op_suspension_visa_date") @db.Date
+  visaNumber String    @map("op_suspension_visa_number") @db.VarChar(255)
+  createdAt  DateTime  @default(now()) @map("op_suspension_created_at")
+  updatedAt  DateTime  @updatedAt @map("op_suspension_updated_at")
+  deletedAt  DateTime? @map("op_suspension_deleted_at")
+
+  tier Tier @relation(fields: [tierId], references: [id])
+
+  @@index([tierId])
+  @@map("op_suspensions")
+}
+
+model OpImportation {
+  id                   String    @id @default(uuid()) @map("op_importation_id")
+  tierId               String    @map("tier_id")
+  countryId            String    @map("settings_country_id")
+  deductionTypeId      String    @map("deduction_type_id")
+  propertyNatureTypeId String    @map("property_nature_type_id")
+  code                 String    @map("op_importation_code") @db.VarChar(255)
+  month                Int       @map("op_importation_month")
+  year                 Int       @map("op_importation_year")
+  date                 DateTime  @map("op_importation_date") @db.Date
+  net                  Decimal?  @map("op_importation_net") @db.Decimal(12, 2)
+  tax                  Decimal?  @map("op_importation_tax") @db.Decimal(12, 2)
+  taxDeduction         Decimal?  @map("op_importation_tax_deduction") @db.Decimal(12, 2)
+  total                Decimal?  @map("op_importation_total") @db.Decimal(12, 2)
+  prorata              Decimal?  @map("op_importation_prorata") @db.Decimal(12, 2)
+  createdAt            DateTime  @default(now()) @map("op_importation_created_at")
+  updatedAt            DateTime  @updatedAt @map("op_importation_updated_at")
+  deletedAt            DateTime? @map("op_importation_deleted_at")
+
+  tier               Tier               @relation(fields: [tierId], references: [id])
+  country            Country            @relation(fields: [countryId], references: [id])
+  deductionType      DeductionType      @relation(fields: [deductionTypeId], references: [id])
+  propertyNatureType PropertyNatureType @relation(fields: [propertyNatureTypeId], references: [id])
+
+  @@index([tierId])
+  @@index([countryId])
+  @@index([deductionTypeId])
+  @@index([propertyNatureTypeId])
+  @@map("op_importations")
+}
+
+model OpExportation {
+  id           String    @id @default(uuid()) @map("op_exportation_id")
+  tierId       String    @map("tier_id")
+  countryId    String    @map("settings_country_id")
+  code         String    @map("op_exportation_code") @db.VarChar(255)
+  month        Int       @map("op_exportation_month")
+  year         Int       @map("op_exportation_year")
+  date         DateTime  @map("op_exportation_date") @db.Date
+  net          Decimal?  @map("op_exportation_net") @db.Decimal(12, 2)
+  tax          Decimal?  @map("op_exportation_tax") @db.Decimal(12, 2)
+  taxDeduction Decimal?  @map("op_exportation_tax_deduction") @db.Decimal(12, 2)
+  total        Decimal?  @map("op_exportation_total") @db.Decimal(12, 2)
+  prorata      Decimal?  @map("op_exportation_prorata") @db.Decimal(12, 2)
+  createdAt    DateTime  @default(now()) @map("op_exportation_created_at")
+  updatedAt    DateTime  @updatedAt @map("op_exportation_updated_at")
+  deletedAt    DateTime? @map("op_exportation_deleted_at")
+
+  tier    Tier    @relation(fields: [tierId], references: [id])
+  country Country @relation(fields: [countryId], references: [id])
+
+  @@index([tierId])
+  @@index([countryId])
+  @@map("op_exportations")
+}
+
+model OpRetain {
+  id        String    @id @default(uuid()) @map("op_retain_id")
+  tierId    String    @map("tier_id")
+  code      String    @map("op_retain_code") @db.VarChar(255)
+  date      DateTime  @map("op_retain_date") @db.Date
+  month     Int       @map("op_retain_month")
+  year      Int       @map("op_retain_year")
+  base      Decimal   @map("op_retain_base") @db.Decimal(12, 2)
+  rate      Decimal   @map("op_retain_rate") @db.Decimal(12, 2)
+  amount    Decimal   @map("op_retain_amount") @db.Decimal(12, 2)
+  createdAt DateTime  @default(now()) @map("op_retain_created_at")
+  updatedAt DateTime  @updatedAt @map("op_retain_updated_at")
+  deletedAt DateTime? @map("op_retain_deleted_at")
+
+  tier Tier @relation(fields: [tierId], references: [id])
+
+  @@index([tierId])
+  @@map("op_retains")
+}
+
+model OpRoyalty {
+  id        String    @id @default(uuid()) @map("op_royalty_id")
+  tierId    String    @map("tier_id")
+  code      String    @map("op_royalty_code") @db.VarChar(255)
+  date      DateTime  @map("op_royalty_date") @db.Date
+  month     Int       @map("op_royalty_month")
+  year      Int       @map("op_royalty_year")
+  base      Decimal   @map("op_royalty_base") @db.Decimal(12, 2)
+  rate      Decimal   @map("op_royalty_rate") @db.Decimal(12, 2)
+  amount    Decimal   @map("op_royalty_amount") @db.Decimal(12, 2)
+  createdAt DateTime  @default(now()) @map("op_royalty_created_at")
+  updatedAt DateTime  @updatedAt @map("op_royalty_updated_at")
+  deletedAt DateTime? @map("op_royalty_deleted_at")
+
+  tier Tier @relation(fields: [tierId], references: [id])
+
+  @@index([tierId])
+  @@map("op_royalties")
+}
+
+model OpExemption {
+  id        String    @id @default(uuid()) @map("op_exemption_id")
+  tierId    String    @map("tier_id")
+  code      String    @map("op_exemption_code") @db.VarChar(255)
+  month     Int       @map("op_exemption_month")
+  year      Int       @map("op_exemption_year")
+  amount    Decimal   @map("op_exemption_amount") @db.Decimal(12, 2)
+  desc      String    @map("op_exemption_desc") @db.Text
+  createdAt DateTime  @default(now()) @map("op_exemption_created_at")
+  updatedAt DateTime  @updatedAt @map("op_exemption_updated_at")
+  deletedAt DateTime? @map("op_exemption_deleted_at")
+
+  tier Tier @relation(fields: [tierId], references: [id])
+
+  @@index([tierId])
+  @@map("op_exemptions")
 }
 
 //////////////////////////////////////////////////////

@@ -5,7 +5,7 @@ import { IsDateString, IsNumber, IsObject, IsUUID, Min } from 'class-validator';
 export class CreateOpLocalPurchaseDto {
   @ApiProperty()
   @IsUUID()
-  providerId: string;
+  tierId: string;
 
   @ApiProperty()
   @IsUUID()
