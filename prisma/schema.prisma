@@ -644,8 +644,8 @@ model OpLocalPurchase {
   tierId               String    @map("tier_id")
   deductionTypeId      String    @map("deduction_type_id")
   propertyNatureTypeId String    @map("property_nature_type_id")
-  month                DateTime  @map("op_local_purchase_month") @db.Date
-  year                 DateTime  @map("op_local_purchase_year") @db.Date
+  month                Int       @map("op_local_purchase_month")
+  year                 Int       @map("op_local_purchase_year")
   net                  Decimal   @map("op_local_purchase_net") @db.Decimal(12, 2)
   tax                  Decimal   @map("op_local_purchase_tax") @db.Decimal(12, 2)
   taxDeduction         Decimal   @map("op_local_purchase_tax_deduction") @db.Decimal(12, 2)

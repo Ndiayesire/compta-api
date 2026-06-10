@@ -53,8 +53,8 @@ export class OpLocalPurchasesService {
         tierId: dto.tierId,
         deductionTypeId: dto.deductionTypeId,
         propertyNatureTypeId: dto.propertyNatureTypeId,
-        month: new Date(dto.month),
-        year: new Date(dto.year),
+        month: dto.month,
+        year: dto.year,
         net: new Prisma.Decimal(String(dto.net)),
         tax: new Prisma.Decimal(String(dto.tax)),
         taxDeduction: new Prisma.Decimal(String(dto.taxDeduction)),
@@ -100,8 +100,8 @@ export class OpLocalPurchasesService {
         ...(dto.propertyNatureTypeId !== undefined
           ? { propertyNatureTypeId: dto.propertyNatureTypeId }
           : {}),
-        ...(dto.month !== undefined ? { month: new Date(dto.month) } : {}),
-        ...(dto.year !== undefined ? { year: new Date(dto.year) } : {}),
+        ...(dto.month !== undefined ? { month: dto.month } : {}),
+        ...(dto.year !== undefined ? { year: dto.year } : {}),
         ...(dto.net !== undefined ? { net: new Prisma.Decimal(String(dto.net)) } : {}),
         ...(dto.tax !== undefined ? { tax: new Prisma.Decimal(String(dto.tax)) } : {}),
         ...(dto.taxDeduction !== undefined

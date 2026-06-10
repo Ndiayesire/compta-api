@@ -1045,7 +1045,7 @@
     {
       "name": "Op local purchases",
       "id": "o0000600-0000-4000-8000-000000000001",
-      "description": "Achats locaux (`op_local_purchases`) — `tierId`, `deductionTypeId`, `propertyNatureTypeId`.",
+      "description": "Achats locaux (`op_local_purchases`) — `tierId`, `deductionTypeId`, `propertyNatureTypeId`, `month` (1–12), `year` (entier).",
       "item": [
         {
           "name": "Create op local purchase",
@@ -1055,7 +1055,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"tierId\": \"{{tierId2}}\",\n  \"deductionTypeId\": \"{{deductionTypeId}}\",\n  \"propertyNatureTypeId\": \"{{propertyNatureTypeId}}\",\n  \"month\": \"2025-01-01T00:00:00.000Z\",\n  \"year\": \"2025-01-01T00:00:00.000Z\",\n  \"net\": 500000,\n  \"tax\": 90000,\n  \"taxDeduction\": 50000,\n  \"total\": 590000,\n  \"prorata\": { \"rate\": 1, \"note\": \"demo\" }\n}"
+              "raw": "{\n  \"tierId\": \"{{tierId2}}\",\n  \"deductionTypeId\": \"{{deductionTypeId}}\",\n  \"propertyNatureTypeId\": \"{{propertyNatureTypeId}}\",\n  \"month\": 1,\n  \"year\": 2025,\n  \"net\": 500000,\n  \"tax\": 90000,\n  \"taxDeduction\": 50000,\n  \"total\": 590000,\n  \"prorata\": { \"rate\": 1, \"note\": \"demo\" }\n}"
             },
             "url": "{{baseUrl}}/op-local-purchases",
             "description": "`201` — copier `data.id` dans `opLocalPurchaseId`."

@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsDateString, IsNumber, IsObject, IsUUID, Min } from 'class-validator';
+import { IsInt, IsNumber, IsObject, IsUUID, Min } from 'class-validator';
 
 export class CreateOpLocalPurchaseDto {
   @ApiProperty()
@@ -15,13 +15,17 @@ export class CreateOpLocalPurchaseDto {
   @IsUUID()
   propertyNatureTypeId: string;
 
-  @ApiProperty({ example: '2025-01-01T00:00:00.000Z', description: 'Date représentant le mois' })
-  @IsDateString()
-  month: string;
+  @ApiProperty({ example: 1, description: 'Mois (1–12)' })
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  month: number;
 
-  @ApiProperty({ example: '2025-01-01T00:00:00.000Z', description: 'Date représentant l’année' })
-  @IsDateString()
-  year: string;
+  @ApiProperty({ example: 2025, description: 'Année' })
+  @Type(() => Number)
+  @IsInt()
+  @Min(1900)
+  year: number;
 
   @ApiProperty({ example: 500000 })
   @Type(() => Number)
