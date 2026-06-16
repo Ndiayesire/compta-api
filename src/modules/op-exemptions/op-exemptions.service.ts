@@ -3,6 +3,7 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { CreateOpExemptionDto } from './dto/create-op-exemption.dto';
 import { UpdateOpExemptionDto } from './dto/update-op-exemption.dto';
+import { parseOpExemptionImportWorkbook } from './op-exemption-excel-import';
 
 const exemptionInclude = {
   tier: true,
@@ -20,6 +21,16 @@ export class OpExemptionsService {
       throw new BadRequestException('Invalid tier');
     }
     return row;
+  }
+
+  private async assertClientBelongsToCompany(clientId: string, companyId: string) {
+    const client = await this.prisma.client.findFirst({
+      where: { id: clientId, companyId, deletedAt: null },
+    });
+    if (!client) {
+      throw new BadRequestException('Client not found or does not belong to your company');
+    }
+    return client;
   }
 
   async create(dto: CreateOpExemptionDto) {
@@ -82,5 +93,46 @@ export class OpExemptionsService {
       where: { id },
       data: { deletedAt: new Date() },
     });
+  }
+
+  /**
+   * Import exonérations depuis le modèle Excel (1ʳᵉ feuille, en-têtes du template).
+   * Le client est fixé par `clientId` (query) — les tiers sont résolus par nom / référence / NINEA.
+   */
+  async importFromExcelBuffer(buffer: Buffer, companyId: string, clientId: string, year: number) {
+    if (!Number.isInteger(year) || year < 1900 || year > 2100) {
+      throw new BadRequestException('Query year must be an integer between 1900 and 2100');
+    }
+    await this.assertClientBelongsToCompany(clientId, companyId);
+    const parsed = await parseOpExemptionImportWorkbook(this.prisma, clientId, year, buffer);
+
+    const errors: { row: number; message: string }[] = [];
+    const created: Awaited<ReturnType<OpExemptionsService['create']>>[] = [];
+    let tiersCreatedCount = 0;
+
+    for (const item of parsed) {
+      if ('error' in item) {
+        errors.push({ row: item.rowNumber, message: item.error });
+        continue;
+      }
+      if (item.tierCreated) {
+        tiersCreatedCount += 1;
+      }
+      try {
+        const data = await this.create(item.dto);
+        created.push(data);
+      } catch (e) {
+        const message = e instanceof Error ? e.message : String(e);
+        errors.push({ row: item.rowNumber, message });
+      }
+    }
+
+    return {
+      createdCount: created.length,
+      failedCount: errors.length,
+      tiersCreatedCount,
+      created,
+      errors,
+    };
   }
 }
