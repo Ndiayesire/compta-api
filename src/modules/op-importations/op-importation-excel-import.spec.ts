@@ -1,14 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import ExcelJS from 'exceljs';
-import {
-  assertImportationImportHeadersComplete,
-  buildImportationImportColumnMap,
-  findOrCreateDeductionTypeByName,
-  findOrCreatePropertyNatureTypeByName,
-  inferDeductionTypeCode,
-  resolveSupplierTierForImport,
-} from './op-importation-excel-import';
+import { assertImportationImportHeadersComplete, buildImportationImportColumnMap, findOrCreateDeductionTypeByName, findOrCreatePropertyNatureTypeByName, inferDeductionTypeCode, resolveSupplierTierForImport } from './op-importation-excel-import';
 
 const TEMPLATE_PATH = path.join(
   __dirname,
