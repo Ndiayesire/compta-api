@@ -69,17 +69,17 @@ async function bootstrap() {
     .addTag('rentals', 'Locations')
     .addTag('balances', 'Balances par client et exercice. Import lignes.')
     .addTag('balance-lines', 'Lecture / mise à jour / suppression de lignes. Création en masse via import sous le tag **balances**.')
-    .addTag('deduction-types', 'Types de déduction (achats locaux)')
-    .addTag('property-nature-types', 'Natures de biens (achats locaux)')
+    .addTag('deduction-types', 'Types de déduction — référentiel ; création auto à l’import Excel **op-importations** si libellé inconnu')
+    .addTag('property-nature-types', 'Natures de biens / services — référentiel ; création auto à l’import **op-importations** (code incrémenté)')
     .addTag('op-turnovers', 'Chiffres d’affaires par client')
     .addTag('op-turnover-stamps', 'Timbres / versions de CA')
     .addTag('op-local-purchases', 'Achats locaux')
     .addTag('op-suspensions', 'Suspensions fiscales par tiers')
-    .addTag('op-importations', 'Importations par tiers')
-    .addTag('op-exportations', 'Exportations par tiers')
+    .addTag('op-importations', 'Importations fiscales par fournisseur — CRUD JSON et **POST /import** Excel (.xlsx, query clientId)')
+    .addTag('op-exportations', 'Exportations par tiers — CRUD JSON et **POST /import** Excel (.xlsx, query clientId)')
     .addTag('op-retains', 'Retenues à la source par tiers')
     .addTag('op-royalties', 'Redevances par tiers')
-    .addTag('op-exemptions', 'Exonérations par tiers')
+    .addTag('op-exemptions', 'Exonérations par tiers — CRUD JSON et **POST /import** Excel (query clientId + year)')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

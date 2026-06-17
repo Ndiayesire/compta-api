@@ -14,7 +14,11 @@ export class DeductionTypesController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
-  @ApiOperation({ summary: 'Créer un type de déduction' })
+  @ApiOperation({
+    summary: 'Créer un type de déduction',
+    description:
+      'Référentiel `deduction_types`. Utilisé par les importations (`op_importations`) : à l’import Excel, un libellé inconnu est créé automatiquement avec un code abrégé.',
+  })
   @ApiBody({ type: CreateDeductionTypeDto })
   @ApiResponse({ status: HttpStatus.CREATED, schema: API_ENVELOPE_SCHEMA })
   async create(@Body() dto: CreateDeductionTypeDto) {

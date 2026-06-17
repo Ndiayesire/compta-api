@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "f7c8c001-0000-4000-8000-000000000001",
     "name": "Insta Compta API",
-    "description": "NestJS **compta-api** — collection alignée sur les modules montés dans `AppModule`. Rapports Excel DGID : dossier **Financial Report**.\n\n**JSON HTTP vs MySQL** : les corps de requête utilisent les **DTO camelCase** (`countryId`, `regionId`, `legalFormId`, `categoryId`, `typeId`, `identificationTypeId`, `tierTypeId`, …). En base, Prisma mappe vers des colonnes courtes (`country_id`, `category_id`, `type_id`, etc.) — ne pas les confondre avec les clés JSON.\n\n**Variables** : `baseUrl` (ex. `http://localhost:4230`), `accessToken`, `refreshToken`. La collection utilise l’auth **Bearer** au niveau collection : après **Auth → Login**, copier `accessToken` / `refreshToken` dans les variables.\n\n**Auth** : `POST /auth/login` est public. **`POST /auth/register` exige un JWT** (guard global) — utiliser un compte déjà connecté (ex. admin seed). `GET /health` est public.\n\n**Périmètres** : la plupart des routes métier filtrent par **société** (`companyId` du JWT) ou par **utilisateur** (activities, notifications). Les tables **settings** (pays, rôles, etc.) sont globales.\n\n**Corps JSON** : les requêtes `POST`/`PATCH` listent **tous les champs du DTO** (y compris optionnels) pour faciliter les essais — retirer ou adapter les clés non voulues.\n\n**Dossiers** : App · Auth · Users · Company · Clients · **Employees** (`POST /employees` JSON, **`POST /employees/import`** fichier `.xlsx` **form-data** `file`) · Employee contracts · Tiers · **Financial Report** (exports Excel / PDF DGID) · **Accounting years** · **Balances** (`/balances`, `/balance-lines`, import `.xlsx` **8 colonnes**, `balanceId` en URL ; infobulles sur les en-têtes du modèle généré) · **Rental usages** · **Rentals** · **Deduction types** · **Property nature types** · **Op turnovers** · **Op turnover stamps** (`opTurnoverId` query obligatoire) · **Op local purchases** (`tierId`) · **Op suspensions** · **Op importations** · **Op exportations** (`POST /op-exportations/import` `.xlsx`, query `clientId` — NINEA/nom tiers, pays sans accents) · **Op retains** · **Op royalties** · **Op exemptions** (`POST /op-exemptions/import` `.xlsx`, query `clientId`, `year`) · **Accounting quarters** · **App meta** · **Tiers transactions** · Documents · Activities · Notifications · Settings (Countries, Regions, Currencies, Legal forms, Document categories, Identification types, Genders, Languages, Payment methods, Contract types, Tier types, Permissions, Roles).\n\n**Variables seed** (`prisma/seed.cjs`) : `clientId`, `companyId`, `userId` (admin), `employeeId`, `employeeContractId`, `tierId`, `tierId2`, `documentId`, `activityId`, `notificationId`, `accountingYearId`, `accountingQuarterId`, `tiersTransactionId`, `balanceId`, `balanceLineId` (vides par défaut — remplir après création / import balance), `rentalUsageId`, `rentalId`, `deductionTypeId`, `propertyNatureTypeId`, `opTurnoverId`, `opTurnoverStampId`, `opLocalPurchaseId`, `opSuspensionId`, `opImportationId`, `opExportationId`, `opRetainId`, `opRoyaltyId`, `opExemptionId` (préremplies après `npm run seed`), et références settings (`countryId`, `regionId`, …). Préremplies pour tests après `npm run seed`.",
+    "description": "NestJS **compta-api** — collection alignée sur les modules montés dans `AppModule`. Rapports Excel DGID : dossier **Financial Report**.\n\n**JSON HTTP vs MySQL** : les corps de requête utilisent les **DTO camelCase** (`countryId`, `regionId`, `legalFormId`, `categoryId`, `typeId`, `identificationTypeId`, `tierTypeId`, …). En base, Prisma mappe vers des colonnes courtes (`country_id`, `category_id`, `type_id`, etc.) — ne pas les confondre avec les clés JSON.\n\n**Variables** : `baseUrl` (ex. `http://localhost:4230`), `accessToken`, `refreshToken`. La collection utilise l’auth **Bearer** au niveau collection : après **Auth → Login**, copier `accessToken` / `refreshToken` dans les variables.\n\n**Auth** : `POST /auth/login` est public. **`POST /auth/register` exige un JWT** (guard global) — utiliser un compte déjà connecté (ex. admin seed). `GET /health` est public.\n\n**Périmètres** : la plupart des routes métier filtrent par **société** (`companyId` du JWT) ou par **utilisateur** (activities, notifications). Les tables **settings** (pays, rôles, etc.) sont globales.\n\n**Corps JSON** : les requêtes `POST`/`PATCH` listent **tous les champs du DTO** (y compris optionnels) pour faciliter les essais — retirer ou adapter les clés non voulues.\n\n**Dossiers** : App · Auth · Users · Company · Clients · **Employees** (`POST /employees` JSON, **`POST /employees/import`** fichier `.xlsx` **form-data** `file`) · Employee contracts · Tiers · **Financial Report** (exports Excel / PDF DGID) · **Accounting years** · **Balances** (`/balances`, `/balance-lines`, import `.xlsx` **8 colonnes**, `balanceId` en URL ; infobulles sur les en-têtes du modèle généré) · **Rental usages** · **Rentals** · **Deduction types** · **Property nature types** · **Op turnovers** · **Op turnover stamps** (`opTurnoverId` query obligatoire) · **Op local purchases** (`tierId`) · **Op suspensions** · **Op importations** (`POST /op-importations/import` `.xlsx`, query `clientId` — fournisseur SUPPLIER, types déduction/nature et pays auto) · **Op exportations** (`POST /op-exportations/import` `.xlsx`, query `clientId` — NINEA/nom tiers, pays sans accents) · **Op retains** · **Op royalties** · **Op exemptions** (`POST /op-exemptions/import` `.xlsx`, query `clientId`, `year`) · **Accounting quarters** · **App meta** · **Tiers transactions** · Documents · Activities · Notifications · Settings (Countries, Regions, Currencies, Legal forms, Document categories, Identification types, Genders, Languages, Payment methods, Contract types, Tier types, Permissions, Roles).\n\n**Variables seed** (`prisma/seed.cjs`) : `clientId`, `companyId`, `userId` (admin), `employeeId`, `employeeContractId`, `tierId`, `tierId2`, `documentId`, `activityId`, `notificationId`, `accountingYearId`, `accountingQuarterId`, `tiersTransactionId`, `balanceId`, `balanceLineId` (vides par défaut — remplir après création / import balance), `rentalUsageId`, `rentalId`, `deductionTypeId`, `propertyNatureTypeId`, `opTurnoverId`, `opTurnoverStampId`, `opLocalPurchaseId`, `opSuspensionId`, `opImportationId`, `opExportationId`, `opRetainId`, `opRoyaltyId`, `opExemptionId` (préremplies après `npm run seed`), et références settings (`countryId`, `regionId`, …). Préremplies pour tests après `npm run seed`.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -50,6 +50,7 @@
     { "key": "languageId", "value": "a0000004-0000-4000-8000-000000000001", "description": "seed langFr" },
     { "key": "genderId", "value": "a0000007-0000-4000-8000-000000000001", "description": "seed genderO" },
     { "key": "tierTypeId", "value": "a0000009-0000-4000-8000-000000000001", "description": "seed tierTypeCustomer" },
+    { "key": "tierTypeIdSupplier", "value": "a000000a-0000-4000-8000-000000000001", "description": "seed tierTypeSupplier (code SUPPLIER — import importations)" },
     { "key": "contractTypeId", "value": "a000000b-0000-4000-8000-000000000001", "description": "seed contractCdi" },
     { "key": "identificationTypeId", "value": "a0000029-0000-4000-8000-000000000001", "description": "seed idTypeCni" },
     { "key": "documentCategoryId", "value": "a000001c-0000-4000-8000-000000000001", "description": "seed docCatInvoice" },
@@ -823,7 +824,7 @@
     {
       "name": "Deduction types",
       "id": "o0000100-0000-4000-8000-000000000001",
-      "description": "Référentiel `deduction_types` — types de déduction (achats locaux).",
+      "description": "Référentiel `deduction_types` — types de déduction. Utilisé par les **importations** (`op_importations`) : à l’import Excel, un nom inconnu est **créé automatiquement** (code abrégé du libellé). Voir aussi **Op importations → Import**.",
       "item": [
         {
           "name": "Create deduction type",
@@ -877,7 +878,7 @@
     {
       "name": "Property nature types",
       "id": "o0000200-0000-4000-8000-000000000001",
-      "description": "Référentiel `property_nature_types` — ex. MARCHANDISES (code `1`), AUTRES MARCHANDISES (code `2`).",
+      "description": "Référentiel `property_nature_types` — ex. MARCHANDISES (code `1`). Utilisé par les **importations** : à l’import Excel, un libellé inconnu est **créé** avec un code **incrémenté**. Voir **Op importations → Import**.",
       "item": [
         {
           "name": "Create property nature type",
@@ -1161,7 +1162,7 @@
     {
       "name": "Op importations",
       "id": "o0000800-0000-4000-8000-000000000001",
-      "description": "Importations (`op_importations`) — CRUD JSON ou **import Excel** (`POST /op-importations/import`, query `clientId`). **FOURNISSEUR** : tiers type **SUPPLIER** (création auto). **TYPE DEDUCTION** / **NATURE** : création auto si absent.",
+      "description": "Importations (`op_importations`) — opérations d’import fiscal par fournisseur.\n\n**Routes** :\n- `POST /op-importations` — création JSON (`tierId`, `countryId`, `deductionTypeId`, `propertyNatureTypeId`, `code`, `month`, `year`, `date`, montants optionnels)\n- **`POST /op-importations/import`** — import **Excel** `.xlsx` (query **`clientId`** obligatoire)\n- `GET /op-importations` — liste (`?tierId=` optionnel)\n- `GET /op-importations/:id` · `PATCH` · `DELETE` (soft)\n\n**Import Excel** : modèle `src/assets/xlsx/importations-import-template.xlsx`. Résolution automatique :\n- **FOURNISSEUR** → tiers du `clientId`, type **SUPPLIER** si création (`tierTypeIdSupplier` / code `SUPPLIER`)\n- **TYPE DEDUCTION** → `deduction_types` (code abrégé si création)\n- **NATURE DU BIEN OU DU SERVICE** → `property_nature_types` (code numérique incrémenté si création)\n- **PAYS** → `settings_countries` (casse/accents) ou création\n\n**Variables seed** : `tierId2` (fournisseur), `deductionTypeId`, `propertyNatureTypeId`, `countryId`, `opImportationId`.",
       "item": [
         {
           "name": "Import op importations (Excel .xlsx)",
@@ -1177,12 +1178,12 @@
                   "type": "file",
                   "src": [],
                   "disabled": false,
-                  "description": "Classeur `.xlsx` (1ʳᵉ feuille). **Ligne 1 — en-têtes** : `ANNEE`, `MOIS`, `FOURNISSEUR`, `PAYS`, `ADRESSE`, `TYPE DEDUCTION`, `NATURE DU BIEN OU DU SERVICE`, `N°DECLARATION`, `DATE`, `MONTANT HT`, `TVA`, `TVA DETUCTIBLE`, `PRORATA`. Modèle : `src/assets/xlsx/importations-import-template.xlsx`."
+                  "description": "Classeur `.xlsx` (1ʳᵉ feuille). **Ligne 1 — en-têtes** (ordre libre) : `ANNEE`, `MOIS`, `FOURNISSEUR`, `PAYS`, `ADRESSE`, `TYPE DEDUCTION`, `NATURE DU BIEN OU DU SERVICE`, `N°DECLARATION`, `DATE`, `MONTANT HT`, `TVA`, `TVA DETUCTIBLE` (typo modèle), `PRORATA`. Données à partir de la ligne 2. Modèle : `src/assets/xlsx/importations-import-template.xlsx`."
                 }
               ]
             },
             "url": "{{baseUrl}}/op-importations/import?clientId={{clientId}}",
-            "description": "**Étapes Postman**\n1. **Variables** : `baseUrl`, `clientId` (ex. seed), puis **Auth → Login** → `accessToken`.\n2. **Body** → **form-data** : champ **`file`** en type **File**.\n3. Exemple ligne 2 seed :\n   - `ANNEE` : `2025` · `MOIS` : `1`\n   - `FOURNISSEUR` : `Tier démo fournisseur A` · `PAYS` : `Sénégal` · `ADRESSE` : `Point E, Dakar`\n   - `TYPE DEDUCTION` : `Déduction standard` · `NATURE DU BIEN OU DU SERVICE` : `MARCHANDISES`\n   - `N°DECLARATION` : `IMP-SEED-2025-01` · `DATE` : `10/01/2025`\n   - `MONTANT HT` : `200000` · `TVA` : `36000` · `TVA DETUCTIBLE` : `20000` · `PRORATA` : `1`\n4. **Send** — attendre `201`.\n\n**Résolution** :\n- **FOURNISSEUR** : nom dans `tiers` du client → sinon création type **SUPPLIER**.\n- **TYPE DEDUCTION** : nom dans `deduction_types` → sinon création (code abrégé du nom).\n- **NATURE** : nom dans `property_nature_types` → sinon création (code incrémenté).\n- **PAYS** : match casse/accents ou création.\n\n**Réponse** : `createdCount`, `failedCount`, `tiersCreatedCount`, `countriesCreatedCount`, `deductionTypesCreatedCount`, `propertyNatureTypesCreatedCount`, `created`, `errors`. Max **500** lignes."
+            "description": "**Étapes Postman**\n1. **Variables** : `baseUrl`, `clientId` (ex. seed `clientDemo`), puis **Auth → Login** → `accessToken`.\n2. **Body** → **form-data** : champ **`file`** en type **File** (pas Text). Ne pas ajouter `Content-Type` manuellement.\n3. Remplir le modèle (ex. ligne 2 seed) :\n   - `ANNEE` : `2025` · `MOIS` : entier **1–12** (ex. `1`)\n   - `FOURNISSEUR` : ex. `Tier démo fournisseur A` (fournisseur — match casse/accents)\n   - `PAYS` : ex. `Sénégal` ou `Senegal` · `ADRESSE` : ex. `Point E, Dakar`\n   - `TYPE DEDUCTION` : ex. `Déduction standard` · `NATURE DU BIEN OU DU SERVICE` : ex. `MARCHANDISES`\n   - `N°DECLARATION` : ex. `IMP-SEED-2025-01` (unique) · `DATE` : ex. `10/01/2025` ou date Excel\n   - `MONTANT HT` : `200000` · `TVA` : `36000` · `TVA DETUCTIBLE` : `20000` · `PRORATA` : `1`\n4. **Send** — attendre `201`.\n\n**Résolution métier** (scope `clientId` en query) :\n1. **FOURNISSEUR** : chercher le nom dans `tiers` → sinon **création** avec type **SUPPLIER**.\n2. **TYPE DEDUCTION** : chercher dans `deduction_types` → sinon **création** (code = abréviation du nom, ex. `DEDU-STAN`).\n3. **NATURE** : chercher dans `property_nature_types` → sinon **création** (code incrémenté : `1`, `2`, `3`…).\n4. **PAYS** : match insensible casse/accents dans `settings_countries` → sinon **création** (devise XOF par défaut).\n\n**Mapping API** : `ANNEE`/`MOIS` → `year`/`month` ; `N°DECLARATION` → `code` ; `DATE` → `date` (ISO) ; `MONTANT HT` → `net` ; `TVA` → `tax` ; `TVA DETUCTIBLE` → `taxDeduction` ; `PRORATA` → `prorata` ; `total` = `net` + `tax` − `taxDeduction` si les trois montants sont présents.\n\n**Réponse** : `data.createdCount`, `data.failedCount`, `data.tiersCreatedCount`, `data.countriesCreatedCount`, `data.deductionTypesCreatedCount`, `data.propertyNatureTypesCreatedCount`, `data.created[]`, `data.errors[]` (`row`, `message`). Copier `data.created[0].id` dans `opImportationId` si besoin. Max **500** lignes utiles.\n\n**Erreurs fréquentes** : `400` fichier absent / non `.xlsx` ; `clientId` manquant ou hors société JWT ; en-têtes obligatoires manquants ; fournisseur ou N° déclaration vide ; mois hors 1–12."
           }
         },
         {
@@ -1193,16 +1194,21 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"tierId\": \"{{tierId2}}\",\n  \"countryId\": \"{{countryId}}\",\n  \"deductionTypeId\": \"{{deductionTypeId}}\",\n  \"propertyNatureTypeId\": \"{{propertyNatureTypeId}}\",\n  \"code\": \"IMP-2025-01\",\n  \"month\": 1,\n  \"year\": 2025,\n  \"date\": \"2025-01-10T00:00:00.000Z\",\n  \"net\": 200000,\n  \"tax\": 36000,\n  \"taxDeduction\": 20000,\n  \"total\": 236000,\n  \"prorata\": 1\n}"
+              "raw": "{\n  \"tierId\": \"{{tierId2}}\",\n  \"countryId\": \"{{countryId}}\",\n  \"deductionTypeId\": \"{{deductionTypeId}}\",\n  \"propertyNatureTypeId\": \"{{propertyNatureTypeId}}\",\n  \"code\": \"IMP-2025-02\",\n  \"month\": 1,\n  \"year\": 2025,\n  \"date\": \"2025-01-10T00:00:00.000Z\",\n  \"net\": 200000,\n  \"tax\": 36000,\n  \"taxDeduction\": 20000,\n  \"total\": 216000,\n  \"prorata\": 1\n}"
             },
             "url": "{{baseUrl}}/op-importations",
-            "description": "`201` — copier `data.id` dans `opImportationId`."
+            "description": "`201` — création manuelle (sans Excel). `tierId2` = fournisseur seed. Copier `data.id` dans `opImportationId`. Seed existant : `IMP-SEED-2025-01` (`opImportationId`)."
           }
         },
         {
           "name": "List op importations",
           "id": "o0000802-0000-4000-8000-000000000002",
-          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/op-importations" }
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/op-importations",
+            "description": "`200` — toutes les importations (non supprimées). Inclut `tier`, `country`, `deductionType`, `propertyNatureType`."
+          }
         },
         {
           "name": "List op importations by tier",
@@ -1210,13 +1216,19 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/op-importations?tierId={{tierId2}}"
+            "url": "{{baseUrl}}/op-importations?tierId={{tierId2}}",
+            "description": "`200` — filtre par fournisseur (`tierId2` = Tier démo fournisseur A)."
           }
         },
         {
           "name": "Get op importation by id",
           "id": "o0000804-0000-4000-8000-000000000004",
-          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/op-importations/{{opImportationId}}" }
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/op-importations/{{opImportationId}}",
+            "description": "`200` — détail. Variable seed : `opImportationId` (`IMP-SEED-2025-01`)."
+          }
         },
         {
           "name": "Update op importation",
@@ -1228,13 +1240,19 @@
               "mode": "raw",
               "raw": "{\n  \"total\": 240000,\n  \"prorata\": 0.85\n}"
             },
-            "url": "{{baseUrl}}/op-importations/{{opImportationId}}"
+            "url": "{{baseUrl}}/op-importations/{{opImportationId}}",
+            "description": "`200` — mise à jour partielle (`total`, `prorata`, montants, `code`, etc.)."
           }
         },
         {
           "name": "Delete op importation (soft)",
           "id": "o0000806-0000-4000-8000-000000000006",
-          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/op-importations/{{opImportationId}}" }
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/op-importations/{{opImportationId}}",
+            "description": "`200` — soft delete (`deletedAt`)."
+          }
         }
       ]
     },

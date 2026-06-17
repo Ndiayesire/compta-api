@@ -14,7 +14,11 @@ export class PropertyNatureTypesController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
-  @ApiOperation({ summary: 'Créer un type de nature de bien' })
+  @ApiOperation({
+    summary: 'Créer un type de nature de bien',
+    description:
+      'Référentiel `property_nature_types`. Utilisé par les importations : à l’import Excel, un libellé inconnu reçoit un code numérique incrémenté.',
+  })
   @ApiBody({ type: CreatePropertyNatureTypeDto })
   @ApiResponse({ status: HttpStatus.CREATED, schema: API_ENVELOPE_SCHEMA })
   async create(@Body() dto: CreatePropertyNatureTypeDto) {
