@@ -3,6 +3,7 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { CreateOpImportationDto } from './dto/create-op-importation.dto';
 import { UpdateOpImportationDto } from './dto/update-op-importation.dto';
+import { parseOpImportationImportWorkbook } from './op-importation-excel-import';
 
 const importationInclude = {
   tier: true,
@@ -53,6 +54,16 @@ export class OpImportationsService {
       throw new BadRequestException('Invalid property nature type');
     }
     return row;
+  }
+
+  private async assertClientBelongsToCompany(clientId: string, companyId: string) {
+    const client = await this.prisma.client.findFirst({
+      where: { id: clientId, companyId, deletedAt: null },
+    });
+    if (!client) {
+      throw new BadRequestException('Client not found or does not belong to your company');
+    }
+    return client;
   }
 
   async create(dto: CreateOpImportationDto) {
@@ -141,5 +152,47 @@ export class OpImportationsService {
       where: { id },
       data: { deletedAt: new Date() },
     });
+  }
+
+  /** Import importations depuis le modèle Excel (1ʳᵉ feuille). */
+  async importFromExcelBuffer(buffer: Buffer, companyId: string, clientId: string) {
+    await this.assertClientBelongsToCompany(clientId, companyId);
+    const parsed = await parseOpImportationImportWorkbook(this.prisma, clientId, buffer);
+
+    const errors: { row: number; message: string }[] = [];
+    const created: Awaited<ReturnType<OpImportationsService['create']>>[] = [];
+    let tiersCreatedCount = 0;
+    let countriesCreatedCount = 0;
+    let deductionTypesCreatedCount = 0;
+    let propertyNatureTypesCreatedCount = 0;
+
+    for (const item of parsed) {
+      if ('error' in item) {
+        errors.push({ row: item.rowNumber, message: item.error });
+        continue;
+      }
+      if (item.tierCreated) tiersCreatedCount += 1;
+      if (item.countryCreated) countriesCreatedCount += 1;
+      if (item.deductionTypeCreated) deductionTypesCreatedCount += 1;
+      if (item.propertyNatureTypeCreated) propertyNatureTypesCreatedCount += 1;
+      try {
+        const data = await this.create(item.dto);
+        created.push(data);
+      } catch (e) {
+        const message = e instanceof Error ? e.message : String(e);
+        errors.push({ row: item.rowNumber, message });
+      }
+    }
+
+    return {
+      createdCount: created.length,
+      failedCount: errors.length,
+      tiersCreatedCount,
+      countriesCreatedCount,
+      deductionTypesCreatedCount,
+      propertyNatureTypesCreatedCount,
+      created,
+      errors,
+    };
   }
 }

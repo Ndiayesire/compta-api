@@ -62,6 +62,7 @@ const ROUTE_NOTES = {
   '/op-turnover-stamps': 'query opTurnoverId obligatoire',
   '/op-local-purchases': 'month/year entiers · tierId',
   '/op-exemptions': 'POST /import · mois 1–12 · query year · tier auto',
+  '/op-importations': 'POST /import · fournisseur SUPPLIER · déduction/nature auto',
   '/op-exportations': 'POST /import · ANNEE/MOIS colonnes · tier auto',
   '/deduction-types': 'réf. fiscal · settings',
   '/property-nature-types': 'réf. fiscal · settings',
@@ -92,6 +93,12 @@ const IMPORT_ROUTES = [
     path: '/op-exportations/import',
     module: 'op-exportations',
     detail: 'query clientId · ANNEE/MOIS colonnes · PAYS · tier auto',
+  },
+  {
+    method: 'POST',
+    path: '/op-importations/import',
+    module: 'op-importations',
+    detail: 'query clientId · fournisseur · déduction · nature · pays auto',
   },
 ];
 

@@ -1161,8 +1161,30 @@
     {
       "name": "Op importations",
       "id": "o0000800-0000-4000-8000-000000000001",
-      "description": "Importations (`op_importations`) — `tierId`, `countryId`, `deductionTypeId`, `propertyNatureTypeId`. Montants et `prorata` optionnels.",
+      "description": "Importations (`op_importations`) — CRUD JSON ou **import Excel** (`POST /op-importations/import`, query `clientId`). **FOURNISSEUR** : tiers type **SUPPLIER** (création auto). **TYPE DEDUCTION** / **NATURE** : création auto si absent.",
       "item": [
+        {
+          "name": "Import op importations (Excel .xlsx)",
+          "id": "o0000807-0000-4000-8000-000000000007",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": [],
+                  "disabled": false,
+                  "description": "Classeur `.xlsx` (1ʳᵉ feuille). **Ligne 1 — en-têtes** : `ANNEE`, `MOIS`, `FOURNISSEUR`, `PAYS`, `ADRESSE`, `TYPE DEDUCTION`, `NATURE DU BIEN OU DU SERVICE`, `N°DECLARATION`, `DATE`, `MONTANT HT`, `TVA`, `TVA DETUCTIBLE`, `PRORATA`. Modèle : `src/assets/xlsx/importations-import-template.xlsx`."
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/op-importations/import?clientId={{clientId}}",
+            "description": "**Étapes Postman**\n1. **Variables** : `baseUrl`, `clientId` (ex. seed), puis **Auth → Login** → `accessToken`.\n2. **Body** → **form-data** : champ **`file`** en type **File**.\n3. Exemple ligne 2 seed :\n   - `ANNEE` : `2025` · `MOIS` : `1`\n   - `FOURNISSEUR` : `Tier démo fournisseur A` · `PAYS` : `Sénégal` · `ADRESSE` : `Point E, Dakar`\n   - `TYPE DEDUCTION` : `Déduction standard` · `NATURE DU BIEN OU DU SERVICE` : `MARCHANDISES`\n   - `N°DECLARATION` : `IMP-SEED-2025-01` · `DATE` : `10/01/2025`\n   - `MONTANT HT` : `200000` · `TVA` : `36000` · `TVA DETUCTIBLE` : `20000` · `PRORATA` : `1`\n4. **Send** — attendre `201`.\n\n**Résolution** :\n- **FOURNISSEUR** : nom dans `tiers` du client → sinon création type **SUPPLIER**.\n- **TYPE DEDUCTION** : nom dans `deduction_types` → sinon création (code abrégé du nom).\n- **NATURE** : nom dans `property_nature_types` → sinon création (code incrémenté).\n- **PAYS** : match casse/accents ou création.\n\n**Réponse** : `createdCount`, `failedCount`, `tiersCreatedCount`, `countriesCreatedCount`, `deductionTypesCreatedCount`, `propertyNatureTypesCreatedCount`, `created`, `errors`. Max **500** lignes."
+          }
+        },
         {
           "name": "Create op importation",
           "id": "o0000801-0000-4000-8000-000000000001",

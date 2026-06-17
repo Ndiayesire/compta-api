@@ -211,6 +211,106 @@ export async function findCountryIdByName(prisma: PrismaService, label: string):
   return matches[0].id;
 }
 
+export type ResolveCountryResult = {
+  countryId: string;
+  created: boolean;
+};
+
+function inferCountryCodeFromName(name: string): string {
+  const letters = name
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-zA-Z]/g, '')
+    .toUpperCase();
+  if (letters.length >= 2) {
+    return letters.slice(0, 3);
+  }
+  return 'XX';
+}
+
+async function pickUniqueCountryCode(prisma: PrismaService, base: string): Promise<string> {
+  let candidate = base.slice(0, 3) || 'XX';
+  for (let i = 0; i < 100; i++) {
+    const code = i === 0 ? candidate : `${candidate.slice(0, 2)}${i}`;
+    const existing = await prisma.country.findFirst({
+      where: { code },
+      select: { id: true },
+    });
+    if (!existing) return code.slice(0, 3);
+  }
+  throw new Error(`Impossible de générer un code pays unique pour « ${base} »`);
+}
+
+async function resolveDefaultCurrencyId(prisma: PrismaService): Promise<string> {
+  const xof = await prisma.currency.findFirst({
+    where: { code: 'XOF', isActive: true },
+    select: { id: true },
+  });
+  if (xof) return xof.id;
+  const any = await prisma.currency.findFirst({
+    where: { isActive: true },
+    select: { id: true },
+    orderBy: { code: 'asc' },
+  });
+  if (!any) {
+    throw new Error('Aucune devise active en base — impossible de créer un pays importé');
+  }
+  return any.id;
+}
+
+export async function findOrCreateCountryIdByName(
+  prisma: PrismaService,
+  label: string,
+  cache: Map<string, ResolveCountryResult>,
+): Promise<ResolveCountryResult> {
+  const trimmed = label.trim();
+  if (!trimmed) {
+    throw new Error('Pays vide');
+  }
+
+  const cacheKey = normalizeLabelForMatch(trimmed);
+  const cached = cache.get(cacheKey);
+  if (cached) {
+    return cached;
+  }
+
+  const countries = await prisma.country.findMany({
+    where: { isActive: true },
+    select: { id: true, name: true, code: true },
+  });
+  const matches = countries.filter(
+    (c) =>
+      eqAccentInsensitive(c.name, trimmed) ||
+      eqAccentInsensitive(c.code, trimmed) ||
+      eqInsensitive(c.code, trimmed),
+  );
+  if (matches.length > 1) {
+    throw new Error(`Plusieurs pays correspondent à « ${trimmed} »`);
+  }
+  if (matches.length === 1) {
+    const result = { countryId: matches[0].id, created: false };
+    cache.set(cacheKey, result);
+    return result;
+  }
+
+  const currencyId = await resolveDefaultCurrencyId(prisma);
+  const code = await pickUniqueCountryCode(prisma, inferCountryCodeFromName(trimmed));
+  const created = await prisma.country.create({
+    data: {
+      currencyId,
+      name: trimmed,
+      code,
+      tva: 0,
+      callingCode: '+0',
+      isActive: true,
+    },
+    select: { id: true },
+  });
+  const result = { countryId: created.id, created: true };
+  cache.set(cacheKey, result);
+  return result;
+}
+
 function mergeTierAddressMeta(adresse: string, existingMeta: unknown): Prisma.InputJsonValue {
   const base =
     typeof existingMeta === 'object' && existingMeta !== null && !Array.isArray(existingMeta)
