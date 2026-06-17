@@ -33,6 +33,7 @@ const HEADER_SYNONYMS: { key: OpImportationImportColumnKey; patterns: string[] }
     key: 'natureBienService',
     patterns: [
       'nature du bien ou du service',
+      'nature du bien ou service',
       'nature bien service',
       'nature du bien',
       'nature bien',
@@ -371,7 +372,7 @@ export async function findOrCreatePropertyNatureTypeByName(
 ): Promise<ResolvePropertyNatureTypeResult> {
   const trimmed = name.trim();
   if (!trimmed) {
-    throw new Error('Nature du bien ou du service vide');
+    throw new Error('Nature du bien ou service vide');
   }
 
   const cacheKey = normalizeLabelForMatch(trimmed);

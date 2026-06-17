@@ -61,7 +61,7 @@ export class OpImportationsController {
       '**Résolution métier** (scope `clientId`) :',
       '1. **FOURNISSEUR** — nom dans `tiers` (casse + accents) → sinon **création** avec type **SUPPLIER** (`tier_types.code = SUPPLIER`).',
       '2. **TYPE DEDUCTION** — nom dans `deduction_types` → sinon **création** (code = abréviation du libellé, ex. `DEDU-STAN`).',
-      '3. **NATURE DU BIEN OU DU SERVICE** — nom dans `property_nature_types` → sinon **création** (code numérique incrémenté : `1`, `2`, `3`…).',
+      '3. **NATURE DU BIEN OU SERVICE** — nom dans `property_nature_types` → sinon **création** (code numérique incrémenté : `1`, `2`, `3`…).',
       '4. **PAYS** — nom ou code dans `settings_countries` (casse + accents) → sinon **création** (devise XOF par défaut).',
       '',
       '**Mapping API** : `ANNEE`/`MOIS` → `year`/`month` ; `N°DECLARATION` → `code` ; `MONTANT HT` → `net` ; `TVA` → `tax` ; `TVA DETUCTIBLE` → `taxDeduction` ; `PRORATA` → `prorata` ; `total` = `net` + `tax` − `taxDeduction` si les trois montants sont renseignés.',
