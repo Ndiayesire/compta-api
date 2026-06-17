@@ -64,10 +64,15 @@
     '/clients': 'user optionnel · meta bp',
     '/employees': 'import Excel',
     '/balances': 'import lignes .xlsx',
+    '/op-exemptions': 'import Excel · mois 1–12 · query year · tier auto',
+    '/op-exportations': 'import Excel · ANNEE/MOIS · PAYS · tier auto',
+    '/op-local-purchases': 'month/year entiers · tierId',
     '/tiers': 'exports DGID + jobs',
     '/notifications': 'GET /unread',
     '(interne)': 'Excel DGID via TiersService',
   };
+
+  let meta = { importRoutes: [], zoneCounts: {}, fiscalModules: [] };
 
   const SNIPPET_LABELS = {
     entry: 'Routes HTTP',
@@ -319,17 +324,20 @@
   function tileCard(m, z) {
     const ctrl = label(m);
     const primarySvc = m.services[0] || '—';
+    const importBadge = hasImportNote(m) ? '<span class="tile-import">.xlsx</span>' : '';
     return `
       <button type="button" class="tile${selectedId === m.id ? ' on' : ''}" data-id="${m.id.replace(/"/g, '&quot;')}" style="--zc:${z.color}">
         <div class="tile-row">
           <span class="tile-zone">${esc(z.label)}</span>
           <span class="tile-route">${esc(m.route)}</span>
+          ${importBadge}
         </div>
         <div class="tile-sub">
           <span class="tile-ctrl">${esc(ctrl)}</span>
           <span class="tile-dot">·</span>
           <span class="tile-svc">${esc(primarySvc)}</span>
         </div>
+        ${m.notes ? `<div class="tile-foot"><span class="tile-badge">${esc(m.notes)}</span></div>` : ''}
       </button>`;
   }
 
@@ -423,6 +431,36 @@
     });
   }
 
+  function hasImportNote(m) {
+    return /import|\.xlsx/i.test(m.notes || '');
+  }
+
+  function renderImportPanel() {
+    const routes = meta.importRoutes || [];
+    if (!routes.length) return '';
+    const items = routes
+      .map(
+        (r) =>
+          `<li><code>${esc(r.method)} ${esc(r.path)}</code> — ${esc(r.detail)} <span style="opacity:0.65">(${esc(r.module)})</span></li>`,
+      )
+      .join('');
+    return `
+      <div class="import-panel">
+        <h3>Imports Excel (.xlsx)</h3>
+        <ul>${items}</ul>
+      </div>`;
+  }
+
+  function formatGenerated(iso) {
+    if (!iso) return '';
+    try {
+      const d = new Date(iso);
+      return `MAJ ${d.toLocaleDateString('fr-FR')} ${d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`;
+    } catch {
+      return '';
+    }
+  }
+
   function flowLink() {
     return '<div class="flow-link"></div>';
   }
@@ -445,8 +483,9 @@
         <div class="stack-global">
           ${layers}
         </div>
+        ${renderImportPanel()}
         <p style="text-align:center;margin-top:1.5rem;font-size:0.78rem;color:var(--muted)">
-          ${modules.length} modules · ${ctrl} controllers · ${svc} services · Cliquez une tuile à droite
+          ${modules.length} modules · ${ctrl} controllers · ${svc} services · ${(meta.fiscalModules || []).length} fiscal · Cliquez une tuile à droite
         </p>
       </div>`;
   }
@@ -578,7 +617,10 @@
     try {
       const res = await fetch('architecture-data.json');
       const data = await res.json();
+      meta = data.meta || meta;
       modules = enrich(data.modules);
+      const genEl = document.getElementById('arch-generated');
+      if (genEl) genEl.textContent = formatGenerated(data.generated);
     } catch {
       document.getElementById('arch-canvas').innerHTML = '<p class="err">Exécutez <code>node scripts/scan-architecture.cjs</code></p>';
       return;

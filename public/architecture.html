@@ -302,6 +302,50 @@
       font-size: 0.78rem;
       color: #fdba74;
     }
+    .import-panel {
+      margin-top: 1.25rem;
+      padding: 0.85rem 1rem;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: rgba(17, 24, 39, 0.85);
+      max-width: 720px;
+      margin-left: auto;
+      margin-right: auto;
+      width: 100%;
+    }
+    .import-panel h3 {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      margin-bottom: 0.65rem;
+    }
+    .import-panel ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+    .import-panel li {
+      font-size: 0.76rem;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+    .import-panel code {
+      font-family: "IBM Plex Mono", ui-monospace, monospace;
+      font-size: 0.7rem;
+      color: #67e8f9;
+    }
+    .tile-import {
+      font-size: 0.55rem;
+      color: var(--accent2);
+      padding: 0.12rem 0.35rem;
+      border-radius: 4px;
+      background: rgba(249, 115, 22, 0.12);
+      border: 1px solid rgba(249, 115, 22, 0.25);
+      flex-shrink: 0;
+    }
     .mod-guard {
       margin-top: 0.75rem;
       font-size: 0.72rem;
@@ -750,7 +794,7 @@
   <header class="hdr">
     <h1>Insta Compta API</h1>
     <input type="search" id="arch-q" placeholder="Filtrer modules…" autocomplete="off" />
-    <p class="hdr-meta"><a href="/">Swagger</a> · NestJS · Prisma · MySQL</p>
+    <p class="hdr-meta"><a href="/">Swagger</a> · NestJS · Prisma · MySQL · <span id="arch-generated"></span></p>
   </header>
 
   <div class="layout">

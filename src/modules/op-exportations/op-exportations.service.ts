@@ -3,6 +3,7 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { CreateOpExportationDto } from './dto/create-op-exportation.dto';
 import { UpdateOpExportationDto } from './dto/update-op-exportation.dto';
+import { parseOpExportationImportWorkbook } from './op-exportation-excel-import';
 
 const exportationInclude = {
   tier: true,
@@ -31,6 +32,16 @@ export class OpExportationsService {
       throw new BadRequestException('Invalid country');
     }
     return row;
+  }
+
+  private async assertClientBelongsToCompany(clientId: string, companyId: string) {
+    const client = await this.prisma.client.findFirst({
+      where: { id: clientId, companyId, deletedAt: null },
+    });
+    if (!client) {
+      throw new BadRequestException('Client not found or does not belong to your company');
+    }
+    return client;
   }
 
   async create(dto: CreateOpExportationDto) {
@@ -109,5 +120,45 @@ export class OpExportationsService {
       where: { id },
       data: { deletedAt: new Date() },
     });
+  }
+
+  /** Import exportations depuis le modèle Excel (1ʳᵉ feuille). */
+  async importFromExcelBuffer(buffer: Buffer, companyId: string, clientId: string) {
+    await this.assertClientBelongsToCompany(clientId, companyId);
+    const parsed = await parseOpExportationImportWorkbook(this.prisma, clientId, buffer);
+
+    const errors: { row: number; message: string }[] = [];
+    const created: Awaited<ReturnType<OpExportationsService['create']>>[] = [];
+    let tiersCreatedCount = 0;
+    let tiersUpdatedCount = 0;
+
+    for (const item of parsed) {
+      if ('error' in item) {
+        errors.push({ row: item.rowNumber, message: item.error });
+        continue;
+      }
+      if (item.tierCreated) {
+        tiersCreatedCount += 1;
+      }
+      if (item.tierUpdated) {
+        tiersUpdatedCount += 1;
+      }
+      try {
+        const data = await this.create(item.dto);
+        created.push(data);
+      } catch (e) {
+        const message = e instanceof Error ? e.message : String(e);
+        errors.push({ row: item.rowNumber, message });
+      }
+    }
+
+    return {
+      createdCount: created.length,
+      failedCount: errors.length,
+      tiersCreatedCount,
+      tiersUpdatedCount,
+      created,
+      errors,
+    };
   }
 }

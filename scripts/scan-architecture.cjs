@@ -49,6 +49,67 @@ const FOLDER_MODELS = {
   'src/modules/excel-reports': [],
 };
 
+/** Notes affichées sur les tuiles / diagramme (source unique pour architecture-data.json). */
+const ROUTE_NOTES = {
+  '/health': '@Public() health check',
+  '/auth': 'POST /login @Public · register JWT',
+  '/clients': 'user optionnel à la création · meta bp',
+  '/employees': 'POST /import · Excel salariés',
+  '/balances': 'POST /:balanceId/balance-lines/import · 8 colonnes .xlsx',
+  '/balance-lines': 'query balanceId obligatoire · import via /balances',
+  '/tiers': 'exports Excel/PDF DGID · jobs async',
+  '/notifications': 'GET /unread avant :id',
+  '/op-turnover-stamps': 'query opTurnoverId obligatoire',
+  '/op-local-purchases': 'month/year entiers · tierId',
+  '/op-exemptions': 'POST /import · mois 1–12 · query year · tier auto',
+  '/op-exportations': 'POST /import · ANNEE/MOIS colonnes · tier auto',
+  '/deduction-types': 'réf. fiscal · settings',
+  '/property-nature-types': 'réf. fiscal · settings',
+  '(interne)': 'Excel DGID via TiersModule',
+};
+
+const IMPORT_ROUTES = [
+  {
+    method: 'POST',
+    path: '/employees/import',
+    module: 'employees',
+    detail: 'multipart file · query clientId',
+  },
+  {
+    method: 'POST',
+    path: '/balances/:balanceId/balance-lines/import',
+    module: 'balances',
+    detail: '8 colonnes · balanceId en URL',
+  },
+  {
+    method: 'POST',
+    path: '/op-exemptions/import',
+    module: 'op-exemptions',
+    detail: 'query clientId + year · mois 1–12 · tier auto',
+  },
+  {
+    method: 'POST',
+    path: '/op-exportations/import',
+    module: 'op-exportations',
+    detail: 'query clientId · ANNEE/MOIS colonnes · PAYS · tier auto',
+  },
+];
+
+function controllerNameToKebab(controllerName) {
+  return controllerName
+    .replace(/Controller$/, '')
+    .replace(/([A-Z])/g, '-$1')
+    .replace(/^-/, '')
+    .toLowerCase();
+}
+
+function resolveControllerFile(dir, controllerName, ctrlFiles) {
+  const kebab = controllerNameToKebab(controllerName);
+  const exact = path.join(dir, `${kebab}.controller.ts`);
+  if (fs.existsSync(exact)) return exact;
+  return ctrlFiles.find((f) => path.basename(f, '.controller.ts') === kebab) || ctrlFiles[0];
+}
+
 function readRoute(filePath) {
   const content = fs.readFileSync(filePath, 'utf8');
   const m = content.match(/@Controller\(\s*['"]([^'"]+)['"]\s*\)/);
@@ -68,8 +129,20 @@ function rel(p) {
   return path.relative(PROJECT, p).replace(/\\/g, '/');
 }
 
+function collapseImportStatements(code) {
+  return code.replace(
+    /^import\s+(?:type\s+)?[\s\S]*?from\s+['"][^'"]+['"]\s*;?\s*\r?\n/gm,
+    (stmt) => {
+      const oneLine = stmt.replace(/\s+/g, ' ').trim();
+      return (oneLine.endsWith(';') ? oneLine : `${oneLine};`) + '\n';
+    },
+  );
+}
+
 function stripImports(code) {
-  return code.replace(/^import\s+.+;\s*\r?\n/gm, '').trim();
+  return collapseImportStatements(code)
+    .replace(/^import\s+.+;\s*\r?\n/gm, '')
+    .trim();
 }
 
 function readTsFiles(dir, suffix) {
@@ -129,16 +202,34 @@ function extractOutputPattern(ctrlCode) {
   return samples.length ? samples.join('\n\n') : `return {\n  success: true,\n  message: '…',\n  data,\n};`;
 }
 
+function readModuleHelpers(dir) {
+  if (!fs.existsSync(dir)) return [];
+  return fs
+    .readdirSync(dir)
+    .filter(
+      (f) =>
+        (f.endsWith('-excel-import.ts') || f.endsWith('-import.ts')) &&
+        !f.endsWith('.spec.ts'),
+    )
+    .map((f) => path.join(dir, f));
+}
+
 function buildSnippets(mod) {
   const dir = moduleDir(mod.folder);
   const ctrlFiles = readTsFiles(dir, '.controller.ts');
   const svcFiles = readTsFiles(dir, '.service.ts');
-  const ctrlFile = ctrlFiles.find((f) => mod.controllers.some((c) => f.includes(c.replace(/Controller$/, '').toLowerCase().replace(/([A-Z])/g, '-$1').replace(/^-/, '')))) || ctrlFiles[0];
-  const svcFile = svcFiles[0];
+  const helperFiles = readModuleHelpers(dir);
+  const ctrlName = mod.controllers[0];
+  const ctrlFile = ctrlName ? resolveControllerFile(dir, ctrlName, ctrlFiles) : ctrlFiles[0];
   const dtoDir = path.join(dir, 'dto');
 
   const ctrlCode = ctrlFile && fs.existsSync(ctrlFile) ? fs.readFileSync(ctrlFile, 'utf8') : '';
-  const svcCode = svcFiles.map((f) => fs.readFileSync(f, 'utf8')).join('\n\n// ---\n\n');
+  const svcParts = svcFiles.map((f) => fs.readFileSync(f, 'utf8'));
+  const helperParts = helperFiles.map((f) => {
+    const name = path.basename(f);
+    return `// ${name}\n${fs.readFileSync(f, 'utf8')}`;
+  });
+  const svcCode = [...svcParts, ...helperParts].join('\n\n// ---\n\n');
   const routePrefix = mod.route === '(interne)' ? '(interne)' : mod.route;
 
   const dtoCode = fs.existsSync(dtoDir)
@@ -165,7 +256,7 @@ function buildSnippets(mod) {
       code: dtoCode || '// Pas de DTO',
     },
     service: {
-      file: svcFiles.map(rel).join(', ') || '—',
+      file: [...svcFiles, ...helperFiles].map(rel).join(', ') || '—',
       code: svcCode ? stripImports(svcCode) : '// Pas de service',
     },
     prisma: {
@@ -230,7 +321,7 @@ modules.push({
   controllers: ['AppController'],
   services: ['AppService'],
   dtos: [],
-  notes: '@Public() health check',
+  notes: ROUTE_NOTES['/health'],
 });
 
 function scanModule(moduleDirPath, folder) {
@@ -267,7 +358,7 @@ for (const entry of fs.readdirSync(ROOT, { withFileTypes: true })) {
       controllers: [],
       services: serviceNames(path.join(ROOT, 'excel-reports')),
       dtos: [],
-      notes: 'Injecté dans TiersModule — exports Excel DGID',
+      notes: ROUTE_NOTES['(interne)'],
     });
     continue;
   }
@@ -278,10 +369,29 @@ modules.forEach((m) => {
   if (m.folder.includes('/settings/deduction-types') || m.folder.includes('/settings/property-nature-types')) {
     m.zone = 'fiscal';
   }
+  if (!m.notes && ROUTE_NOTES[m.route]) {
+    m.notes = ROUTE_NOTES[m.route];
+  }
   m.snippets = buildSnippets(m);
 });
 
 modules.sort((a, b) => a.route.localeCompare(b.route));
-const out = { generated: new Date().toISOString(), count: modules.length, modules };
+
+const zoneCounts = modules.reduce((acc, m) => {
+  acc[m.zone] = (acc[m.zone] || 0) + 1;
+  return acc;
+}, {});
+
+const out = {
+  generated: new Date().toISOString(),
+  count: modules.length,
+  meta: {
+    stack: ['NestJS 11', 'Prisma 7', 'MySQL', 'JWT'],
+    zoneCounts,
+    importRoutes: IMPORT_ROUTES,
+    fiscalModules: modules.filter((m) => m.zone === 'fiscal').map((m) => m.route),
+  },
+  modules,
+};
 fs.writeFileSync(path.join(PROJECT, 'public', 'architecture-data.json'), JSON.stringify(out, null, 2));
 console.log('OK', modules.length, 'modules');
