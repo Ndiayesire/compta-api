@@ -60,7 +60,7 @@ const ROUTE_NOTES = {
   '/tiers': 'exports Excel/PDF DGID · jobs async',
   '/notifications': 'GET /unread avant :id',
   '/op-turnover-stamps': 'query opTurnoverId obligatoire',
-  '/op-local-purchases': 'month/year entiers · tierId',
+  '/op-local-purchases': 'POST /import · NINEA/fournisseur SUPPLIER · déduction/nature auto',
   '/op-exemptions': 'POST /import · mois 1–12 · query year · tier auto',
   '/op-importations': 'POST /import · fournisseur SUPPLIER · déduction/nature auto',
   '/op-exportations': 'POST /import · ANNEE/MOIS colonnes · tier auto',
@@ -99,6 +99,12 @@ const IMPORT_ROUTES = [
     path: '/op-importations/import',
     module: 'op-importations',
     detail: 'query clientId · fournisseur · déduction · nature · pays auto',
+  },
+  {
+    method: 'POST',
+    path: '/op-local-purchases/import',
+    module: 'op-local-purchases',
+    detail: 'query clientId · NINEA/COFI/fournisseur · déduction · nature',
   },
 ];
 

@@ -73,7 +73,7 @@ async function bootstrap() {
     .addTag('property-nature-types', 'Natures de biens / services — référentiel ; création auto à l’import **op-importations** (code incrémenté)')
     .addTag('op-turnovers', 'Chiffres d’affaires par client')
     .addTag('op-turnover-stamps', 'Timbres / versions de CA')
-    .addTag('op-local-purchases', 'Achats locaux')
+    .addTag('op-local-purchases', 'Achats locaux — CRUD JSON et **POST /import** Excel (.xlsx, query clientId)')
     .addTag('op-suspensions', 'Suspensions fiscales par tiers')
     .addTag('op-importations', 'Importations fiscales par fournisseur — CRUD JSON et **POST /import** Excel (.xlsx, query clientId)')
     .addTag('op-exportations', 'Exportations par tiers — CRUD JSON et **POST /import** Excel (.xlsx, query clientId)')
