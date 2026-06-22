@@ -3,21 +3,12 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { CreateOpTurnoverDto } from './dto/create-op-turnover.dto';
 import { UpdateOpTurnoverDto } from './dto/update-op-turnover.dto';
-import { CreateOpTurnoverStampDto } from './dto/create-op-turnover-stamp.dto';
-import { UpdateOpTurnoverStampDto } from './dto/update-op-turnover-stamp.dto';
+import { parseOpTurnoverImportWorkbook } from './op-turnover-excel-import';
 
 const turnoverInclude = {
   client: { select: { id: true, name: true, companyId: true } },
   stamps: { where: { deletedAt: null }, orderBy: { date: 'desc' as const } },
 } satisfies Prisma.OpTurnoverInclude;
-
-const stampInclude = {
-  opTurnover: {
-    include: {
-      client: { select: { id: true, name: true, companyId: true } },
-    },
-  },
-} satisfies Prisma.OpTurnoverStampInclude;
 
 @Injectable()
 export class OpTurnoversService {
@@ -31,20 +22,6 @@ export class OpTurnoversService {
       throw new BadRequestException('Client not found or does not belong to your company');
     }
     return client;
-  }
-
-  private async assertTurnoverInCompany(id: string, companyId: string) {
-    const row = await this.prisma.opTurnover.findFirst({
-      where: {
-        id,
-        deletedAt: null,
-        client: { companyId, deletedAt: null },
-      },
-    });
-    if (!row) {
-      throw new NotFoundException('Op turnover not found');
-    }
-    return row;
   }
 
   async create(dto: CreateOpTurnoverDto, companyId: string) {
@@ -115,79 +92,33 @@ export class OpTurnoversService {
     });
   }
 
-  async createStamp(dto: CreateOpTurnoverStampDto, companyId: string) {
-    await this.assertTurnoverInCompany(dto.opTurnoverId, companyId);
-    return this.prisma.opTurnoverStamp.create({
-      data: {
-        opTurnoverId: dto.opTurnoverId,
-        date: new Date(dto.date),
-        net: new Prisma.Decimal(String(dto.net)),
-        tax: new Prisma.Decimal(String(dto.tax)),
-        total: new Prisma.Decimal(String(dto.total)),
-        amount: dto.amount as Prisma.InputJsonValue,
-        amountDeduction: dto.amountDeduction as Prisma.InputJsonValue,
-      },
-      include: stampInclude,
-    });
-  }
+  /** Import chiffres d'affaires depuis le modèle Excel (1ʳᵉ feuille). */
+  async importFromExcelBuffer(buffer: Buffer, companyId: string, clientId: string) {
+    await this.assertClientInCompany(clientId, companyId);
+    const parsed = await parseOpTurnoverImportWorkbook(this.prisma, clientId, buffer);
 
-  async findAllStamps(opTurnoverId: string, companyId: string) {
-    await this.assertTurnoverInCompany(opTurnoverId, companyId);
-    return this.prisma.opTurnoverStamp.findMany({
-      where: {
-        opTurnoverId,
-        deletedAt: null,
-        opTurnover: {
-          deletedAt: null,
-          client: { companyId, deletedAt: null },
-        },
-      },
-      include: stampInclude,
-      orderBy: { date: 'desc' },
-    });
-  }
+    const errors: { row: number; message: string }[] = [];
+    const created: Awaited<ReturnType<OpTurnoversService['create']>>[] = [];
 
-  async findOneStamp(id: string, companyId: string) {
-    const row = await this.prisma.opTurnoverStamp.findFirst({
-      where: {
-        id,
-        deletedAt: null,
-        opTurnover: {
-          deletedAt: null,
-          client: { companyId, deletedAt: null },
-        },
-      },
-      include: stampInclude,
-    });
-    if (!row) {
-      throw new NotFoundException('Op turnover stamp not found');
+    for (const item of parsed) {
+      if ('error' in item) {
+        errors.push({ row: item.rowNumber, message: item.error });
+        continue;
+      }
+      try {
+        const data = await this.create(item.dto, companyId);
+        created.push(data);
+      } catch (e) {
+        const message = e instanceof Error ? e.message : String(e);
+        errors.push({ row: item.rowNumber, message });
+      }
     }
-    return row;
-  }
 
-  async updateStamp(id: string, dto: UpdateOpTurnoverStampDto, companyId: string) {
-    await this.findOneStamp(id, companyId);
-    return this.prisma.opTurnoverStamp.update({
-      where: { id },
-      data: {
-        ...(dto.date !== undefined ? { date: new Date(dto.date) } : {}),
-        ...(dto.net !== undefined ? { net: new Prisma.Decimal(String(dto.net)) } : {}),
-        ...(dto.tax !== undefined ? { tax: new Prisma.Decimal(String(dto.tax)) } : {}),
-        ...(dto.total !== undefined ? { total: new Prisma.Decimal(String(dto.total)) } : {}),
-        ...(dto.amount !== undefined ? { amount: dto.amount as Prisma.InputJsonValue } : {}),
-        ...(dto.amountDeduction !== undefined
-          ? { amountDeduction: dto.amountDeduction as Prisma.InputJsonValue }
-          : {}),
-      },
-      include: stampInclude,
-    });
-  }
-
-  async removeStamp(id: string, companyId: string) {
-    await this.findOneStamp(id, companyId);
-    return this.prisma.opTurnoverStamp.update({
-      where: { id },
-      data: { deletedAt: new Date() },
-    });
+    return {
+      createdCount: created.length,
+      failedCount: errors.length,
+      created,
+      errors,
+    };
   }
 }

@@ -20,7 +20,8 @@ const FOLDER_MODELS = {
   'src/modules/documents': ['Document'],
   'src/modules/accounting-years': ['AccountingYear'],
   'src/modules/accounting-quarters': ['AccountingQuarter'],
-  'src/modules/op-turnovers': ['OpTurnover', 'OpTurnoverStamp'],
+  'src/modules/op-turnovers': ['OpTurnover'],
+  'src/modules/op-turnover-stamps': ['OpTurnoverStamp'],
   'src/modules/op-local-purchases': ['OpLocalPurchase'],
   'src/modules/op-suspensions': ['OpSuspension'],
   'src/modules/op-importations': ['OpImportation'],
@@ -59,6 +60,7 @@ const ROUTE_NOTES = {
   '/balance-lines': 'query balanceId obligatoire · import via /balances',
   '/tiers': 'exports Excel/PDF DGID · jobs async',
   '/notifications': 'GET /unread avant :id',
+  '/op-turnovers': 'POST /import · DATES/N° FACTURE/montants · query clientId',
   '/op-turnover-stamps': 'query opTurnoverId obligatoire',
   '/op-local-purchases': 'POST /import · NINEA/fournisseur SUPPLIER · déduction/nature auto',
   '/op-exemptions': 'POST /import · mois 1–12 · query year · tier auto',
@@ -105,6 +107,12 @@ const IMPORT_ROUTES = [
     path: '/op-local-purchases/import',
     module: 'op-local-purchases',
     detail: 'query clientId · NINEA/COFI/fournisseur · déduction · nature',
+  },
+  {
+    method: 'POST',
+    path: '/op-turnovers/import',
+    module: 'op-turnovers',
+    detail: 'query clientId · DATES/N° FACTURE/montants · LIBELLES non persisté',
   },
 ];
 
@@ -317,7 +325,7 @@ function dtoNames(moduleDir) {
 function zoneFor(folder) {
   if (['auth', 'users', 'company', 'clients'].includes(folder)) return 'core';
   if (['activities', 'notifications'].includes(folder)) return 'perso';
-  if (['op-turnovers', 'op-local-purchases', 'op-suspensions', 'op-importations', 'op-exportations', 'op-retains', 'op-royalties', 'op-exemptions'].includes(folder)) return 'fiscal';
+  if (['op-turnovers', 'op-turnover-stamps', 'op-local-purchases', 'op-suspensions', 'op-importations', 'op-exportations', 'op-retains', 'op-royalties', 'op-exemptions'].includes(folder)) return 'fiscal';
   if (['deduction-types', 'property-nature-types'].includes(folder)) return 'fiscal';
   if (['app-meta'].includes(folder)) return 'app';
   if (folder.startsWith('settings/')) return 'settings';

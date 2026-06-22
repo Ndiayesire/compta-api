@@ -932,8 +932,30 @@
     {
       "name": "Op turnovers",
       "id": "o0000400-0000-4000-8000-000000000001",
-      "description": "Chiffres d'affaires (`op_turnovers`) — scope société via `clientId`.",
+      "description": "Chiffres d'affaires (`op_turnovers`) — CRUD JSON ou **import Excel** (`POST /op-turnovers/import`, query `clientId`). Colonnes : `DATES`, `N° FACTURE`, `LIBELLES` (informatif), `MONTANT HT`, `TVA`, `TTC`.",
       "item": [
+        {
+          "name": "Import op turnovers (Excel .xlsx)",
+          "id": "o0000407-0000-4000-8000-000000000007",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": [],
+                  "disabled": false,
+                  "description": "Classeur `.xlsx`. **Ligne 1** : `DATES`, `N° FACTURE`, `LIBELLES`, `MONTANT HT`, `TVA`, `TTC`. Modèle : `src/assets/xlsx/turnovers-import-template.xlsx`."
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/op-turnovers/import?clientId={{clientId}}",
+            "description": "**Étapes**\n1. Variables `baseUrl`, `clientId`, **Auth → Login** → `accessToken`.\n2. **form-data** → champ **`file`** (type File).\n3. Exemple seed ligne 2 :\n   - `DATES` `2025-03-31` · `N° FACTURE` `CA-SEED-2025-Q1` · `LIBELLES` `Chiffre affaires T1 seed`\n   - `MONTANT HT` `1000000` · `TVA` `180000` · `TTC` `1180000`\n\n**LIBELLES** : colonne informative — **non persistée** en base.\n\n**Réponse** : `createdCount`, `failedCount`, `created`, `errors`. Max **500** lignes."
+          }
+        },
         {
           "name": "Create op turnover",
           "id": "o0000401-0000-4000-8000-000000000001",

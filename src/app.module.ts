@@ -40,6 +40,7 @@ import { BalancesModule } from './modules/balances/balances.module';
 import { DeductionTypesModule } from './modules/settings/deduction-types/deduction-types.module';
 import { PropertyNatureTypesModule } from './modules/settings/property-nature-types/property-nature-types.module';
 import { OpTurnoversModule } from './modules/op-turnovers/op-turnovers.module';
+import { OpTurnoverStampsModule } from './modules/op-turnover-stamps/op-turnover-stamps.module';
 import { OpLocalPurchasesModule } from './modules/op-local-purchases/op-local-purchases.module';
 import { OpSuspensionsModule } from './modules/op-suspensions/op-suspensions.module';
 import { OpImportationsModule } from './modules/op-importations/op-importations.module';
@@ -82,6 +83,7 @@ import { HttpLatencyInterceptor } from './common/interceptors/http-latency/http-
     DeductionTypesModule,
     PropertyNatureTypesModule,
     OpTurnoversModule,
+    OpTurnoverStampsModule,
     OpLocalPurchasesModule,
     OpSuspensionsModule,
     OpImportationsModule,
