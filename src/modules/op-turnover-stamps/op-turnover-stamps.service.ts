@@ -47,7 +47,7 @@ export class OpTurnoverStampsService {
     }
     return this.prisma.opTurnoverStamp.create({
       data: {
-        opTurnoverId: dto.opTurnoverId ?? null,
+        ...(dto.opTurnoverId ? { opTurnover: { connect: { id: dto.opTurnoverId } } } : {}),
         date: new Date(dto.date),
         net: new Prisma.Decimal(String(dto.net)),
         tax: new Prisma.Decimal(String(dto.tax)),
@@ -119,9 +119,20 @@ export class OpTurnoverStampsService {
 
   async update(id: string, dto: UpdateOpTurnoverStampDto, companyId: string) {
     await this.findOne(id, companyId);
+    if (dto.opTurnoverId) {
+      await this.assertTurnoverInCompany(dto.opTurnoverId, companyId);
+    }
+    const turnoverLink =
+      dto.opTurnoverId === undefined
+        ? {}
+        : dto.opTurnoverId === null
+          ? { opTurnover: { disconnect: true } }
+          : { opTurnover: { connect: { id: dto.opTurnoverId } } };
+
     return this.prisma.opTurnoverStamp.update({
       where: { id },
       data: {
+        ...turnoverLink,
         ...(dto.date !== undefined ? { date: new Date(dto.date) } : {}),
         ...(dto.net !== undefined ? { net: new Prisma.Decimal(String(dto.net)) } : {}),
         ...(dto.tax !== undefined ? { tax: new Prisma.Decimal(String(dto.tax)) } : {}),

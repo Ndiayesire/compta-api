@@ -1084,10 +1084,10 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"total\": 1180000,\n  \"amount\": { \"lines\": [{ \"label\": \"CA T1\", \"value\": 1180000 }] }\n}"
+              "raw": "{\n  \"opTurnoverId\": \"{{opTurnoverId}}\",\n  \"total\": 1180000,\n  \"amount\": { \"lines\": [{ \"label\": \"CA T1\", \"value\": 1180000 }] }\n}"
             },
             "url": "{{baseUrl}}/op-turnover-stamps/{{opTurnoverStampId}}",
-            "description": "`opTurnoverId` non modifiable via PATCH."
+            "description": "`opTurnoverId` modifiable (UUID ou `null` pour détacher le timbre du CA)."
           }
         },
         {
