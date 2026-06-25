@@ -72,7 +72,7 @@ async function bootstrap() {
     .addTag('deduction-types', 'Types de déduction — référentiel ; création auto à l’import Excel **op-importations** si libellé inconnu')
     .addTag('property-nature-types', 'Natures de biens / services — référentiel ; création auto à l’import **op-importations** (code incrémenté)')
     .addTag('op-turnovers', 'Chiffres d’affaires par client — CRUD JSON et **POST /import** Excel (.xlsx, query clientId)')
-    .addTag('op-turnover-stamps', 'Timbres / versions de CA')
+    .addTag('op-turnover-stamps', 'Timbres / versions de CA — CRUD JSON et **POST /import** Excel (.xlsx, query clientId)')
     .addTag('op-local-purchases', 'Achats locaux — CRUD JSON et **POST /import** Excel (.xlsx, query clientId)')
     .addTag('op-suspensions', 'Suspensions fiscales par tiers')
     .addTag('op-importations', 'Importations fiscales par fournisseur — CRUD JSON et **POST /import** Excel (.xlsx, query clientId)')

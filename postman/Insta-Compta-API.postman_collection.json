@@ -1013,8 +1013,30 @@
     {
       "name": "Op turnover stamps",
       "id": "o0000500-0000-4000-8000-000000000001",
-      "description": "Timbres / versions de CA (`op_turnover_stamps`). Liste : query **`opTurnoverId`** obligatoire.",
+      "description": "Timbres / versions de CA (`op_turnover_stamps`) — CRUD JSON ou **import Excel** (`POST /op-turnover-stamps/import`, query `clientId`). **N° FACTURE** : recherche CA existant → `opTurnoverId` ; sinon timbre orphelin (`opTurnoverId` null). Liste : query **`opTurnoverId`** obligatoire.",
       "item": [
+        {
+          "name": "Import op turnover stamps (Excel .xlsx)",
+          "id": "o0000507-0000-4000-8000-000000000007",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": [],
+                  "disabled": false,
+                  "description": "Classeur `.xlsx`. **Ligne 1** : `DATES`, `N° FACTURE`, `LIBELLES`, `MONTANT TTC`, `TAUX 1%`, `TSE A PAYER`. Modèle : `src/assets/xlsx/stamps-import-template.xlsx`."
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/op-turnover-stamps/import?clientId={{clientId}}",
+            "description": "**Étapes**\n1. Variables `baseUrl`, `clientId`, **Auth → Login** → `accessToken`.\n2. **form-data** → champ **`file`** (type File).\n3. Exemple seed ligne 2 (CA `CA-SEED-2025-Q1` doit exister) :\n   - `DATES` `2025-03-31` · `N° FACTURE` `CA-SEED-2025-Q1` · `LIBELLES` `Timbre T1 seed`\n   - `MONTANT TTC` `1180000` · `TAUX 1%` `1%` · `TSE A PAYER` `11800`\n\n**Résolution** : N° facture trouvé dans `op_turnovers` → `linkedCount` ; sinon `unlinkedCount` (timbre créé sans lien).\n\n**Réponse** : `createdCount`, `failedCount`, `linkedCount`, `unlinkedCount`, `created`, `errors`. Max **500** lignes."
+          }
+        },
         {
           "name": "Create op turnover stamp",
           "id": "o0000501-0000-4000-8000-000000000001",

@@ -3,6 +3,7 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { CreateOpTurnoverStampDto } from './dto/create-op-turnover-stamp.dto';
 import { UpdateOpTurnoverStampDto } from './dto/update-op-turnover-stamp.dto';
+import { parseOpTurnoverStampImportWorkbook } from './op-turnover-stamp-excel-import';
 
 const stampInclude = {
   opTurnover: {
@@ -15,6 +16,16 @@ const stampInclude = {
 @Injectable()
 export class OpTurnoverStampsService {
   constructor(private readonly prisma: PrismaService) {}
+
+  private async assertClientInCompany(clientId: string, companyId: string) {
+    const client = await this.prisma.client.findFirst({
+      where: { id: clientId, companyId, deletedAt: null },
+    });
+    if (!client) {
+      throw new BadRequestException('Client not found or does not belong to your company');
+    }
+    return client;
+  }
 
   private async assertTurnoverInCompany(opTurnoverId: string, companyId: string) {
     const row = await this.prisma.opTurnover.findFirst({
@@ -31,10 +42,12 @@ export class OpTurnoverStampsService {
   }
 
   async create(dto: CreateOpTurnoverStampDto, companyId: string) {
-    await this.assertTurnoverInCompany(dto.opTurnoverId, companyId);
+    if (dto.opTurnoverId) {
+      await this.assertTurnoverInCompany(dto.opTurnoverId, companyId);
+    }
     return this.prisma.opTurnoverStamp.create({
       data: {
-        opTurnoverId: dto.opTurnoverId,
+        opTurnoverId: dto.opTurnoverId ?? null,
         date: new Date(dto.date),
         net: new Prisma.Decimal(String(dto.net)),
         tax: new Prisma.Decimal(String(dto.tax)),
@@ -67,10 +80,15 @@ export class OpTurnoverStampsService {
       where: {
         id,
         deletedAt: null,
-        opTurnover: {
-          deletedAt: null,
-          client: { companyId, deletedAt: null },
-        },
+        OR: [
+          {
+            opTurnover: {
+              deletedAt: null,
+              client: { companyId, deletedAt: null },
+            },
+          },
+          { opTurnoverId: null },
+        ],
       },
       include: stampInclude,
     });
@@ -104,5 +122,60 @@ export class OpTurnoverStampsService {
       where: { id },
       data: { deletedAt: new Date() },
     });
+  }
+
+  /** Import timbres depuis le modèle Excel (1ʳᵉ feuille). */
+  async importFromExcelBuffer(buffer: Buffer, companyId: string, clientId: string) {
+    await this.assertClientInCompany(clientId, companyId);
+    const parsed = await parseOpTurnoverStampImportWorkbook(
+      this.prisma,
+      clientId,
+      companyId,
+      buffer,
+    );
+
+    const errors: { row: number; message: string }[] = [];
+    const created: Awaited<ReturnType<OpTurnoverStampsService['create']>>[] = [];
+    let linkedCount = 0;
+    let unlinkedCount = 0;
+
+    for (const item of parsed) {
+      if ('error' in item) {
+        errors.push({ row: item.rowNumber, message: item.error });
+        continue;
+      }
+      try {
+        const data = await this.create(
+          {
+            opTurnoverId: item.opTurnoverId ?? undefined,
+            date: item.date,
+            net: item.net,
+            tax: item.tax,
+            total: item.total,
+            amount: item.amount,
+            amountDeduction: item.amountDeduction,
+          },
+          companyId,
+        );
+        created.push(data);
+        if (item.opTurnoverId) {
+          linkedCount += 1;
+        } else {
+          unlinkedCount += 1;
+        }
+      } catch (e) {
+        const message = e instanceof Error ? e.message : String(e);
+        errors.push({ row: item.rowNumber, message });
+      }
+    }
+
+    return {
+      createdCount: created.length,
+      failedCount: errors.length,
+      linkedCount,
+      unlinkedCount,
+      created,
+      errors,
+    };
   }
 }

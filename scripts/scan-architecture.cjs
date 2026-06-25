@@ -61,7 +61,7 @@ const ROUTE_NOTES = {
   '/tiers': 'exports Excel/PDF DGID · jobs async',
   '/notifications': 'GET /unread avant :id',
   '/op-turnovers': 'POST /import · DATES/N° FACTURE/montants · query clientId',
-  '/op-turnover-stamps': 'query opTurnoverId obligatoire',
+  '/op-turnover-stamps': 'POST /import · N° FACTURE → CA · query clientId',
   '/op-local-purchases': 'POST /import · NINEA/fournisseur SUPPLIER · déduction/nature auto',
   '/op-exemptions': 'POST /import · mois 1–12 · query year · tier auto',
   '/op-importations': 'POST /import · fournisseur SUPPLIER · déduction/nature auto',
@@ -113,6 +113,12 @@ const IMPORT_ROUTES = [
     path: '/op-turnovers/import',
     module: 'op-turnovers',
     detail: 'query clientId · DATES/N° FACTURE/montants · LIBELLES non persisté',
+  },
+  {
+    method: 'POST',
+    path: '/op-turnover-stamps/import',
+    module: 'op-turnover-stamps',
+    detail: 'query clientId · N° FACTURE → opTurnoverId ou null · TSE',
   },
 ];
 

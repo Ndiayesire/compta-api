@@ -1,11 +1,12 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsDateString, IsNumber, IsObject, IsUUID, Min } from 'class-validator';
+import { IsDateString, IsNumber, IsObject, IsOptional, IsUUID, Min } from 'class-validator';
 
 export class CreateOpTurnoverStampDto {
-  @ApiProperty()
+  @ApiPropertyOptional({ description: 'UUID du CA parent — optionnel si timbre orphelin' })
+  @IsOptional()
   @IsUUID()
-  opTurnoverId: string;
+  opTurnoverId?: string;
 
   @ApiProperty({ example: '2025-03-31T00:00:00.000Z' })
   @IsDateString()

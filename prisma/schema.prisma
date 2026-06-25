@@ -622,7 +622,7 @@ model OpTurnover {
 
 model OpTurnoverStamp {
   id              String    @id @default(uuid()) @map("op_turnover_stamp_id")
-  opTurnoverId    String    @map("op_turnover_id")
+  opTurnoverId    String?   @map("op_turnover_id")
   date            DateTime  @map("op_turnover_stamp_date") @db.Date
   net             Decimal   @map("op_turnover_stamp_net") @db.Decimal(12, 2)
   tax             Decimal   @map("op_turnover_stamp_tax") @db.Decimal(12, 2)
@@ -633,7 +633,7 @@ model OpTurnoverStamp {
   updatedAt       DateTime  @updatedAt @map("op_turnover_stamp_updated_at")
   deletedAt       DateTime? @map("op_turnover_stamp_deleted_at")
 
-  opTurnover OpTurnover @relation(fields: [opTurnoverId], references: [id])
+  opTurnover OpTurnover? @relation(fields: [opTurnoverId], references: [id])
 
   @@index([opTurnoverId])
   @@map("op_turnover_stamps")
