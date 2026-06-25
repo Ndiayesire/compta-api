@@ -1013,7 +1013,7 @@
     {
       "name": "Op turnover stamps",
       "id": "o0000500-0000-4000-8000-000000000001",
-      "description": "Timbres / versions de CA (`op_turnover_stamps`) — CRUD JSON ou **import Excel** (`POST /op-turnover-stamps/import`, query `clientId`). **N° FACTURE** : recherche CA existant → `opTurnoverId` ; sinon timbre orphelin (`opTurnoverId` null). Liste : query **`opTurnoverId`** obligatoire.",
+      "description": "Timbres / versions de CA (`op_turnover_stamps`) — CRUD JSON ou **import Excel** (`POST /op-turnover-stamps/import`, query `clientId`). **N° FACTURE** : recherche CA existant → `opTurnoverId` ; sinon timbre orphelin (`opTurnoverId` null). Liste : tous les timbres de la société ; filtre optionnel `opTurnoverId`.",
       "item": [
         {
           "name": "Import op turnover stamps (Excel .xlsx)",
@@ -1057,8 +1057,18 @@
           "request": {
             "method": "GET",
             "header": [],
+            "url": "{{baseUrl}}/op-turnover-stamps",
+            "description": "Tous les timbres de la **société JWT** (liés et orphelins)."
+          }
+        },
+        {
+          "name": "List op turnover stamps by turnover",
+          "id": "o0000508-0000-4000-8000-000000000008",
+          "request": {
+            "method": "GET",
+            "header": [],
             "url": "{{baseUrl}}/op-turnover-stamps?opTurnoverId={{opTurnoverId}}",
-            "description": "Query **`opTurnoverId`** obligatoire."
+            "description": "Filtre optionnel par **`opTurnoverId`**."
           }
         },
         {

@@ -59,16 +59,35 @@ export class OpTurnoverStampsService {
     });
   }
 
-  async findAll(opTurnoverId: string, companyId: string) {
-    await this.assertTurnoverInCompany(opTurnoverId, companyId);
+  async findAll(companyId: string, opTurnoverId?: string) {
+    if (opTurnoverId) {
+      await this.assertTurnoverInCompany(opTurnoverId, companyId);
+      return this.prisma.opTurnoverStamp.findMany({
+        where: {
+          opTurnoverId,
+          deletedAt: null,
+          opTurnover: {
+            deletedAt: null,
+            client: { companyId, deletedAt: null },
+          },
+        },
+        include: stampInclude,
+        orderBy: { date: 'desc' },
+      });
+    }
+
     return this.prisma.opTurnoverStamp.findMany({
       where: {
-        opTurnoverId,
         deletedAt: null,
-        opTurnover: {
-          deletedAt: null,
-          client: { companyId, deletedAt: null },
-        },
+        OR: [
+          {
+            opTurnover: {
+              deletedAt: null,
+              client: { companyId, deletedAt: null },
+            },
+          },
+          { opTurnoverId: null },
+        ],
       },
       include: stampInclude,
       orderBy: { date: 'desc' },

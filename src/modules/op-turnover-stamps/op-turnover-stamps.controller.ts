@@ -120,14 +120,18 @@ export class OpTurnoverStampsController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Lister les timbres d’un chiffre d’affaires' })
-  @ApiQuery({ name: 'opTurnoverId', required: true, type: String })
+  @ApiOperation({ summary: 'Lister les timbres CA de la société' })
+  @ApiQuery({
+    name: 'opTurnoverId',
+    required: false,
+    type: String,
+    description: 'Filtre optionnel par chiffre d’affaires parent',
+  })
   @ApiResponse({ status: HttpStatus.OK, schema: API_ENVELOPE_SCHEMA })
-  async findAll(@Query('opTurnoverId') opTurnoverId: string, @CurrentUser() user: AuthUser) {
+  async findAll(@CurrentUser() user: AuthUser, @Query('opTurnoverId') opTurnoverId?: string) {
     const companyId = user.companyId;
     if (!companyId) throw new BadRequestException('User must belong to a company');
-    if (!opTurnoverId) throw new BadRequestException('opTurnoverId query parameter is required');
-    const data = await this.opTurnoverStampsService.findAll(opTurnoverId, companyId);
+    const data = await this.opTurnoverStampsService.findAll(companyId, opTurnoverId);
     return { success: true, message: 'Op turnover stamps retrieved successfully', data };
   }
 
