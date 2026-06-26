@@ -1180,8 +1180,30 @@
     {
       "name": "Op suspensions",
       "id": "o0000700-0000-4000-8000-000000000001",
-      "description": "Suspensions fiscales (`op_suspensions`) — liées à un `tierId`. Filtre liste : `?tierId=`.",
+      "description": "Suspensions fiscales (`op_suspensions`) — CRUD JSON ou **import Excel** (`POST /op-suspensions/import`, query `clientId`). **NINEA** puis **DENOMINATION DU CLIENT** → tier auto.",
       "item": [
+        {
+          "name": "Import op suspensions (Excel .xlsx)",
+          "id": "o0000707-0000-4000-8000-000000000007",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": [],
+                  "disabled": false,
+                  "description": "Classeur `.xlsx`. **Ligne 1** : `ANNEE`, `MOIS`, `NINEA`, `DENOMINATION DU CLIENT`, `ADRESSE`, `N°FACTURE`, `MONTANT`, `TVA`, `N°VISA`, `DATE VISA`. Modèle : `src/assets/xlsx/suspensions-import-template.xlsx`."
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/op-suspensions/import?clientId={{clientId}}",
+            "description": "**Étapes**\n1. Variables `baseUrl`, `clientId`, **Auth → Login** → `accessToken`.\n2. **form-data** → champ **`file`** (type File).\n3. Exemple seed ligne 2 :\n   - `ANNEE` `2025` · `MOIS` `1` · `NINEA` `SN222333444` · `DENOMINATION DU CLIENT` `Tier démo fournisseur A`\n   - `ADRESSE` `Point E, Dakar` · `N°FACTURE` `SUSP-SEED-2025-01`\n   - `MONTANT` `100000` · `TVA` `18000` · `N°VISA` `VISA-SEED-001` · `DATE VISA` `2025-01-20`\n\n**Résolution tiers** : NINEA → dénomination client → création auto.\n\n**Réponse** : `createdCount`, `failedCount`, `tiersCreatedCount`, `tiersUpdatedCount`, `created`, `errors`. Max **500** lignes."
+          }
+        },
         {
           "name": "Create op suspension",
           "id": "o0000701-0000-4000-8000-000000000001",
@@ -1415,8 +1437,30 @@
     {
       "name": "Op retains",
       "id": "o0000a00-0000-4000-8000-000000000001",
-      "description": "Retenues à la source (`op_retains`) — `tierId`, base, taux, montant.",
+      "description": "Retenues à la source (`op_retains`) — CRUD JSON ou **import Excel** (`POST /op-retains/import`, query `clientId`). **RAISON SOCIALE** : recherche tier par nom → création **SUPPLIER** si absent.",
       "item": [
+        {
+          "name": "Import op retains (Excel .xlsx)",
+          "id": "o0000a07-0000-4000-8000-000000000007",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": [],
+                  "disabled": false,
+                  "description": "Classeur `.xlsx`. **Ligne 1** : `RAISON SOCIALE DU FOURNISSEUR`, `ADRESSE`, `N°FACTURE`, `DATE`, `BASE`, `TAUX`, `MONTANT`. Modèle : `src/assets/xlsx/retains-import-template.xlsx`."
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/op-retains/import?clientId={{clientId}}",
+            "description": "**Étapes**\n1. Variables `baseUrl`, `clientId`, **Auth → Login** → `accessToken`.\n2. **form-data** → champ **`file`** (type File).\n3. Exemple seed ligne 2 :\n   - `RAISON SOCIALE DU FOURNISSEUR` `Tier démo fournisseur A` · `ADRESSE` `Point E, Dakar`\n   - `N°FACTURE` `RET-SEED-2025-01` · `DATE` `2025-01-25`\n   - `BASE` `50000` · `TAUX` `5` · `MONTANT` `2500`\n\n**Résolution** : tier par raison sociale (nom) ; création auto type **SUPPLIER** si absent.\n\n**Réponse** : `createdCount`, `failedCount`, `tiersCreatedCount`, `created`, `errors`. Max **500** lignes."
+          }
+        },
         {
           "name": "Create op retain",
           "id": "o0000a01-0000-4000-8000-000000000001",
@@ -1473,8 +1517,30 @@
     {
       "name": "Op royalties",
       "id": "o0000b00-0000-4000-8000-000000000001",
-      "description": "Redevances (`op_royalties`) — `tierId`, base, taux, montant.",
+      "description": "Redevances (`op_royalties`) — CRUD JSON ou **import Excel** (`POST /op-royalties/import`, query `clientId`). **RAISON SOCIALE** : recherche tier par nom → création **SUPPLIER** si absent.",
       "item": [
+        {
+          "name": "Import op royalties (Excel .xlsx)",
+          "id": "o0000b07-0000-4000-8000-000000000007",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": [],
+                  "disabled": false,
+                  "description": "Classeur `.xlsx`. **Ligne 1** : `RAISON SOCIALE DU FOURNISSEUR`, `ADRESSE`, `N°FACTURE`, `DATE`, `BASE`, `TAUX`, `MONTANT`. Modèle : `src/assets/xlsx/royalties-import-template.xlsx`."
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/op-royalties/import?clientId={{clientId}}",
+            "description": "**Étapes**\n1. Variables `baseUrl`, `clientId`, **Auth → Login** → `accessToken`.\n2. **form-data** → champ **`file`** (type File).\n3. Exemple seed ligne 2 :\n   - `RAISON SOCIALE DU FOURNISSEUR` `Tier démo fournisseur A` · `ADRESSE` `Point E, Dakar`\n   - `N°FACTURE` `ROY-SEED-2025-01` · `DATE` `2025-01-28`\n   - `BASE` `80000` · `TAUX` `10` · `MONTANT` `8000`\n\n**Résolution** : tier par raison sociale (nom) ; création auto type **SUPPLIER** si absent.\n\n**Réponse** : `createdCount`, `failedCount`, `tiersCreatedCount`, `created`, `errors`. Max **500** lignes."
+          }
+        },
         {
           "name": "Create op royalty",
           "id": "o0000b01-0000-4000-8000-000000000001",

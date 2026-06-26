@@ -3,6 +3,7 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { CreateOpSuspensionDto } from './dto/create-op-suspension.dto';
 import { UpdateOpSuspensionDto } from './dto/update-op-suspension.dto';
+import { parseOpSuspensionImportWorkbook } from './op-suspension-excel-import';
 
 const suspensionInclude = {
   tier: true,
@@ -20,6 +21,16 @@ export class OpSuspensionsService {
       throw new BadRequestException('Invalid tier');
     }
     return row;
+  }
+
+  private async assertClientInCompany(clientId: string, companyId: string) {
+    const client = await this.prisma.client.findFirst({
+      where: { id: clientId, companyId, deletedAt: null },
+    });
+    if (!client) {
+      throw new BadRequestException('Client not found or does not belong to your company');
+    }
+    return client;
   }
 
   async create(dto: CreateOpSuspensionDto) {
@@ -90,5 +101,41 @@ export class OpSuspensionsService {
       where: { id },
       data: { deletedAt: new Date() },
     });
+  }
+
+  /** Import suspensions depuis le modèle Excel (1ʳᵉ feuille). */
+  async importFromExcelBuffer(buffer: Buffer, companyId: string, clientId: string) {
+    await this.assertClientInCompany(clientId, companyId);
+    const parsed = await parseOpSuspensionImportWorkbook(this.prisma, clientId, buffer);
+
+    const errors: { row: number; message: string }[] = [];
+    const created: Awaited<ReturnType<OpSuspensionsService['create']>>[] = [];
+    let tiersCreatedCount = 0;
+    let tiersUpdatedCount = 0;
+
+    for (const item of parsed) {
+      if ('error' in item) {
+        errors.push({ row: item.rowNumber, message: item.error });
+        continue;
+      }
+      if (item.tierCreated) tiersCreatedCount += 1;
+      if (item.tierUpdated) tiersUpdatedCount += 1;
+      try {
+        const data = await this.create(item.dto);
+        created.push(data);
+      } catch (e) {
+        const message = e instanceof Error ? e.message : String(e);
+        errors.push({ row: item.rowNumber, message });
+      }
+    }
+
+    return {
+      createdCount: created.length,
+      failedCount: errors.length,
+      tiersCreatedCount,
+      tiersUpdatedCount,
+      created,
+      errors,
+    };
   }
 }

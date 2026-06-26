@@ -74,11 +74,11 @@ async function bootstrap() {
     .addTag('op-turnovers', 'Chiffres d’affaires par client — CRUD JSON et **POST /import** Excel (.xlsx, query clientId)')
     .addTag('op-turnover-stamps', 'Timbres / versions de CA — CRUD JSON et **POST /import** Excel (.xlsx, query clientId)')
     .addTag('op-local-purchases', 'Achats locaux — CRUD JSON et **POST /import** Excel (.xlsx, query clientId)')
-    .addTag('op-suspensions', 'Suspensions fiscales par tiers')
+    .addTag('op-suspensions', 'Suspensions fiscales par tiers — CRUD JSON et **POST /import** Excel (.xlsx, query clientId)')
     .addTag('op-importations', 'Importations fiscales par fournisseur — CRUD JSON et **POST /import** Excel (.xlsx, query clientId)')
     .addTag('op-exportations', 'Exportations par tiers — CRUD JSON et **POST /import** Excel (.xlsx, query clientId)')
-    .addTag('op-retains', 'Retenues à la source par tiers')
-    .addTag('op-royalties', 'Redevances par tiers')
+    .addTag('op-retains', 'Retenues à la source par tiers — CRUD JSON et **POST /import** Excel (.xlsx, query clientId)')
+    .addTag('op-royalties', 'Redevances par tiers — CRUD JSON et **POST /import** Excel (.xlsx, query clientId)')
     .addTag('op-exemptions', 'Exonérations par tiers — CRUD JSON et **POST /import** Excel (query clientId + year)')
     .build();
 

@@ -3,6 +3,7 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { CreateOpRoyaltyDto } from './dto/create-op-royalty.dto';
 import { UpdateOpRoyaltyDto } from './dto/update-op-royalty.dto';
+import { parseOpRoyaltyImportWorkbook } from './op-royalty-excel-import';
 
 const royaltyInclude = {
   tier: true,
@@ -20,6 +21,16 @@ export class OpRoyaltiesService {
       throw new BadRequestException('Invalid tier');
     }
     return row;
+  }
+
+  private async assertClientInCompany(clientId: string, companyId: string) {
+    const client = await this.prisma.client.findFirst({
+      where: { id: clientId, companyId, deletedAt: null },
+    });
+    if (!client) {
+      throw new BadRequestException('Client not found or does not belong to your company');
+    }
+    return client;
   }
 
   async create(dto: CreateOpRoyaltyDto) {
@@ -86,5 +97,40 @@ export class OpRoyaltiesService {
       where: { id },
       data: { deletedAt: new Date() },
     });
+  }
+
+  /** Import redevances depuis le modèle Excel (1ʳᵉ feuille). */
+  async importFromExcelBuffer(buffer: Buffer, companyId: string, clientId: string) {
+    await this.assertClientInCompany(clientId, companyId);
+    const parsed = await parseOpRoyaltyImportWorkbook(this.prisma, clientId, buffer);
+
+    const errors: { row: number; message: string }[] = [];
+    const created: Awaited<ReturnType<OpRoyaltiesService['create']>>[] = [];
+    let tiersCreatedCount = 0;
+
+    for (const item of parsed) {
+      if ('error' in item) {
+        errors.push({ row: item.rowNumber, message: item.error });
+        continue;
+      }
+      if (item.tierCreated) {
+        tiersCreatedCount += 1;
+      }
+      try {
+        const data = await this.create(item.dto);
+        created.push(data);
+      } catch (e) {
+        const message = e instanceof Error ? e.message : String(e);
+        errors.push({ row: item.rowNumber, message });
+      }
+    }
+
+    return {
+      createdCount: created.length,
+      failedCount: errors.length,
+      tiersCreatedCount,
+      created,
+      errors,
+    };
   }
 }

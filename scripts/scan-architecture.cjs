@@ -63,6 +63,9 @@ const ROUTE_NOTES = {
   '/op-turnovers': 'POST /import · DATES/N° FACTURE/montants · query clientId',
   '/op-turnover-stamps': 'POST /import · N° FACTURE → CA · query clientId',
   '/op-local-purchases': 'POST /import · NINEA/fournisseur SUPPLIER · déduction/nature auto',
+  '/op-suspensions': 'POST /import · NINEA puis dénomination client · tier auto · query clientId',
+  '/op-retains': 'POST /import · raison sociale fournisseur · tier auto · query clientId',
+  '/op-royalties': 'POST /import · raison sociale fournisseur · tier auto · query clientId',
   '/op-exemptions': 'POST /import · mois 1–12 · query year · tier auto',
   '/op-importations': 'POST /import · fournisseur SUPPLIER · déduction/nature auto',
   '/op-exportations': 'POST /import · ANNEE/MOIS colonnes · tier auto',
@@ -119,6 +122,24 @@ const IMPORT_ROUTES = [
     path: '/op-turnover-stamps/import',
     module: 'op-turnover-stamps',
     detail: 'query clientId · N° FACTURE → opTurnoverId ou null · TSE',
+  },
+  {
+    method: 'POST',
+    path: '/op-retains/import',
+    module: 'op-retains',
+    detail: 'query clientId · raison sociale → tier SUPPLIER auto',
+  },
+  {
+    method: 'POST',
+    path: '/op-royalties/import',
+    module: 'op-royalties',
+    detail: 'query clientId · raison sociale → tier SUPPLIER auto',
+  },
+  {
+    method: 'POST',
+    path: '/op-suspensions/import',
+    module: 'op-suspensions',
+    detail: 'query clientId · NINEA puis dénomination client · tier auto',
   },
 ];
 
