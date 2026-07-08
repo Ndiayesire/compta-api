@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Insta Compta — API interactive</title>
+  <link rel="icon" href="/public/favicon.ico" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/api-internal/swagger-ui.css" />
+  <link rel="stylesheet" href="/public/docs/docs.css" />
+  <link rel="stylesheet" href="/public/swagger-custom.css" />
+</head>
+<body data-page="api">
+  <div class="sidebar-backdrop" aria-hidden="true"></div>
+  <button class="menu-toggle" type="button" aria-label="Ouvrir le menu">☰</button>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-panel">
+        <div class="sidebar-head">
+          <button type="button" class="sidebar-close" aria-label="Fermer le menu">
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+              <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <a class="brand" href="/docs" data-tooltip="Insta Compta">
+            <span class="brand-mark">
+              <img class="brand-logo" src="/public/logo.png" alt="Insta Compta" width="38" height="38" />
+            </span>
+            <div class="brand-text">
+              <strong>Insta Compta</strong>
+              <span>Documentation</span>
+            </div>
+          </a>
+        </div>
+
+        <nav class="sidebar-nav">
+          <div class="nav-group">
+            <h3>Présentation</h3>
+            <a href="/docs#introduction" class="nav-link" data-tooltip="Introduction">
+              <span class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
+              <span class="nav-label">Introduction</span>
+              <span class="nav-chevron"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span>
+            </a>
+            <a href="/docs#quickstart" class="nav-link" data-tooltip="Démarrage rapide">
+              <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></span>
+              <span class="nav-label">Démarrage rapide</span>
+              <span class="nav-chevron"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span>
+            </a>
+            <a href="/docs#auth" class="nav-link" data-tooltip="Authentification">
+              <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg></span>
+              <span class="nav-label">Authentification</span>
+              <span class="nav-chevron"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span>
+            </a>
+            <a href="/docs#conventions" class="nav-link" data-tooltip="Conventions">
+              <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></span>
+              <span class="nav-label">Conventions</span>
+              <span class="nav-chevron"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span>
+            </a>
+          </div>
+          <div class="nav-group">
+            <h3>Imports</h3>
+            <a href="/docs#imports" class="nav-link" data-tooltip="Vue d'ensemble">
+              <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg></span>
+              <span class="nav-label">Vue d'ensemble</span>
+              <span class="nav-chevron"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span>
+            </a>
+            <a href="/docs#imports-fiscal" class="nav-link" data-tooltip="Opérations fiscales">
+              <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></span>
+              <span class="nav-label">Opérations fiscales</span>
+              <span class="nav-chevron"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span>
+            </a>
+          </div>
+          <div class="nav-group">
+            <h3>Fiscalité</h3>
+            <a href="/docs#tva-annexe" class="nav-link" data-tooltip="Annexe TVA">
+              <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
+              <span class="nav-label">Annexe TVA</span>
+              <span class="nav-chevron"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span>
+            </a>
+            <a href="/docs#tva-formules" class="nav-link" data-tooltip="Formules L5–L115">
+              <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>
+              <span class="nav-label">Formules</span>
+              <span class="nav-chevron"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span>
+            </a>
+          </div>
+          <div class="nav-group">
+            <h3>Référence</h3>
+            <a href="/docs#envelope" class="nav-link" data-tooltip="Réponses API">
+              <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/></svg></span>
+              <span class="nav-label">Réponses API</span>
+              <span class="nav-chevron"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span>
+            </a>
+            <a href="/docs#errors" class="nav-link" data-tooltip="Erreurs">
+              <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg></span>
+              <span class="nav-label">Erreurs</span>
+              <span class="nav-chevron"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span>
+            </a>
+          </div>
+        </nav>
+
+        <div class="sidebar-foot">
+          <div class="theme-switch" role="group" aria-label="Thème">
+            <button type="button" class="theme-switch-btn" data-theme-set="light" aria-label="Thème clair">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+            </button>
+            <button type="button" class="theme-switch-track" data-theme-toggle aria-label="Basculer le thème">
+              <span class="theme-switch-knob"></span>
+            </button>
+            <button type="button" class="theme-switch-btn" data-theme-set="dark" aria-label="Thème sombre">
+              <svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            </button>
+          </div>
+          <button class="sidebar-collapse" type="button" aria-label="Replier le menu" aria-expanded="true">
+            <svg class="collapse-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+              <path d="M15 18l-6-6 6-6" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span class="sidebar-collapse-label">Réduire</span>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main main--swagger">
+      <div class="api-shell">
+        <header class="api-hero">
+          <div class="api-hero-inner">
+            <span class="hero-badge">OpenAPI 3 · REST · JWT</span>
+            <h1>API interactive</h1>
+            <p class="api-hero-lead">
+              Explorez et testez les endpoints. Connectez-vous via
+              <code>POST /auth/login</code>, puis autorisez vos requêtes avec votre token Bearer.
+            </p>
+          </div>
+        </header>
+
+        <div class="api-toolbar">
+          <label class="api-search" for="swagger-filter-input">
+            <svg class="api-search-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/>
+              <path d="M20 20l-3.5-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <input
+              id="swagger-filter-input"
+              type="search"
+              placeholder="Filtrer par tag (ex. clients, auth, balances…)"
+              autocomplete="off"
+              spellcheck="false"
+            />
+          </label>
+          <button type="button" id="swagger-authorize-btn" class="api-authorize-btn" aria-pressed="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <rect x="5" y="11" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            <span class="api-authorize-label">Authorize</span>
+          </button>
+        </div>
+
+        <div class="api-body">
+          <div id="swagger-ui"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/api-internal/swagger-ui-bundle.js"></script>
+  <script src="/api-internal/swagger-ui-standalone-preset.js"></script>
+  <script src="/public/docs/swagger-embed.js"></script>
+  <script src="/public/docs/shell.js"></script>
+</body>
+</html>

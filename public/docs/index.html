@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Insta Compta — Documentation</title>
+  <link rel="icon" href="/public/favicon.ico" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/public/docs/docs.css" />
+</head>
+<body data-page="guide">
+  <div class="sidebar-backdrop" aria-hidden="true"></div>
+  <button class="menu-toggle" type="button" aria-label="Ouvrir le menu">☰</button>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-panel">
+        <div class="sidebar-head">
+          <button type="button" class="sidebar-close" aria-label="Fermer le menu">
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+              <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <a class="brand" href="/docs" data-tooltip="Insta Compta">
+            <span class="brand-mark">
+              <img class="brand-logo" src="/public/logo.png" alt="Insta Compta" width="38" height="38" />
+            </span>
+            <div class="brand-text">
+              <strong>Insta Compta</strong>
+              <span>Documentation</span>
+            </div>
+          </a>
+        </div>
+
+        <nav class="sidebar-nav">
+          <div class="nav-group">
+            <h3>Présentation</h3>
+            <a href="#introduction" class="nav-link" data-tooltip="Introduction">
+              <span class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
+              <span class="nav-label">Introduction</span>
+              <span class="nav-chevron"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span>
+            </a>
+            <a href="#quickstart" class="nav-link" data-tooltip="Démarrage rapide">
+              <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></span>
+              <span class="nav-label">Démarrage rapide</span>
+              <span class="nav-chevron"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span>
+            </a>
+            <a href="#auth" class="nav-link" data-tooltip="Authentification">
+              <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg></span>
+              <span class="nav-label">Authentification</span>
+              <span class="nav-chevron"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span>
+            </a>
+            <a href="#conventions" class="nav-link" data-tooltip="Conventions">
+              <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></span>
+              <span class="nav-label">Conventions</span>
+              <span class="nav-chevron"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span>
+            </a>
+          </div>
+          <div class="nav-group">
+            <h3>Imports</h3>
+            <a href="#imports" class="nav-link" data-tooltip="Vue d'ensemble">
+              <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg></span>
+              <span class="nav-label">Vue d'ensemble</span>
+              <span class="nav-chevron"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span>
+            </a>
+            <a href="#imports-fiscal" class="nav-link" data-tooltip="Opérations fiscales">
+              <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></span>
+              <span class="nav-label">Opérations fiscales</span>
+              <span class="nav-chevron"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span>
+            </a>
+          </div>
+          <div class="nav-group">
+            <h3>Fiscalité</h3>
+            <a href="#tva-annexe" class="nav-link" data-tooltip="Annexe TVA">
+              <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
+              <span class="nav-label">Annexe TVA</span>
+              <span class="nav-chevron"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span>
+            </a>
+            <a href="#tva-formules" class="nav-link" data-tooltip="Formules L5–L115">
+              <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>
+              <span class="nav-label">Formules</span>
+              <span class="nav-chevron"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span>
+            </a>
+          </div>
+          <div class="nav-group">
+            <h3>Référence</h3>
+            <a href="#envelope" class="nav-link" data-tooltip="Réponses API">
+              <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/></svg></span>
+              <span class="nav-label">Réponses API</span>
+              <span class="nav-chevron"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span>
+            </a>
+            <a href="#errors" class="nav-link" data-tooltip="Erreurs">
+              <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg></span>
+              <span class="nav-label">Erreurs</span>
+              <span class="nav-chevron"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span>
+            </a>
+          </div>
+        </nav>
+
+        <div class="sidebar-foot">
+          <div class="theme-switch" role="group" aria-label="Thème">
+            <button type="button" class="theme-switch-btn" data-theme-set="light" aria-label="Thème clair">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+            </button>
+            <button type="button" class="theme-switch-track" data-theme-toggle aria-label="Basculer le thème">
+              <span class="theme-switch-knob"></span>
+            </button>
+            <button type="button" class="theme-switch-btn" data-theme-set="dark" aria-label="Thème sombre">
+              <svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            </button>
+          </div>
+          <button class="sidebar-collapse" type="button" aria-label="Replier le menu" aria-expanded="true">
+            <svg class="collapse-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+              <path d="M15 18l-6-6 6-6" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span class="sidebar-collapse-label">Réduire</span>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="hero">
+        <span class="hero-badge">REST · JSON · JWT</span>
+        <h1>Insta Compta</h1>
+        <p>
+          Plateforme comptable pour cabinets d'expertise en Afrique francophone.
+          Gestion clients, tiers, balances, opérations fiscales et exports DGID.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="/docs/api">Explorer l'API</a>
+          <a class="btn btn-ghost" href="/health">Health check</a>
+        </div>
+      </header>
+
+      <div class="content-wrap">
+      <section id="introduction">
+        <h2>Introduction</h2>
+        <p>
+          L'API <strong>Insta Compta</strong> expose des endpoints REST sécurisés par JWT.
+          Les réponses métier suivent l'enveloppe <code>{ success, message, data }</code>.
+          Les montants sont en <strong>Decimal</strong> (jamais en float) ; les dates en UTC côté serveur.
+        </p>
+        <div class="card-grid">
+          <div class="card">
+            <strong>Base URL</strong>
+            <span><code>http://localhost:4230</code> en local</span>
+          </div>
+          <div class="card">
+            <strong>Format</strong>
+            <span>JSON · camelCase dans les corps HTTP</span>
+          </div>
+          <div class="card">
+            <strong>Auth</strong>
+            <span>Bearer JWT · <code>Authorization: Bearer &lt;token&gt;</code></span>
+          </div>
+          <div class="card">
+            <strong>Postman</strong>
+            <span>Collection dans <code>postman/</code> du dépôt</span>
+          </div>
+        </div>
+      </section>
+
+      <section id="quickstart">
+        <h2>Démarrage rapide</h2>
+        <h3>1. Connexion</h3>
+        <p><code>POST /auth/login</code> est public. Récupérez <code>accessToken</code> et <code>refreshToken</code>.</p>
+        <pre><code>POST /auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@example.com",
+  "password": "votre-mot-de-passe"
+}</code></pre>
+
+        <h3>2. Appeler un endpoint protégé</h3>
+        <pre><code>GET /clients
+Authorization: Bearer eyJhbGciOiJIUzI1NiIs...</code></pre>
+
+        <h3>3. Rafraîchir le token</h3>
+        <pre><code>POST /auth/refresh
+Content-Type: application/json
+
+{ "refreshToken": "..." }</code></pre>
+      </section>
+
+      <section id="auth">
+        <h2>Authentification</h2>
+        <p>
+          Un guard JWT global protège la majorité des routes. Les routes publiques sont annotées côté serveur
+          (ex. <code>POST /auth/login</code>, <code>GET /health</code>).
+        </p>
+        <ul>
+          <li><strong>Access token</strong> — courte durée, à envoyer sur chaque requête.</li>
+          <li><strong>Refresh token</strong> — renouvellement sans re-login.</li>
+          <li><strong>Périmètre société</strong> — <code>companyId</code> issu du JWT filtre la plupart des données métier.</li>
+        </ul>
+      </section>
+
+      <section id="conventions">
+        <h2>Conventions</h2>
+        <h3>JSON vs PostgreSQL</h3>
+        <p>
+          Les DTO HTTP restent en <strong>camelCase</strong> (<code>clientId</code>, <code>countryId</code>, …).
+          Prisma mappe vers des colonnes PostgreSQL en snake_case (<code>client_id</code>, <code>country_id</code>).
+        </p>
+        <h3>Imports Excel</h3>
+        <ul>
+          <li>Multipart <code>file</code> (`.xlsx`, max 5 Mo)</li>
+          <li><code>clientId</code> en query pour les imports par client</li>
+          <li>Max <strong>500</strong> lignes utiles par fichier</li>
+          <li>En-têtes ligne 1 — ordre libre, synonymes FR acceptés</li>
+        </ul>
+      </section>
+
+      <section id="imports">
+        <h2>Imports Excel</h2>
+        <p>
+          Plusieurs modules acceptent un import en masse. Les modèles sont dans
+          <code>src/assets/xlsx/</code>. Réponse type :
+          <code>createdCount</code>, <code>failedCount</code>, <code>errors[]</code>.
+        </p>
+      </section>
+
+      <section id="imports-fiscal">
+        <h2>Opérations fiscales</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Route</th>
+                <th>Query</th>
+                <th>Résolution tiers</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="method method-post">POST</span> /op-local-purchases/import</td>
+                <td><code>clientId</code></td>
+                <td>NINEA → nom fournisseur → SUPPLIER</td>
+              </tr>
+              <tr>
+                <td><span class="method method-post">POST</span> /op-importations/import</td>
+                <td><code>clientId</code></td>
+                <td>Nom fournisseur → SUPPLIER · pays auto</td>
+              </tr>
+              <tr>
+                <td><span class="method method-post">POST</span> /op-exportations/import</td>
+                <td><code>clientId</code></td>
+                <td>NINEA → nom client</td>
+              </tr>
+              <tr>
+                <td><span class="method method-post">POST</span> /op-suspensions/import</td>
+                <td><code>clientId</code></td>
+                <td>NINEA → dénomination client</td>
+              </tr>
+              <tr>
+                <td><span class="method method-post">POST</span> /op-retains/import</td>
+                <td><code>clientId</code></td>
+                <td>Raison sociale fournisseur</td>
+              </tr>
+              <tr>
+                <td><span class="method method-post">POST</span> /op-royalties/import</td>
+                <td><code>clientId</code></td>
+                <td>Raison sociale fournisseur</td>
+              </tr>
+              <tr>
+                <td><span class="method method-post">POST</span> /op-turnovers/import</td>
+                <td><code>clientId</code></td>
+                <td>— (CA direct)</td>
+              </tr>
+              <tr>
+                <td><span class="method method-post">POST</span> /op-turnover-stamps/import</td>
+                <td><code>clientId</code></td>
+                <td>N° facture → CA ou orphelin</td>
+              </tr>
+              <tr>
+                <td><span class="method method-post">POST</span> /op-exemptions/import</td>
+                <td><code>clientId</code>, <code>year</code></td>
+                <td>Nom client</td>
+              </tr>
+              <tr>
+                <td><span class="method method-post">POST</span> /employees/import</td>
+                <td><code>clientId</code></td>
+                <td>—</td>
+              </tr>
+              <tr>
+                <td><span class="method method-post">POST</span> /balances/:id/balance-lines/import</td>
+                <td><code>balanceId</code> en URL</td>
+                <td>—</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="tva-annexe">
+        <h2>Annexe fiscale TVA</h2>
+        <p>
+          La déclaration mensuelle s’appuie sur une <strong>annexe fiscale</strong> (lignes <strong>L5–L120</strong>).
+          L’endpoint de calcul agège les opérations du mois puis applique les formules de solde.
+        </p>
+        <pre><code>GET /tva-annexes/compute?clientId={{clientId}}&amp;month=1&amp;year=2025
+Authorization: Bearer …</code></pre>
+        <p>Paramètres optionnels :</p>
+        <ul>
+          <li><code>reducedBase</code> — <strong>L40</strong> (part HT au taux réduit, défaut 0)</li>
+          <li><code>previousCredit</code> — <strong>L100</strong> (crédit reporté = L115 du mois précédent)</li>
+          <li><code>checksDdi</code> — <strong>L75</strong> (chèques DDI)</li>
+          <li><code>selfSupplies</code> — <strong>L30</strong> (informatif)</li>
+          <li><code>reducedRate</code> — taux réduit en % (défaut <strong>10</strong>)</li>
+        </ul>
+        <p>
+          Taux normal : <code>client.country.tva</code> (ex. 18 %). Réponse :
+          <code>lines.L*</code>, <code>payable</code> (L110), <code>creditCarryForward</code> (L115).
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Ligne</th>
+                <th>Source API</th>
+                <th>Champ</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>L5</td><td><code>op_turnovers</code></td><td><code>net</code> (filtre <code>date</code> du mois)</td></tr>
+              <tr><td>L10</td><td><code>op_exportations</code></td><td><code>net</code></td></tr>
+              <tr><td>L15</td><td><code>op_exemptions</code></td><td><code>amount</code></td></tr>
+              <tr><td>L20</td><td><code>op_suspensions</code></td><td><code>net</code></td></tr>
+              <tr><td>L70</td><td><code>op_retains</code></td><td><code>amount</code></td></tr>
+              <tr><td>L80 / L85</td><td><code>op_importations</code></td><td><code>net</code> ; <code>taxDeduction</code> sinon <code>tax</code></td></tr>
+              <tr><td>L90</td><td><code>op_local_purchases</code></td><td><code>taxDeduction</code></td></tr>
+              <tr><td>L100</td><td>Query</td><td><code>previousCredit</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>
+          Les timbres (<code>op_turnover_stamps</code>) et redevances (<code>op_royalties</code>) restent hors tableau annexe.
+          Scope : client de la <strong>société JWT</strong> + tiers du client.
+        </p>
+      </section>
+
+      <section id="tva-formules">
+        <h2>Formules L5–L115</h2>
+        <pre><code>L25  = L10 + L15 + L20
+L35  = L5  − L25
+L45  = L35 − L40
+L50  = L40 × 10%
+L55  = L45 × taux_pays%
+L60  = L50 + L55
+L76  = L70 + L75
+L91  = L85 + L90
+L92  = L76 + L91
+L105 = L70 + L75 + L85 + L90 + L100
+L110 = max(0, L60 − L105)    → TVA à payer
+L115 = max(0, L105 − L60)    → Crédit à reporter</code></pre>
+        <p>
+          Enchaînement mensuel : persister <strong>L115</strong> pour alimenter <strong>L100</strong> du mois suivant
+          (query <code>previousCredit</code>). Arrondis à 2 décimales.
+        </p>
+      </section>
+
+      <section id="envelope">
+        <h2>Réponses API</h2>
+        <pre><code>{
+  "success": true,
+  "message": "Op retain created successfully",
+  "data": { ... }
+}</code></pre>
+        <p>Les imports renvoient souvent des compteurs dans <code>data</code> :</p>
+        <pre><code>{
+  "success": true,
+  "message": "Import retenues : 2 créé(s), 0 ligne(s) en erreur",
+  "data": {
+    "createdCount": 2,
+    "failedCount": 0,
+    "tiersCreatedCount": 1,
+    "created": [ ... ],
+    "errors": [ { "row": 4, "message": "..." } ]
+  }
+}</code></pre>
+      </section>
+
+      <section id="errors">
+        <h2>Erreurs</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Code</th><th>Cas courant</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>400</code></td><td>Validation DTO, fichier manquant, client hors société</td></tr>
+              <tr><td><code>401</code></td><td>JWT absent ou invalide</td></tr>
+              <tr><td><code>404</code></td><td>Ressource introuvable</td></tr>
+              <tr><td><code>409</code></td><td>Conflit métier (ex. email déjà pris)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <p class="footer-note">
+        Insta Compta API v1.0 — Documentation InstaHR.
+      </p>
+      </div>
+    </main>
+  </div>
+
+  <script src="/public/docs/code-highlight.js"></script>
+  <script src="/public/docs/shell.js"></script>
+</body>
+</html>

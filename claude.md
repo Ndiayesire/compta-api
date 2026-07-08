@@ -55,6 +55,7 @@ La documentation projet est dans **[`CLAUDE.md`](./CLAUDE.md)** (fichier canoniq
 | Métier | `tiers-transactions` | `/tiers-transactions` — filtre `tierId` |
 | Métier | `balances` | `/balances` — client + exercice ; **`POST /balances/:balanceId/balance-lines/import`** (`.xlsx`, `balanceId` en URL uniquement) |
 | Métier | (lignes) | `/balance-lines` — query **`balanceId`** obligatoire pour la liste |
+| Métier | `tva-annexes` | `/tva-annexes` — **`GET /tva-annexes/compute?clientId=&month=&year=`** annexe fiscale TVA (L5–L115) |
 | Métier | `documents` | `/documents` — métadonnées ; `companyId` = JWT |
 | Métier | `rental-usages` | `/rental-usages` |
 | Métier | `rentals` | `/rentals` |

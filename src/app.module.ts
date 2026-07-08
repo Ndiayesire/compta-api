@@ -48,6 +48,7 @@ import { OpExportationsModule } from './modules/op-exportations/op-exportations.
 import { OpRetainsModule } from './modules/op-retains/op-retains.module';
 import { OpRoyaltiesModule } from './modules/op-royalties/op-royalties.module';
 import { OpExemptionsModule } from './modules/op-exemptions/op-exemptions.module';
+import { TvaAnnexesModule } from './modules/tva-annexes/tva-annexes.module';
 import { HttpLatencyInterceptor } from './common/interceptors/http-latency/http-latency.interceptor';
 // import { MailerModule } from './modules/mailer/mailer.module';
 
@@ -91,6 +92,7 @@ import { HttpLatencyInterceptor } from './common/interceptors/http-latency/http-
     OpRetainsModule,
     OpRoyaltiesModule,
     OpExemptionsModule,
+    TvaAnnexesModule,
     DocumentsModule,
     ActivitiesModule,
     NotificationsModule,

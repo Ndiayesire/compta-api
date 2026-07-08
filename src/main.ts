@@ -17,6 +17,21 @@ async function bootstrap() {
   });
 
   app.use('/public', express.static(join(__dirname, '..', '..', 'public')));
+  app.use('/docs', express.static(join(__dirname, '..', '..', 'public', 'docs'), { index: 'index.html' }));
+
+  const httpAdapter = app.getHttpAdapter().getInstance();
+
+  const redirectToDocsApi = (_req: express.Request, res: express.Response) => {
+    res.redirect('/docs/api');
+  };
+
+  httpAdapter.get('/', (_req: express.Request, res: express.Response) => {
+    res.redirect('/docs');
+  });
+  httpAdapter.get('/api', redirectToDocsApi);
+  httpAdapter.get('/api/', redirectToDocsApi);
+  httpAdapter.get('/api-internal', redirectToDocsApi);
+  httpAdapter.get('/api-internal/', redirectToDocsApi);
 
   const config = new DocumentBuilder()
     .setTitle('Insta Compta API')
@@ -80,22 +95,22 @@ async function bootstrap() {
     .addTag('op-retains', 'Retenues à la source par tiers — CRUD JSON et **POST /import** Excel (.xlsx, query clientId)')
     .addTag('op-royalties', 'Redevances par tiers — CRUD JSON et **POST /import** Excel (.xlsx, query clientId)')
     .addTag('op-exemptions', 'Exonérations par tiers — CRUD JSON et **POST /import** Excel (query clientId + year)')
+    .addTag(
+      'tva-annexes',
+      'Annexe fiscale TVA — **GET /tva-annexes/compute** (agrégation mensuelle L5–L115 à partir des opérations `op_*`)',
+    )
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
 
-  SwaggerModule.setup('/', app, document, {
-    customSiteTitle: 'Insta Compta · API Docs',
+  SwaggerModule.setup('api-internal', app, document, {
+    customSiteTitle: 'Insta Compta · API Reference',
     customfavIcon: '/public/favicon.ico',
     customCssUrl: '/public/swagger-custom.css',
-    customJs: ['/public/swagger-dark.js'],
     swaggerOptions: {
       persistAuthorization: true,
-      // displayRequestDuration: true,
       filter: true,
-      // deepLinking: true,
       docExpansion: 'none',
-      // defaultModelsExpandDepth: 1,
       tagsSorter: 'alpha',
     },
   });

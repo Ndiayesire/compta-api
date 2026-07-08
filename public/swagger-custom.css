@@ -1,124 +1,143 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
 
 /* ---- Base ---- */
 body,
 .swagger-ui {
-	font-family: 'Roboto', sans-serif !important;
-	background-color: #fdfcfc !important;
+	font-family: 'IBM Plex Sans', system-ui, sans-serif !important;
+	background-color: transparent !important;
 }
 
 * {
 	outline: none !important;
 }
 
-/* ---- Topbar: dark blue background ---- */
+/* ---- Topbar hidden (embedded in docs layout) ---- */
 .swagger-ui .topbar {
-	background: #0f172a;
-	border-bottom: 3px solid #0ea5e9;
-	padding: 10px 24px;
-	box-shadow: 0 1px 8px rgba(0, 0, 0, 0.2);
-}
-
-/* ---- Hide default Swagger logo image completely ---- */
-.swagger-ui .topbar-wrapper button {
 	display: none !important;
 }
 
-.swagger-ui .topbar-wrapper a {
+/* ---- Info block (masqué sur page docs/api) ---- */
+#swagger-ui .info,
+#swagger-ui .information-container {
 	display: none !important;
 }
 
-/* ---- Hide the Swagger link/text too ---- */
-.swagger-ui .topbar-wrapper a,
-.swagger-ui .topbar-wrapper .link {
-	pointer-events: none;
-}
-
-.swagger-ui .topbar-wrapper a span {
-	display: none !important;
-}
-
-/* ---- Show YOUR logo instead ---- */
-.swagger-ui .topbar-wrapper::before {
-	content: '';
-	display: block;
-	background-image: url('https://instahr.ca/Color%20logo%20-%20no%20background.png');
-	background-repeat: no-repeat;
-	background-size: contain;
-	width: 160px;
-	height: 54px;
-}
-
-/* ---- Info block ---- */
-.swagger-ui .info {
-	margin: 32px 0 20px;
-}
-
-.swagger-ui .info h2.title {
-	color: #0f172a;
-	font-size: 1.9rem;
-	font-weight: 700;
-}
-
-.swagger-ui .info .description p {
-	color: #475569;
-}
-
-.swagger-ui .info a {
-	color: #0ea5e9;
-}
-
-/* ---- Filter / search bar ---- */
-.swagger-ui .filter input {
-	border: 1px solid #cbd5e1 !important;
-	border-radius: 8px !important;
-	background: #fff !important;
-	color: #0f172a !important;
-	box-shadow: none !important;
-	font-size: 13px;
-}
-
-.swagger-ui .filter input:focus {
-	border-color: #0ea5e9 !important;
-	outline: none !important;
-}
-
-/* ---- Tag section headers ---- */
-.swagger-ui .opblock-tag {
-	color: #0f172a !important;
-	border-bottom: 1px solid #e2e8f0 !important;
-	font-weight: 600 !important;
-	font-size: 1rem !important;
-	text-transform: capitalize;
-}
-
-.swagger-ui .operation-tag-content {
-	padding: 8px !important;
-}
-
-.swagger-ui .opblock-tag:hover {
-	background: #f1f5f9 !important;
-	border-radius: 6px;
-}
-
+/* ---- Filtre + Authorize (in-place dans #swagger-ui — ne pas déplacer le DOM) ---- */
+/* ---- Tag sections — liste épurée, sans cartes grises ---- */
 .swagger-ui .opblock-tag-section {
 	display: flex;
 	flex-direction: column;
-	background: white;
-	border-radius: 8px;
+	gap: 0.3rem;
+	margin-bottom: 1.1rem;
+	padding: 0;
+	background: transparent;
+	border: none;
+	border-radius: 0;
+}
+
+.swagger-ui .opblock-tag {
+	position: relative;
+	display: block !important;
+	padding: 0.5rem 2rem 0.55rem 0 !important;
+	margin: 0 !important;
+	border: none !important;
+	border-bottom: 1px solid #e2e8f0 !important;
+	background: transparent !important;
+	cursor: pointer;
+	transition: border-color 0.15s;
+}
+
+.swagger-ui .opblock-tag:hover {
+	background: transparent !important;
+	border-bottom-color: #cbd5e1 !important;
+}
+
+.swagger-ui .opblock-tag a {
+	display: block;
+	color: #0f172a !important;
+	font-weight: 700 !important;
+	font-size: 1.05rem !important;
+	line-height: 1.3;
+	text-transform: none !important;
+	text-decoration: none !important;
+}
+
+.swagger-ui .opblock-tag a:hover {
+	color: #0284c7 !important;
+}
+
+.swagger-ui .opblock-tag small {
+	display: block;
+	margin-top: 0.1rem;
+	font-size: 0.8rem !important;
+	font-weight: 400 !important;
+	line-height: 1.35;
+	color: #64748b !important;
+	text-transform: none !important;
+}
+
+.swagger-ui .opblock-tag .expand-operation,
+.swagger-ui .opblock-tag button {
+	position: absolute !important;
+	right: 0;
+	top: 50%;
+	transform: translateY(-50%);
+	margin: 0 !important;
+	padding: 0.35rem !important;
+	border: none !important;
+	background: transparent !important;
+	color: #94a3b8 !important;
+	cursor: pointer;
+}
+
+.swagger-ui .opblock-tag svg {
+	fill: #94a3b8;
+	transition: transform 0.2s, fill 0.15s;
+}
+
+.swagger-ui .opblock-tag-section.is-open .opblock-tag svg {
+	transform: rotate(180deg);
+}
+
+.swagger-ui .operation-tag-content {
+	padding: 0.05rem 0 0 !important;
+	display: flex;
+	flex-direction: column;
+	gap: 0.3rem;
 }
 
 /* ---- Operation blocks ---- */
 .swagger-ui .opblock {
-	border-radius: 8px !important;
-	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06) !important;
-	margin-bottom: 6px !important;
+	border-radius: 10px !important;
+	box-shadow: none !important;
+	margin-bottom: 0 !important;
 	background: #ffffff !important;
-	border: 2px solid;
+	border: 1px solid #e2e8f0 !important;
+	overflow: hidden;
+	transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.swagger-ui .opblock:hover {
+	border-color: #cbd5e1 !important;
 }
 
 .swagger-ui .opblock.is-open {
-	box-shadow: 0 2px 8px rgba(14, 165, 233, 0.15) !important;
+	border-color: #7dd3fc !important;
+	box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1) !important;
+}
+
+.swagger-ui .opblock-summary {
+	padding: 0.5rem 0.75rem !important;
+	align-items: center !important;
+}
+
+.swagger-ui .opblock-summary-method {
+	border-radius: 6px !important;
+	font-size: 0.72rem !important;
+	font-weight: 700 !important;
+	min-width: 4.5rem !important;
+	padding: 0.35rem 0.5rem !important;
+	text-align: center !important;
 }
 
 /* ---- Operation summary text ---- */
@@ -134,7 +153,24 @@ body,
 /* ---- Expanded body ---- */
 .swagger-ui .opblock-body,
 .swagger-ui .opblock-description-wrapper {
-	background: #f8fafc !important;
+	background: #fafbfc !important;
+}
+
+.swagger-ui .opblock.opblock-get {
+	border-color: #bfdbfe !important;
+}
+
+.swagger-ui .opblock.opblock-post {
+	border-color: #bbf7d0 !important;
+}
+
+.swagger-ui .opblock.opblock-put,
+.swagger-ui .opblock.opblock-patch {
+	border-color: #fde68a !important;
+}
+
+.swagger-ui .opblock.opblock-delete {
+	border-color: #fecaca !important;
 }
 
 /* ---- Parameters ---- */
@@ -234,8 +270,7 @@ body,
 }
 
 .swagger-ui .opblock .opblock-post {
-	border: 2px solid #49cc90;
-	border-radius: 4px;
+	border: none;
 }
 
 .swagger-ui .opblock.opblock-patch .opblock-summary-method {
@@ -243,8 +278,8 @@ body,
 }
 
 .swagger-ui .opblock.opblock-patch {
-	background: rgba(80, 227, 194, .1);
-	border-color: #d487ce;
+	background: #ffffff !important;
+	border-color: #e9d5ff !important;
 }
 
 .swagger-ui .opblock-summary-path a span {
@@ -277,157 +312,182 @@ body,
 
 
 /* ============================================================
-   DARK MODE — activates when system is set to dark
+   DARK MODE — suit le toggle docs (body.theme-dark)
    ============================================================ */
-@media (prefers-color-scheme: dark) {
+body.theme-dark .swagger-ui {
+	background-color: transparent !important;
+	color: #e2e8f0 !important;
+}
 
-	body,
-	.swagger-ui {
-		background-color: #0f172a !important;
-		color: #e2e8f0 !important;
-	}
+body.theme-dark .swagger-ui .topbar {
+	background: #020617;
+	border-bottom: 3px solid #0ea5e9;
+}
 
-	/* ---- Topbar stays dark, accent adjusts ---- */
-	.swagger-ui .topbar {
-		background: #020617;
-		border-bottom: 3px solid #0ea5e9;
-	}
+body.theme-dark .swagger-ui .info h2.title {
+	color: #f1f5f9;
+}
 
-	/* ---- Info block ---- */
-	.swagger-ui .info h2.title {
-		color: #f1f5f9;
-	}
+body.theme-dark .swagger-ui .info .description p {
+	color: #94a3b8;
+}
 
-	.swagger-ui .info .description p {
-		color: #94a3b8;
-	}
+body.theme-dark .swagger-ui .filter input {
+	border: 1px solid #334155 !important;
+	background: #1e293b !important;
+	color: #e2e8f0 !important;
+}
 
-	/* ---- Filter ---- */
-	.swagger-ui .filter input {
-		border: 1px solid #334155 !important;
-		background: #1e293b !important;
-		color: #e2e8f0 !important;
-	}
+body.theme-dark .swagger-ui .opblock-tag {
+	border-bottom-color: #334155 !important;
+}
 
-	/* ---- Tag section headers ---- */
-	.swagger-ui .opblock-tag {
-		color: #f1f5f9 !important;
-		border-bottom: 1px solid #1e293b !important;
-	}
+body.theme-dark .swagger-ui .opblock-tag:hover {
+	border-bottom-color: #475569 !important;
+}
 
-	.swagger-ui .opblock-tag:hover {
-		background: #1e293b !important;
-	}
+body.theme-dark .swagger-ui .opblock-tag a {
+	color: #f1f5f9 !important;
+}
 
-	.swagger-ui .opblock-tag-section {
-		background: #0f172a;
-	}
+body.theme-dark .swagger-ui .opblock-tag a:hover {
+	color: #7dd3fc !important;
+}
 
-	/* ---- Operation blocks ---- */
-	.swagger-ui .opblock {
-		background: #1e293b !important;
-		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
-	}
+body.theme-dark .swagger-ui .opblock-tag small {
+	color: #94a3b8 !important;
+}
 
-	.swagger-ui .opblock.is-open {
-		box-shadow: 0 2px 8px rgba(14, 165, 233, 0.25) !important;
-	}
+body.theme-dark .swagger-ui .opblock-tag-section {
+	background: transparent !important;
+	border: none !important;
+}
 
-	.swagger-ui .opblock.opblock-patch {
-		background: rgba(212, 135, 206, 0.08) !important;
-		border-color: #d487ce;
-	}
+body.theme-dark .swagger-ui .opblock {
+	background: #111827 !important;
+	border-color: #334155 !important;
+}
 
-	/* ---- Summary text ---- */
-	.swagger-ui .opblock-summary-description {
-		color: #94a3b8 !important;
-	}
+body.theme-dark .swagger-ui .opblock:hover {
+	border-color: #475569 !important;
+}
 
-	.swagger-ui .opblock-summary-path {
-		color: #e2e8f0 !important;
-	}
+body.theme-dark .swagger-ui .opblock.is-open {
+	border-color: #0ea5e9 !important;
+	box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15) !important;
+}
 
-	.swagger-ui .opblock-summary-path a span {
-		color: #cbd5e1;
-	}
+body.theme-dark .swagger-ui .opblock.opblock-get {
+	border-color: rgba(59, 130, 246, 0.35) !important;
+}
 
-	/* ---- Expanded body ---- */
-	.swagger-ui .opblock-body,
-	.swagger-ui .opblock-description-wrapper {
-		background: #0f172a !important;
-	}
+body.theme-dark .swagger-ui .opblock.opblock-post {
+	border-color: rgba(34, 197, 94, 0.35) !important;
+}
 
-	/* ---- Parameters table ---- */
-	.swagger-ui table thead tr th,
-	.swagger-ui table thead tr td {
-		color: #94a3b8 !important;
-		border-bottom: 1px solid #1e293b !important;
-	}
+body.theme-dark .swagger-ui .opblock.opblock-put,
+body.theme-dark .swagger-ui .opblock.opblock-patch {
+	border-color: rgba(250, 204, 21, 0.35) !important;
+}
 
-	.swagger-ui .parameter__name {
-		color: #e2e8f0 !important;
-	}
+body.theme-dark .swagger-ui .opblock.opblock-delete {
+	border-color: rgba(239, 68, 68, 0.35) !important;
+}
 
-	/* ---- Input fields ---- */
-	.swagger-ui input,
-	.swagger-ui textarea,
-	.swagger-ui select {
-		background: #1e293b !important;
-		border: 1px solid #334155 !important;
-		color: #e2e8f0 !important;
-	}
+body.theme-dark .swagger-ui .opblock.opblock-patch {
+	background: #111827 !important;
+	border-color: rgba(212, 135, 206, 0.35) !important;
+}
 
-	/* ---- Models / schemas ---- */
-	.swagger-ui section.models {
-		background: #1e293b !important;
-		border: 1px solid #334155 !important;
-	}
+body.theme-dark .swagger-ui .opblock-summary-description {
+	color: #94a3b8 !important;
+}
 
-	.swagger-ui section.models h4 {
-		color: #f1f5f9 !important;
-	}
+body.theme-dark .swagger-ui .opblock-summary-path {
+	color: #e2e8f0 !important;
+}
 
-	.swagger-ui section.models .model-container {
-		background: rgba(255, 255, 255, 0.03);
-	}
+body.theme-dark .swagger-ui .opblock-summary-path a span {
+	color: #cbd5e1;
+}
 
-	/* ---- General text inside swagger-ui ---- */
-	.swagger-ui .opblock-section-header,
-	.swagger-ui .opblock-section-header label,
-	.swagger-ui .tab li,
-	.swagger-ui .response-col_description,
-	.swagger-ui .responses-inner h4,
-	.swagger-ui .responses-inner h5,
-	.swagger-ui label,
-	.swagger-ui p,
-	.swagger-ui td,
-	.swagger-ui li {
-		color: #cbd5e1 !important;
-	}
+body.theme-dark .swagger-ui .opblock-body,
+body.theme-dark .swagger-ui .opblock-description-wrapper {
+	background: #0b1120 !important;
+}
 
-	.swagger-ui .opblock-section-header {
-		background: #1e293b !important;
-		border-bottom: 1px solid #334155 !important;
-	}
+body.theme-dark .swagger-ui table thead tr th,
+body.theme-dark .swagger-ui table thead tr td {
+	color: #94a3b8 !important;
+	border-bottom: 1px solid #334155 !important;
+}
 
-	/* ---- Code / response body ---- */
-	.swagger-ui .microlight,
-	.swagger-ui .highlight-code {
-		background: #020617 !important;
-		color: #7dd3fc !important;
-		border-radius: 6px;
-	}
+body.theme-dark .swagger-ui .parameter__name {
+	color: #e2e8f0 !important;
+}
 
-	/* ---- Scrollbar ---- */
-	::-webkit-scrollbar-track {
-		background: #0f172a;
-	}
+body.theme-dark .swagger-ui input,
+body.theme-dark .swagger-ui textarea,
+body.theme-dark .swagger-ui select {
+	background: #1e293b !important;
+	border: 1px solid #334155 !important;
+	color: #e2e8f0 !important;
+}
 
-	::-webkit-scrollbar-thumb {
-		background: #334155;
-	}
+body.theme-dark .swagger-ui section.models {
+	background: #1e293b !important;
+	border: 1px solid #334155 !important;
+}
 
-	::-webkit-scrollbar-thumb:hover {
-		background: #0ea5e9;
-	}
+body.theme-dark .swagger-ui section.models h4 {
+	color: #f1f5f9 !important;
+}
+
+body.theme-dark .swagger-ui section.models .model-container {
+	background: rgba(255, 255, 255, 0.03);
+}
+
+body.theme-dark .swagger-ui .opblock-section-header,
+body.theme-dark .swagger-ui .opblock-section-header label,
+body.theme-dark .swagger-ui .tab li,
+body.theme-dark .swagger-ui .response-col_description,
+body.theme-dark .swagger-ui .responses-inner h4,
+body.theme-dark .swagger-ui .responses-inner h5,
+body.theme-dark .swagger-ui label,
+body.theme-dark .swagger-ui p,
+body.theme-dark .swagger-ui td,
+body.theme-dark .swagger-ui li {
+	color: #cbd5e1 !important;
+}
+
+body.theme-dark .swagger-ui .opblock-section-header {
+	background: #1e293b !important;
+	border-bottom: 1px solid #334155 !important;
+}
+
+body.theme-dark .swagger-ui .microlight,
+body.theme-dark .swagger-ui .highlight-code {
+	background: #020617 !important;
+	color: #7dd3fc !important;
+	border-radius: 6px;
+}
+
+body.theme-dark .swagger-ui .btn {
+	color: #e2e8f0;
+}
+
+body.theme-dark .swagger-ui .response-col_status {
+	color: #94a3b8 !important;
+}
+
+body.theme-dark ::-webkit-scrollbar-track {
+	background: #0f172a;
+}
+
+body.theme-dark ::-webkit-scrollbar-thumb {
+	background: #334155;
+}
+
+body.theme-dark ::-webkit-scrollbar-thumb:hover {
+	background: #0ea5e9;
 }
