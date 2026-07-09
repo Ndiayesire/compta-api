@@ -1,12 +1,4 @@
-import {
-  BadRequestException,
-  Controller,
-  Get,
-  HttpStatus,
-  Query,
-  UsePipes,
-  ValidationPipe,
-} from '@nestjs/common';
+import { BadRequestException, Controller, Get, HttpStatus, Query, UsePipes, ValidationPipe } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import type { AuthUser } from '../../common/types/auth-user.type';
@@ -27,14 +19,16 @@ export class TvaAnnexesController {
     description: [
       'Agrège les opérations fiscales du **client** pour `month` / `year`, puis applique les formules L5–L115.',
       '',
-      '**Sources automatiques** :',
-      '- **L5** `op_turnovers.net` (filtre `date` du mois)',
-      '- **L10** `op_exportations.net`',
+      '**Sources automatiques** (uniquement `*_tax` / `amount`, jamais `net` ni `total`) :',
+      '- **L5** `op_turnovers.tax` (filtre `date` du mois)',
+      '- **L10** `op_exportations.tax`',
       '- **L15** `op_exemptions.amount`',
-      '- **L20** `op_suspensions.net`',
+      '- **L20** `op_suspensions.tax`',
+      '- **L60** `op_turnovers.tax` (prioritaire ; L50/L55 = ventilation ou secours)',
       '- **L70** `op_retains.amount`',
-      '- **L80 / L85** `op_importations` (`net` ; `taxDeduction` sinon `tax`)',
-      '- **L90** `op_local_purchases.taxDeduction`',
+      '- **L80** `op_importations.tax`',
+      '- **L85** `op_importations.taxDeduction` sinon `tax`',
+      '- **L90** `op_local_purchases.taxDeduction` sinon `tax`',
       '',
       '**Overrides query** : `reducedBase` (L40), `previousCredit` (L100), `checksDdi` (L75), `selfSupplies` (L30), `reducedRate`.',
       '',

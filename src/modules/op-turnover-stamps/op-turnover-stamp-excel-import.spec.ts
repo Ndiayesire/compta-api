@@ -1,10 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import ExcelJS from 'exceljs';
-import {
-  assertTurnoverStampImportHeadersComplete,
-  buildTurnoverStampImportColumnMap,
-} from './op-turnover-stamp-excel-import';
+import { assertTurnoverStampImportHeadersComplete, buildTurnoverStampImportColumnMap } from './op-turnover-stamp-excel-import';
 
 const TEMPLATE_PATH = path.join(
   __dirname,

@@ -1,11 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import ExcelJS from 'exceljs';
-import {
-  assertRoyaltyImportHeadersComplete,
-  buildRoyaltyImportColumnMap,
-  parseOpRoyaltyImportWorkbook,
-} from './op-royalty-excel-import';
+import { assertRoyaltyImportHeadersComplete, buildRoyaltyImportColumnMap, parseOpRoyaltyImportWorkbook } from './op-royalty-excel-import';
 
 const TEMPLATE_PATH = path.join(
   __dirname,

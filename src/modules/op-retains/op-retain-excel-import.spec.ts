@@ -1,11 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import ExcelJS from 'exceljs';
-import {
-  assertRetainImportHeadersComplete,
-  buildRetainImportColumnMap,
-  parseOpRetainImportWorkbook,
-} from './op-retain-excel-import';
+import { assertRetainImportHeadersComplete, buildRetainImportColumnMap, parseOpRetainImportWorkbook } from './op-retain-excel-import';
 
 const TEMPLATE_PATH = path.join(
   __dirname,

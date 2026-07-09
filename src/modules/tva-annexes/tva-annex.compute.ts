@@ -8,17 +8,17 @@ export type TvaAnnexRates = {
 };
 
 export type TvaAnnexInputs = {
-  /** L5 — CA HT */
+  /** L5 — SUM(op_turnover_tax) */
   l5: number;
-  /** L10 — Exportations HT */
+  /** L10 — SUM(op_exportation_tax) */
   l10: number;
-  /** L15 — Exonérations */
+  /** L15 — SUM(op_exemption_amount) */
   l15: number;
-  /** L20 — Suspensions HT */
+  /** L20 — SUM(op_suspension_tax) */
   l20: number;
-  /** L30 — Auto-livraisons (informatif ; hors formule L35 actuelle) */
+  /** L30 — Auto-livraisons (informatif) */
   l30: number;
-  /** L40 — Part taxe au taux réduit */
+  /** L40 — Part taxe au taux réduit (ventilation / saisie) */
   l40: number;
   /** L65 — Affaires soumises au précompte (informatif) */
   l65: number;
@@ -26,7 +26,7 @@ export type TvaAnnexInputs = {
   l70: number;
   /** L75 — Chèques DDI */
   l75: number;
-  /** L80 — Importations HT */
+  /** L80 — SUM(op_importation_tax) */
   l80: number;
   /** L85 — TVA déductible importations */
   l85: number;
@@ -37,6 +37,8 @@ export type TvaAnnexInputs = {
   /** L95 / L120 — saisie manuelle (informatifs) */
   l95: number;
   l120: number;
+  /** L60 — SUM(op_turnover_tax) ; défaut = l5 */
+  l60TurnoverTax?: number;
 };
 
 export type TvaAnnexLine = {
@@ -63,9 +65,36 @@ function max0(n: number): number {
   return n > 0 ? n : 0;
 }
 
+function ventilateTurnoverTax(
+  l60Collected: number,
+  l40: number,
+  l45: number,
+  rates: TvaAnnexRates,
+): { l50: number; l55: number; l60: number; mode: 'collected' | 'formula' } {
+  const l50Formula = round2(l40 * (rates.reducedRate / 100));
+  const l55Formula = round2(l45 * (rates.normalRate / 100));
+
+  if (l60Collected > 0) {
+    if (l40 > 0 && l50Formula + l55Formula > 0) {
+      const l50 = round2(l60Collected * (l50Formula / (l50Formula + l55Formula)));
+      return {
+        l50,
+        l55: round2(l60Collected - l50),
+        l60: l60Collected,
+        mode: 'collected',
+      };
+    }
+    return { l50: l50Formula, l55: l55Formula, l60: l60Collected, mode: 'collected' };
+  }
+
+  const l50 = l50Formula;
+  const l55 = l55Formula;
+  return { l50, l55, l60: round2(l50 + l55), mode: 'formula' };
+}
+
 /**
  * Calcule l’annexe TVA à partir des agrégats d’entrée.
- * Formules alignées sur `processus_calcul_tva.md`.
+ * Formules alignées sur `processus_calcul_tva.md` (colonnes `*_tax` uniquement).
  */
 export function computeTvaAnnex(
   inputs: TvaAnnexInputs,
@@ -86,13 +115,12 @@ export function computeTvaAnnex(
   const l95 = round2(inputs.l95);
   const l100 = round2(inputs.l100);
   const l120 = round2(inputs.l120);
+  const l60Collected = round2(inputs.l60TurnoverTax ?? inputs.l5);
 
   const l25 = round2(l10 + l15 + l20);
   const l35 = round2(l5 - l25);
   const l45 = round2(l35 - l40);
-  const l50 = round2(l40 * (rates.reducedRate / 100));
-  const l55 = round2(l45 * (rates.normalRate / 100));
-  const l60 = round2(l50 + l55);
+  const { l50, l55, l60, mode: l60Mode } = ventilateTurnoverTax(l60Collected, l40, l45, rates);
   const l76 = round2(l70 + l75);
   const l91 = round2(l85 + l90);
   const l92 = round2(l76 + l91);
@@ -101,20 +129,27 @@ export function computeTvaAnnex(
   const l110 = round2(max0(l60 - l105));
   const l115 = round2(max0(l105 - l60));
 
+  const l50Formula =
+    l40 > 0 ? `ventilation L60 (taux réduit)` : `L40 × ${rates.reducedRate}% (secours)`;
+  const l55Formula =
+    l40 > 0 ? `ventilation L60 (taux normal)` : `L45 × ${rates.normalRate}% (secours)`;
+  const l60Formula =
+    l60Mode === 'collected' ? 'SUM(op_turnover_tax)' : 'L50 + L55 (secours)';
+
   const lines: Record<string, TvaAnnexLine> = {
     L5: {
       code: 'L5',
       label: 'Montant des opérations',
       type: 'input',
       amount: l5,
-      source: 'op_turnovers.net',
+      source: 'op_turnovers.tax',
     },
     L10: {
       code: 'L10',
       label: 'Affaires à l’exportation',
       type: 'input',
       amount: l10,
-      source: 'op_exportations.net',
+      source: 'op_exportations.tax',
     },
     L15: {
       code: 'L15',
@@ -128,7 +163,7 @@ export function computeTvaAnnex(
       label: 'Affaires réalisées en suspension de la TVA',
       type: 'input',
       amount: l20,
-      source: 'op_suspensions.net',
+      source: 'op_suspensions.tax',
     },
     L25: {
       code: 'L25',
@@ -170,21 +205,22 @@ export function computeTvaAnnex(
       label: 'Montant de la TVA — taux réduit',
       type: 'calc',
       amount: l50,
-      formula: `L40 × ${rates.reducedRate}%`,
+      formula: l50Formula,
     },
     L55: {
       code: 'L55',
       label: 'Montant de la TVA — taux normal',
       type: 'calc',
       amount: l55,
-      formula: `L45 × ${rates.normalRate}%`,
+      formula: l55Formula,
     },
     L60: {
       code: 'L60',
       label: 'Montant de la TVA brute',
-      type: 'calc',
+      type: l60Mode === 'collected' ? 'input' : 'calc',
       amount: l60,
-      formula: 'L50 + L55',
+      formula: l60Formula,
+      source: l60Mode === 'collected' ? 'op_turnovers.tax' : undefined,
     },
     L65: {
       code: 'L65',
@@ -219,7 +255,7 @@ export function computeTvaAnnex(
       label: 'Montant des importations du mois',
       type: 'input',
       amount: l80,
-      source: 'op_importations.net',
+      source: 'op_importations.tax',
     },
     L85: {
       code: 'L85',
@@ -233,7 +269,7 @@ export function computeTvaAnnex(
       label: 'TVA acquittée sur les achats intérieurs du mois',
       type: 'input',
       amount: l90,
-      source: 'op_local_purchases.taxDeduction',
+      source: 'op_local_purchases.taxDeduction|tax',
     },
     L91: {
       code: 'L91',

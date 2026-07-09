@@ -10,6 +10,10 @@ function dec(value: Prisma.Decimal | number | null | undefined): number {
   return value.toNumber();
 }
 
+function pickTaxDeduction(taxDeduction: number, tax: number): number {
+  return taxDeduction > 0 ? taxDeduction : tax;
+}
+
 @Injectable()
 export class TvaAnnexesService {
   constructor(private readonly prisma: PrismaService) {}
@@ -50,7 +54,7 @@ export class TvaAnnexesService {
           client: { companyId, deletedAt: null },
           date: { gte: periodStart, lt: periodEnd },
         },
-        _sum: { net: true },
+        _sum: { tax: true },
         _count: true,
       }),
       this.prisma.opExportation.aggregate({
@@ -60,7 +64,7 @@ export class TvaAnnexesService {
           year,
           tier: tierScope,
         },
-        _sum: { net: true },
+        _sum: { tax: true },
         _count: true,
       }),
       this.prisma.opExemption.aggregate({
@@ -80,7 +84,7 @@ export class TvaAnnexesService {
           year,
           tier: tierScope,
         },
-        _sum: { net: true },
+        _sum: { tax: true },
         _count: true,
       }),
       this.prisma.opRetain.aggregate({
@@ -100,7 +104,7 @@ export class TvaAnnexesService {
           year,
           tier: tierScope,
         },
-        _sum: { net: true, tax: true, taxDeduction: true },
+        _sum: { tax: true, taxDeduction: true },
         _count: true,
       }),
       this.prisma.opLocalPurchase.aggregate({
@@ -110,35 +114,40 @@ export class TvaAnnexesService {
           year,
           tier: tierScope,
         },
-        _sum: { taxDeduction: true },
+        _sum: { tax: true, taxDeduction: true },
         _count: true,
       }),
     ]);
 
-    const l85TaxDeduction = dec(importationAgg._sum.taxDeduction);
-    const l85Tax = dec(importationAgg._sum.tax);
-    const l85 = l85TaxDeduction > 0 ? l85TaxDeduction : l85Tax;
+    const turnoverTax = dec(turnoverAgg._sum.tax);
+    const importTax = dec(importationAgg._sum.tax);
+    const importTaxDeduction = dec(importationAgg._sum.taxDeduction);
+    const localTax = dec(localPurchaseAgg._sum.tax);
+    const localTaxDeduction = dec(localPurchaseAgg._sum.taxDeduction);
+    const l85 = pickTaxDeduction(importTaxDeduction, importTax);
+    const l90 = pickTaxDeduction(localTaxDeduction, localTax);
 
     const reducedRate = query.reducedRate ?? 10;
     const normalRate = client.country?.tva ?? 18;
 
     const annex = computeTvaAnnex(
       {
-        l5: dec(turnoverAgg._sum.net),
-        l10: dec(exportAgg._sum.net),
+        l5: turnoverTax,
+        l10: dec(exportAgg._sum.tax),
         l15: dec(exemptionAgg._sum.amount),
-        l20: dec(suspensionAgg._sum.net),
+        l20: dec(suspensionAgg._sum.tax),
         l30: query.selfSupplies ?? 0,
         l40: query.reducedBase ?? 0,
         l65: 0,
         l70: dec(retainAgg._sum.amount),
         l75: query.checksDdi ?? 0,
-        l80: dec(importationAgg._sum.net),
+        l80: importTax,
         l85,
-        l90: dec(localPurchaseAgg._sum.taxDeduction),
+        l90,
         l95: 0,
         l100: query.previousCredit ?? 0,
         l120: 0,
+        l60TurnoverTax: turnoverTax,
       },
       { reducedRate, normalRate },
     );
@@ -154,21 +163,23 @@ export class TvaAnnexesService {
       },
       rates: annex.rates,
       sources: {
-        turnovers: { count: turnoverAgg._count, sumNet: dec(turnoverAgg._sum.net) },
-        exportations: { count: exportAgg._count, sumNet: dec(exportAgg._sum.net) },
+        turnovers: { count: turnoverAgg._count, sumTax: turnoverTax },
+        exportations: { count: exportAgg._count, sumTax: dec(exportAgg._sum.tax) },
         exemptions: { count: exemptionAgg._count, sumAmount: dec(exemptionAgg._sum.amount) },
-        suspensions: { count: suspensionAgg._count, sumNet: dec(suspensionAgg._sum.net) },
+        suspensions: { count: suspensionAgg._count, sumTax: dec(suspensionAgg._sum.tax) },
         retains: { count: retainAgg._count, sumAmount: dec(retainAgg._sum.amount) },
         importations: {
           count: importationAgg._count,
-          sumNet: dec(importationAgg._sum.net),
-          sumTax: l85Tax,
-          sumTaxDeduction: l85TaxDeduction,
+          sumTax: importTax,
+          sumTaxDeduction: importTaxDeduction,
+          usedForL80: importTax,
           usedForL85: l85,
         },
         localPurchases: {
           count: localPurchaseAgg._count,
-          sumTaxDeduction: dec(localPurchaseAgg._sum.taxDeduction),
+          sumTax: localTax,
+          sumTaxDeduction: localTaxDeduction,
+          usedForL90: l90,
         },
       },
       overrides: {

@@ -1,11 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import ExcelJS from 'exceljs';
-import {
-  assertSuspensionImportHeadersComplete,
-  buildSuspensionImportColumnMap,
-  parseOpSuspensionImportWorkbook,
-} from './op-suspension-excel-import';
+import { assertSuspensionImportHeadersComplete, buildSuspensionImportColumnMap, parseOpSuspensionImportWorkbook } from './op-suspension-excel-import';
 
 const TEMPLATE_PATH = path.join(
   __dirname,
