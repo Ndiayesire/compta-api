@@ -1,18 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { ComputeTvaAnnexQueryDto } from './dto/compute-tva-annex.dto';
+import { sumCompletedNet, sumRetainAmount, sumTaxDeductionOrTax, toNullableNumber } from './op-amounts';
 import { computeTvaAnnex } from './tva-annex.compute';
-
-function dec(value: Prisma.Decimal | number | null | undefined): number {
-  if (value == null) return 0;
-  if (typeof value === 'number') return value;
-  return value.toNumber();
-}
-
-function pickTaxDeduction(taxDeduction: number, tax: number): number {
-  return taxDeduction > 0 ? taxDeduction : tax;
-}
 
 @Injectable()
 export class TvaAnnexesService {
@@ -39,115 +29,78 @@ export class TvaAnnexesService {
     };
 
     const [
-      turnoverAgg,
-      exportAgg,
-      exemptionAgg,
-      suspensionAgg,
-      retainAgg,
-      importationAgg,
-      localPurchaseAgg,
+      turnovers,
+      exportations,
+      exemptions,
+      suspensions,
+      retains,
+      importations,
+      localPurchases,
     ] = await Promise.all([
-      this.prisma.opTurnover.aggregate({
+      this.prisma.opTurnover.findMany({
         where: {
           deletedAt: null,
           clientId,
           client: { companyId, deletedAt: null },
           date: { gte: periodStart, lt: periodEnd },
         },
-        _sum: { tax: true },
-        _count: true,
+        select: { net: true, tax: true, total: true },
       }),
-      this.prisma.opExportation.aggregate({
-        where: {
-          deletedAt: null,
-          month,
-          year,
-          tier: tierScope,
-        },
-        _sum: { tax: true },
-        _count: true,
+      this.prisma.opExportation.findMany({
+        where: { deletedAt: null, month, year, tier: tierScope },
+        select: { net: true, tax: true, total: true },
       }),
-      this.prisma.opExemption.aggregate({
-        where: {
-          deletedAt: null,
-          month,
-          year,
-          tier: tierScope,
-        },
-        _sum: { amount: true },
-        _count: true,
+      this.prisma.opExemption.findMany({
+        where: { deletedAt: null, month, year, tier: tierScope },
+        select: { amount: true },
       }),
-      this.prisma.opSuspension.aggregate({
-        where: {
-          deletedAt: null,
-          month,
-          year,
-          tier: tierScope,
-        },
-        _sum: { tax: true },
-        _count: true,
+      this.prisma.opSuspension.findMany({
+        where: { deletedAt: null, month, year, tier: tierScope },
+        select: { net: true, tax: true, total: true },
       }),
-      this.prisma.opRetain.aggregate({
-        where: {
-          deletedAt: null,
-          month,
-          year,
-          tier: tierScope,
-        },
-        _sum: { amount: true },
-        _count: true,
+      this.prisma.opRetain.findMany({
+        where: { deletedAt: null, month, year, tier: tierScope },
+        select: { amount: true, base: true, rate: true },
       }),
-      this.prisma.opImportation.aggregate({
-        where: {
-          deletedAt: null,
-          month,
-          year,
-          tier: tierScope,
-        },
-        _sum: { tax: true, taxDeduction: true },
-        _count: true,
+      this.prisma.opImportation.findMany({
+        where: { deletedAt: null, month, year, tier: tierScope },
+        select: { net: true, tax: true, total: true, taxDeduction: true },
       }),
-      this.prisma.opLocalPurchase.aggregate({
-        where: {
-          deletedAt: null,
-          month,
-          year,
-          tier: tierScope,
-        },
-        _sum: { tax: true, taxDeduction: true },
-        _count: true,
+      this.prisma.opLocalPurchase.findMany({
+        where: { deletedAt: null, month, year, tier: tierScope },
+        select: { net: true, tax: true, total: true, taxDeduction: true },
       }),
     ]);
 
-    const turnoverTax = dec(turnoverAgg._sum.tax);
-    const importTax = dec(importationAgg._sum.tax);
-    const importTaxDeduction = dec(importationAgg._sum.taxDeduction);
-    const localTax = dec(localPurchaseAgg._sum.tax);
-    const localTaxDeduction = dec(localPurchaseAgg._sum.taxDeduction);
-    const l85 = pickTaxDeduction(importTaxDeduction, importTax);
-    const l90 = pickTaxDeduction(localTaxDeduction, localTax);
+    const l5 = sumCompletedNet(turnovers);
+    const l10 = sumCompletedNet(exportations);
+    const l15 = exemptions.reduce((acc, row) => acc + (toNullableNumber(row.amount) ?? 0), 0);
+    const l20 = sumCompletedNet(suspensions);
+    const l70 = sumRetainAmount(retains);
+    const l80 = sumCompletedNet(importations);
+    const l85 = sumTaxDeductionOrTax(importations);
+    const l90 = sumTaxDeductionOrTax(localPurchases);
 
     const reducedRate = query.reducedRate ?? 10;
     const normalRate = client.country?.tva ?? 18;
 
     const annex = computeTvaAnnex(
       {
-        l5: turnoverTax,
-        l10: dec(exportAgg._sum.tax),
-        l15: dec(exemptionAgg._sum.amount),
-        l20: dec(suspensionAgg._sum.tax),
+        l5,
+        l10,
+        l15: Math.round(l15),
+        l20,
         l30: query.selfSupplies ?? 0,
         l40: query.reducedBase ?? 0,
         l65: 0,
-        l70: dec(retainAgg._sum.amount),
+        l70,
         l75: query.checksDdi ?? 0,
-        l80: importTax,
+        l80,
         l85,
         l90,
         l95: 0,
         l100: query.previousCredit ?? 0,
         l120: 0,
-        l60TurnoverTax: turnoverTax,
       },
       { reducedRate, normalRate },
     );
@@ -163,22 +116,18 @@ export class TvaAnnexesService {
       },
       rates: annex.rates,
       sources: {
-        turnovers: { count: turnoverAgg._count, sumTax: turnoverTax },
-        exportations: { count: exportAgg._count, sumTax: dec(exportAgg._sum.tax) },
-        exemptions: { count: exemptionAgg._count, sumAmount: dec(exemptionAgg._sum.amount) },
-        suspensions: { count: suspensionAgg._count, sumTax: dec(suspensionAgg._sum.tax) },
-        retains: { count: retainAgg._count, sumAmount: dec(retainAgg._sum.amount) },
+        turnovers: { count: turnovers.length, sumNet: l5 },
+        exportations: { count: exportations.length, sumNet: l10 },
+        exemptions: { count: exemptions.length, sumAmount: Math.round(l15) },
+        suspensions: { count: suspensions.length, sumNet: l20 },
+        retains: { count: retains.length, sumAmount: l70 },
         importations: {
-          count: importationAgg._count,
-          sumTax: importTax,
-          sumTaxDeduction: importTaxDeduction,
-          usedForL80: importTax,
+          count: importations.length,
+          sumNet: l80,
           usedForL85: l85,
         },
         localPurchases: {
-          count: localPurchaseAgg._count,
-          sumTax: localTax,
-          sumTaxDeduction: localTaxDeduction,
+          count: localPurchases.length,
           usedForL90: l90,
         },
       },

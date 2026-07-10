@@ -312,8 +312,10 @@ Authorization: Bearer …</code></pre>
           <li><code>reducedRate</code> — taux réduit en % (défaut <strong>10</strong>)</li>
         </ul>
         <p>
-          Règle : agrégation <strong>uniquement</strong> sur <code>tax</code>, <code>taxDeduction</code> ou <code>amount</code>
-          — jamais <code>net</code> ni <code>total</code>. Taux normal : <code>client.country.tva</code> (ex. 18 %).
+          Avant agrégation, chaque ligne opérationnelle complète le triplet
+          <code>total = net + tax</code> (champ manquant déduit des deux autres).
+          Bases d’assiette en <strong>HT (<code>net</code>)</strong> ; TVA collectée via
+          <code>L60 = L50 + L55</code>. Taux normal : <code>client.country.tva</code>.
           Réponse : <code>lines.L*</code>, <code>payable</code> (L110), <code>creditCarryForward</code> (L115).
         </p>
         <div class="table-wrap">
@@ -326,13 +328,13 @@ Authorization: Bearer …</code></pre>
               </tr>
             </thead>
             <tbody>
-              <tr><td>L5</td><td><code>op_turnovers</code></td><td><code>tax</code> (filtre <code>date</code> du mois)</td></tr>
-              <tr><td>L10</td><td><code>op_exportations</code></td><td><code>tax</code></td></tr>
+              <tr><td>L5</td><td><code>op_turnovers</code></td><td><code>net</code> (complété ; filtre <code>date</code>)</td></tr>
+              <tr><td>L10</td><td><code>op_exportations</code></td><td><code>net</code> (complété)</td></tr>
               <tr><td>L15</td><td><code>op_exemptions</code></td><td><code>amount</code></td></tr>
-              <tr><td>L20</td><td><code>op_suspensions</code></td><td><code>tax</code></td></tr>
-              <tr><td>L60</td><td><code>op_turnovers</code></td><td><code>tax</code> (prioritaire)</td></tr>
-              <tr><td>L70</td><td><code>op_retains</code></td><td><code>amount</code></td></tr>
-              <tr><td>L80</td><td><code>op_importations</code></td><td><code>tax</code></td></tr>
+              <tr><td>L20</td><td><code>op_suspensions</code></td><td><code>net</code> (complété)</td></tr>
+              <tr><td>L60</td><td>Calcul</td><td><code>L50 + L55</code></td></tr>
+              <tr><td>L70</td><td><code>op_retains</code></td><td><code>amount</code> (ou <code>base×rate</code>)</td></tr>
+              <tr><td>L80</td><td><code>op_importations</code></td><td><code>net</code> (complété)</td></tr>
               <tr><td>L85</td><td><code>op_importations</code></td><td><code>taxDeduction</code> sinon <code>tax</code></td></tr>
               <tr><td>L90</td><td><code>op_local_purchases</code></td><td><code>taxDeduction</code> sinon <code>tax</code></td></tr>
               <tr><td>L100</td><td>Query</td><td><code>previousCredit</code></td></tr>
@@ -347,19 +349,20 @@ Authorization: Bearer …</code></pre>
 
       <section id="tva-formules">
         <h2>Formules L5–L115</h2>
-        <pre><code>L5   = SUM(op_turnover_tax)
-L10  = SUM(op_exportation_tax)
-L15  = SUM(op_exemption_amount)
-L20  = SUM(op_suspension_tax)
+        <pre><code># Complétion ligne : total = net + tax (champ manquant déduit)
+L5   = Σ op_turnover_net
+L10  = Σ op_exportation_net
+L15  = Σ op_exemption_amount
+L20  = Σ op_suspension_net
 L25  = L10 + L15 + L20
 L35  = L5  − L25
 L45  = L35 − L40
-L60  = SUM(op_turnover_tax)   → prioritaire
-L50  = ventilation L60 ou L40 × 10% (secours)
-L55  = ventilation L60 ou L45 × taux_pays% (secours)
-L80  = SUM(op_importation_tax)
-L85  = SUM(taxDeduction) ou SUM(tax) importations
-L90  = SUM(taxDeduction) ou SUM(tax) achats locaux
+L50  = L40 × 10%
+L55  = L45 × taux_pays%
+L60  = L50 + L55
+L80  = Σ op_importation_net
+L85  = Σ taxDeduction (sinon tax) importations
+L90  = Σ taxDeduction (sinon tax) achats locaux
 L76  = L70 + L75
 L91  = L85 + L90
 L92  = L76 + L91
