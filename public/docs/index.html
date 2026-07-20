@@ -328,7 +328,7 @@ Authorization: Bearer …</code></pre>
               </tr>
             </thead>
             <tbody>
-              <tr><td>L5</td><td><code>op_turnovers</code></td><td><code>net</code> (complété ; filtre <code>date</code>)</td></tr>
+              <tr><td>L5</td><td><code>op_turnovers</code> + <code>op_exemptions</code></td><td><code>Σ net</code> + <code>Σ amount</code> (= CA + L15)</td></tr>
               <tr><td>L10</td><td><code>op_exportations</code></td><td><code>net</code> (complété)</td></tr>
               <tr><td>L15</td><td><code>op_exemptions</code></td><td><code>amount</code></td></tr>
               <tr><td>L20</td><td><code>op_suspensions</code></td><td><code>net</code> (complété)</td></tr>
@@ -350,7 +350,7 @@ Authorization: Bearer …</code></pre>
       <section id="tva-formules">
         <h2>Formules L5–L115</h2>
         <pre><code># Complétion ligne : total = net + tax (champ manquant déduit)
-L5   = Σ op_turnover_net
+L5   = Σ op_turnover_net + Σ op_exemption_amount   (= CA + L15)
 L10  = Σ op_exportation_net
 L15  = Σ op_exemption_amount
 L20  = Σ op_suspension_net

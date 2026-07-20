@@ -1,10 +1,11 @@
 import { computeTvaAnnex } from './tva-annex.compute';
 
 describe('computeTvaAnnex', () => {
-  it('matches the illustrative example from processus_calcul_tva.md (bases HT)', () => {
+  it('matches the illustrative example from processus_calcul_tva.md (L5 = CA + exo)', () => {
+    // L5 = 10_000_000 (CA) + 500_000 (exo) = 10_500_000
     const result = computeTvaAnnex(
       {
-        l5: 10_000_000,
+        l5: 10_500_000,
         l10: 1_000_000,
         l15: 500_000,
         l20: 500_000,
@@ -24,13 +25,13 @@ describe('computeTvaAnnex', () => {
     );
 
     expect(result.lines.L25.amount).toBe(2_000_000);
-    expect(result.lines.L35.amount).toBe(8_000_000);
-    expect(result.lines.L45.amount).toBe(7_000_000);
+    expect(result.lines.L35.amount).toBe(8_500_000);
+    expect(result.lines.L45.amount).toBe(7_500_000);
     expect(result.lines.L50.amount).toBe(100_000);
-    expect(result.lines.L55.amount).toBe(1_260_000);
-    expect(result.lines.L60.amount).toBe(1_360_000);
+    expect(result.lines.L55.amount).toBe(1_350_000);
+    expect(result.lines.L60.amount).toBe(1_450_000);
     expect(result.lines.L105.amount).toBe(650_000);
-    expect(result.payable).toBe(710_000);
+    expect(result.payable).toBe(800_000);
     expect(result.creditCarryForward).toBe(0);
   });
 

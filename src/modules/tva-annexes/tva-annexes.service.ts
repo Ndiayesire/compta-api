@@ -72,9 +72,13 @@ export class TvaAnnexesService {
       }),
     ]);
 
-    const l5 = sumCompletedNet(turnovers);
+    const turnoverNet = sumCompletedNet(turnovers);
     const l10 = sumCompletedNet(exportations);
-    const l15 = exemptions.reduce((acc, row) => acc + (toNullableNumber(row.amount) ?? 0), 0);
+    const l15 = Math.round(
+      exemptions.reduce((acc, row) => acc + (toNullableNumber(row.amount) ?? 0), 0),
+    );
+    /** L5 = Σ CA HT + Σ exonérations (= CA + L15) */
+    const l5 = Math.round(turnoverNet + l15);
     const l20 = sumCompletedNet(suspensions);
     const l70 = sumRetainAmount(retains);
     const l80 = sumCompletedNet(importations);
@@ -88,7 +92,7 @@ export class TvaAnnexesService {
       {
         l5,
         l10,
-        l15: Math.round(l15),
+        l15,
         l20,
         l30: query.selfSupplies ?? 0,
         l40: query.reducedBase ?? 0,
@@ -117,9 +121,9 @@ export class TvaAnnexesService {
       },
       rates: annex.rates,
       sources: {
-        turnovers: { count: turnovers.length, sumNet: l5 },
+        turnovers: { count: turnovers.length, sumNet: turnoverNet },
         exportations: { count: exportations.length, sumNet: l10 },
-        exemptions: { count: exemptions.length, sumAmount: Math.round(l15) },
+        exemptions: { count: exemptions.length, sumAmount: l15 },
         suspensions: { count: suspensions.length, sumNet: l20 },
         retains: { count: retains.length, sumAmount: l70 },
         importations: {

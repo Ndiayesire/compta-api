@@ -46,7 +46,7 @@ const DESC_COMMON = [
   '**Pr\u00e9alable** : chaque ligne `op_*` passe par la compl\u00e9tion du triplet `total = net + tax` avant agr\u00e9gation.',
   '',
   '**Sources automatiques** :',
-  '- **L5** `op_turnovers.net` (compl\u00e9t\u00e9 ; filtre `date` du mois)',
+  '- **L5** `Σ op_turnovers.net` + `Σ op_exemptions.amount` (= CA + L15)',
   '- **L10** `op_exportations.net` (compl\u00e9t\u00e9)',
   '- **L15** `op_exemptions.amount`',
   '- **L20** `op_suspensions.net` (compl\u00e9t\u00e9)',

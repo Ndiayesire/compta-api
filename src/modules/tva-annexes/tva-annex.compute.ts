@@ -8,7 +8,7 @@ export type TvaAnnexRates = {
 };
 
 export type TvaAnnexInputs = {
-  /** L5 — Σ op_turnover_net (après complétion) */
+  /** L5 — Σ op_turnover_net + Σ op_exemption_amount (= CA + L15) */
   l5: number;
   /** L10 — Σ op_exportation_net */
   l10: number;
@@ -104,10 +104,11 @@ export function computeTvaAnnex(
   const lines: Record<string, TvaAnnexLine> = {
     L5: {
       code: 'L5',
-      label: 'Montant des opérations',
+      label: 'Montant total des opérations',
       type: 'input',
       amount: l5,
-      source: 'op_turnovers.net (complété)',
+      formula: 'Σ CA HT + Σ exonérations',
+      source: 'op_turnovers.net + op_exemptions.amount',
     },
     L10: {
       code: 'L10',

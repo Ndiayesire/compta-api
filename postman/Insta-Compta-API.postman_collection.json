@@ -1676,7 +1676,7 @@
     },
     {
       "name": "TVA annexes",
-      "description": "Calcul d’annexe fiscale TVA mensuelle (L5–L115) à partir des opérations `op_*` du client.\n\n**Préalable** : complétion du triplet `total = net + tax` avant agrégation.\n**Bases** : L5/L10/L20/L80 = `net` ; L60 = L50 + L55.\n\n**GET /tva-annexes/compute** — query : `clientId`, `month`, `year` ; optionnel : `reducedBase` (L40), `previousCredit` (L100), `checksDdi` (L75), `selfSupplies` (L30), `reducedRate`.",
+      "description": "Calcul d’annexe fiscale TVA mensuelle (L5–L115) à partir des opérations `op_*` du client.\n\n**Préalable** : complétion du triplet `total = net + tax` avant agrégation.\n**Bases** : L5 = Σ CA HT + Σ exo ; L10/L20/L80 = `net` ; L60 = L50 + L55.\n\n**GET /tva-annexes/compute** — query : `clientId`, `month`, `year` ; optionnel : `reducedBase` (L40), `previousCredit` (L100), `checksDdi` (L75), `selfSupplies` (L30), `reducedRate`.",
       "item": [
         {
           "name": "Compute TVA annex (month)",
