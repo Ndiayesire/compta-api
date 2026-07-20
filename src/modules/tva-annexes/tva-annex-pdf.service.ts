@@ -1,5 +1,9 @@
-import PDFDocument from 'pdfkit';
+import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import type { TvaAnnexResult } from './tva-annex.compute';
+
+// ─── Types ──────────────────────────────────────────────────────────────────
 
 export type TvaAnnexPdfMeta = {
   ninea: string;
@@ -9,193 +13,225 @@ export type TvaAnnexPdfMeta = {
   year: number;
 };
 
+// ─── Constants ───────────────────────────────────────────────────────────────
+
 const MONTHS_FR = [
-  'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
-  'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre',
+  'Janvier', 'Fevrier', 'Mars', 'Avril', 'Mai', 'Juin',
+  'Juillet', 'Aout', 'Septembre', 'Octobre', 'Novembre', 'Decembre',
 ];
 
+const PAGE_H = 842;
+
+/** Convert viewport-top y (pdfjs) to pdf-lib bottom-origin y (baseline). */
+const pdfY = (yTop: number) => PAGE_H - yTop;
+
+/**
+ * Amount column: values are right-aligned up to this x.
+ * Based on extracted layout: right margin ~15pt, page width 595pt.
+ */
+const AMT_RIGHT = 578;
+
+/** Mapping: line key → yTop (from page top, as extracted by pdfjs). */
+const ROW_Y: Record<string, number> = {
+  L5:   376,
+  L10:  387,
+  L15:  397,
+  L20:  407,
+  L25:  418,
+  L30:  428,
+  L35:  439,
+  L40:  449,
+  L45:  459,
+  L50:  470,
+  L55:  480,
+  L60:  490,
+  L65:  501,
+  L70:  511,
+  L75:  521,
+  L76:  532,
+  L80:  542,
+  L85:  553,
+  L90:  563,
+  L91:  573,
+  L92:  584,
+  L93:  594,
+  L95:  604,
+  L100: 615,
+  L105: 625,
+  L110: 636,
+  L115: 646,
+  L120: 656,
+};
+
+/**
+ * Header fields to overwrite.
+ * clearBox: white rectangle drawn first (x, yTop, w, h in viewport coords).
+ * textX/textYTop: baseline where the new value is drawn.
+ */
+type HeaderField = {
+  key: string;
+  clearBox: { x: number; yTop: number; w: number; h: number };
+  textX: number;
+  textYTop: number;
+};
+
+const HEADER_FIELDS: HeaderField[] = [
+  {
+    key: 'period',
+    clearBox: { x: 430, yTop: 168, w: 150, h: 10 },
+    textX: 436, textYTop: 174,
+  },
+  {
+    key: 'ninea',
+    clearBox: { x: 140, yTop: 180, w: 130, h: 10 },
+    textX: 149, textYTop: 186,
+  },
+  {
+    key: 'name',
+    clearBox: { x: 410, yTop: 180, w: 175, h: 10 },
+    textX: 416, textYTop: 186,
+  },
+  {
+    key: 'centreFiscal',
+    clearBox: { x: 140, yTop: 204, w: 130, h: 10 },
+    textX: 149, textYTop: 210,
+  },
+  {
+    key: 'dateDebut',
+    clearBox: { x: 140, yTop: 227, w: 130, h: 10 },
+    textX: 149, textYTop: 233,
+  },
+  {
+    key: 'dateFin',
+    clearBox: { x: 410, yTop: 227, w: 130, h: 10 },
+    textX: 416, textYTop: 233,
+  },
+  {
+    key: 'dateLimiteDep',
+    clearBox: { x: 140, yTop: 239, w: 130, h: 10 },
+    textX: 149, textYTop: 245,
+  },
+  {
+    key: 'dateLimitePay',
+    clearBox: { x: 410, yTop: 239, w: 130, h: 10 },
+    textX: 416, textYTop: 245,
+  },
+];
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
 function fmt(amount: number): string {
-  return new Intl.NumberFormat('fr-FR').format(amount);
+  // Replace narrow no-break space (U+202F) used by fr-FR locale with regular space
+  // because WinAnsi (standard PDF fonts) cannot encode U+202F.
+  return new Intl.NumberFormat('fr-FR').format(amount).replace(/\u202f/g, '\u0020');
 }
 
-function zeroDash(amount: number): string {
-  return amount === 0 ? '—' : fmt(amount);
-}
-
-/** Retourne les jours du mois (1-indexed) */
 function daysInMonth(month: number, year: number): number {
   return new Date(year, month, 0).getDate();
 }
 
-const ROWS: Array<{
-  label: string;
-  tag?: string;
-  line: number;
-  key: string;
-  bold?: boolean;
-}> = [
-  { label: 'Montant des opérations', line: 5, key: 'L5' },
-  { label: "Affaires \u00e0 l'exportation", tag: 'EXPORTATIONS', line: 10, key: 'L10' },
-  { label: "Affaires r\u00e9alis\u00e9es \u00e0 l'int\u00e9rieur non tax\u00e9es", tag: 'EXONERATIONS', line: 15, key: 'L15' },
-  { label: 'Affaires réalisées en suspension de la TVA', tag: 'SUSPENSIONS', line: 20, key: 'L20' },
-  { label: 'Total affaires non soumises à la TVA (L10+L15+L20)', line: 25, key: 'L25', bold: true },
-  { label: 'Pr\u00e9l\u00e8vements et livraisons ou prestations \u00e0 soi-m\u00eame', line: 30, key: 'L30' },
-  { label: 'Montant Total Taxable (L5-L25)', line: 35, key: 'L35', bold: true },
-  { label: 'Montant taxable — Taux réduit', line: 40, key: 'L40' },
-  { label: 'Montant taxable — Taux Normal (L35-L40)', line: 45, key: 'L45' },
-  { label: 'Montant de la TVA — Taux Réduit (L40×10%)', line: 50, key: 'L50' },
-  { label: 'Montant de la TVA — Taux Normal (L45×18%)', line: 55, key: 'L55' },
-  { label: 'Montant de la TVA Brute (L50+L55)', line: 60, key: 'L60', bold: true },
-  { label: 'Affaires soumises au précompte', line: 65, key: 'L65' },
-  { label: 'Précompte de TVA', tag: 'TVA PRECOMPTEE', line: 70, key: 'L70' },
-  { label: 'Imputation de chèques DDI', line: 75, key: 'L75' },
-  { label: 'Total des avances (L70+L75)', line: 76, key: 'L76', bold: true },
-  { label: 'Montant des importations du mois', line: 80, key: 'L80' },
-  { label: 'TVA acquittée sur les importations du mois', tag: 'IMPORTATIONS', line: 85, key: 'L85' },
-  { label: 'TVA acquittée sur les achats intérieurs du mois', tag: 'ACHATS LOCAUX', line: 90, key: 'L90' },
-  { label: 'Déductions sur achats (L85+L90)', line: 91, key: 'L91', bold: true },
-  { label: 'Total déductions pour le mois (L76+L91)', line: 92, key: 'L92', bold: true },
-  { label: 'Solde total exigible pour la période', line: 93, key: 'L93' },
-  { label: 'Montant des remboursements demandés et accordés', line: 95, key: 'L95' },
-  { label: 'Crédit de TVA du mois précédent', line: 100, key: 'L100' },
-  { label: 'Montant total déductible pour le mois (L70+L75+L85+L90+L100)', line: 105, key: 'L105', bold: true },
-  { label: 'Solde Total Exigible (L60-L105 si positif)', line: 110, key: 'L110', bold: true },
-  { label: 'Crédit de TVA à reporter (L105-L60 si positif)', line: 115, key: 'L115', bold: true },
-  { label: 'Montant des remboursements demandés et en instruction', line: 120, key: 'L120' },
-];
+function nextMonth(month: number, year: number): { m: string; y: number } {
+  const d = new Date(year, month, 1); // month is 1-indexed, so this gives next month
+  return { m: MONTHS_FR[d.getMonth()], y: d.getFullYear() };
+}
 
-export function buildTvaAnnexPdf(
+// ─── Main export ─────────────────────────────────────────────────────────────
+
+export async function buildTvaAnnexPdf(
   meta: TvaAnnexPdfMeta,
   annex: TvaAnnexResult,
 ): Promise<Buffer> {
-  return new Promise((resolve, reject) => {
-    const doc = new PDFDocument({ size: 'A4', margin: 36, info: { Title: 'Déclaration TVA' } });
-    const chunks: Buffer[] = [];
+  // Load the template
+  const templatePath = join(__dirname, '..', '..', 'assets', 'pdf', 'declaration-tva-template.pdf');
+  const templateBytes = readFileSync(templatePath);
+  const pdfDoc = await PDFDocument.load(templateBytes);
 
-    doc.on('data', (c: Buffer) => chunks.push(c));
-    doc.on('end', () => resolve(Buffer.concat(chunks)));
-    doc.on('error', reject);
+  const page = pdfDoc.getPages()[0];
+  const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
-    const W = doc.page.width - 72;
-    const MONTH_FR = MONTHS_FR[meta.month - 1];
-    const lastDay = daysInMonth(meta.month, meta.year);
-    const monthPad = String(meta.month).padStart(2, '0');
-    const periodLabel = `${MONTH_FR.toUpperCase()} ${meta.year}`;
-    const lines = annex.lines;
+  const FONT_SIZE = 8;
+  const FONT_SIZE_HDR = 7.5;
 
-    /* ── En-tête ── */
-    doc.fontSize(9).font('Helvetica');
+  // ── Compute header string values ──────────────────────────────────────────
 
-    doc.text('REPUBLIQUE DU SENEGAL', { align: 'center' });
-    doc.text('Un Peuple - Un But - Une Foi', { align: 'center' });
-    doc.text('DGID - Ministère des Finances et du Budget', { align: 'center' });
-    doc.moveDown(0.4);
+  const monthName = MONTHS_FR[meta.month - 1];
+  const lastDay   = daysInMonth(meta.month, meta.year);
+  const next      = nextMonth(meta.month, meta.year);
 
-    doc.font('Helvetica-Bold').fontSize(13)
-      .text('TAXE SUR LA VALEUR AJOUTÉE', { align: 'center' });
-    doc.font('Helvetica').fontSize(9);
-    doc.moveDown(0.5);
+  const headerValues: Record<string, string> = {
+    period:       `${monthName.toUpperCase()} ${meta.year}`,
+    ninea:        meta.ninea,
+    name:         meta.companyName,
+    centreFiscal: meta.centreFiscal,
+    dateDebut:    `01 ${monthName} ${meta.year}`,
+    dateFin:      `${lastDay} ${monthName} ${meta.year}`,
+    dateLimiteDep: `15 ${next.m} ${next.y}`,
+    dateLimitePay: `15 ${next.m} ${next.y}`,
+  };
 
-    /* ── Bloc renseignements ── */
-    const boxTop = doc.y;
-    doc.rect(36, boxTop, W, 100).stroke();
+  // ── Overwrite header fields ───────────────────────────────────────────────
 
-    const col1 = 36, col2 = 260, col3 = 450;
-    const rowH = 16;
-    let ry = boxTop + 6;
+  for (const field of HEADER_FIELDS) {
+    const value = headerValues[field.key] ?? '';
 
-    function infoRow(
-      leftLabel: string, leftVal: string,
-      rightLabel?: string, rightVal?: string,
-    ) {
-      doc.font('Helvetica-Bold').text(leftLabel, col1 + 4, ry, { width: 120 });
-      doc.font('Helvetica').text(leftVal, col2, ry, { width: 180 });
-      if (rightLabel) {
-        doc.font('Helvetica-Bold').text(rightLabel, col3, ry, { width: 80 });
-        doc.font('Helvetica').text(rightVal ?? '', col3 + 85, ry, { width: 100 });
-      }
-      ry += rowH;
-    }
-
-    infoRow("P\u00c9RIODE D'IMPOSITION", periodLabel);
-    infoRow('NINEA', meta.ninea, 'NOM DU CONTRIBUABLE', meta.companyName);
-    infoRow('CENTRE FISCAL', meta.centreFiscal);
-    infoRow('DÉBUT DE LA PÉRIODE', `01 ${MONTH_FR} ${meta.year}`, 'FIN DE LA PÉRIODE', `${lastDay} ${MONTH_FR} ${meta.year}`);
-    infoRow(
-      'DATE LIMITE DE DÉPÔT',
-      `15 ${MONTHS_FR[meta.month % 12]} ${meta.month === 12 ? meta.year + 1 : meta.year}`,
-      'DATE LIMITE DE PAIEMENT',
-      `15 ${MONTHS_FR[meta.month % 12]} ${meta.month === 12 ? meta.year + 1 : meta.year}`,
-    );
-
-    doc.y = boxTop + 104;
-    doc.moveDown(0.4);
-
-    /* ── Tableau lignes ── */
-    const COL_LABEL = 36;
-    const COL_TAG   = 290;
-    const COL_LINE  = 390;
-    const COL_AMT   = 430;
-    const ROW_H     = 17;
-    const AMT_W     = 120;
-
-    // En-tête tableau
-    doc.font('Helvetica-Bold').fontSize(8);
-    const tableTop = doc.y;
-    doc.rect(36, tableTop, W, ROW_H).fillAndStroke('#dce6f1', '#aaa');
-    doc.fillColor('black')
-      .text('Annexe fiscale', COL_LABEL + 2, tableTop + 4, { width: 250 })
-      .text('Ligne', COL_LINE, tableTop + 4, { width: 35, align: 'center' })
-      .text('Montant', COL_AMT, tableTop + 4, { width: AMT_W, align: 'right' });
-
-    let curY = tableTop + ROW_H;
-
-    ROWS.forEach((row, i) => {
-      const isShaded = i % 2 === 1;
-      const bg = isShaded ? '#f5f8fc' : 'white';
-      doc.rect(36, curY, W, ROW_H).fillAndStroke(bg, '#ccc');
-
-      const amount = (lines as Record<string, { amount: number }>)[row.key]?.amount ?? 0;
-      const amtStr = zeroDash(amount);
-
-      doc.fillColor('black');
-
-      if (row.bold) {
-        doc.font('Helvetica-Bold').fontSize(7.5);
-      } else {
-        doc.font('Helvetica').fontSize(7.5);
-      }
-
-      doc.text(row.label, COL_LABEL + 2, curY + 4, { width: 250, lineBreak: false });
-      if (row.tag) {
-        doc.font('Helvetica-Oblique').fontSize(6.5)
-          .text(row.tag, COL_TAG, curY + 5, { width: 90, lineBreak: false });
-      }
-
-      doc.font('Helvetica').fontSize(7.5)
-        .text(String(row.line), COL_LINE, curY + 4, { width: 35, align: 'center', lineBreak: false });
-
-      if (row.bold) {
-        doc.font('Helvetica-Bold');
-      }
-      doc.text(amtStr, COL_AMT, curY + 4, { width: AMT_W, align: 'right', lineBreak: false });
-
-      curY += ROW_H;
+    // 1. Draw white rectangle to cover existing text
+    const { x: bx, yTop: by, w: bw, h: bh } = field.clearBox;
+    page.drawRectangle({
+      x:      bx,
+      y:      pdfY(by + bh), // bottom-left corner in pdf coords
+      width:  bw,
+      height: bh,
+      color:  rgb(1, 1, 1),
     });
 
-    // Trait bas
-    doc.rect(36, curY, W, 1).fill('#aaa');
-    curY += 6;
+    // 2. Draw new value
+    page.drawText(value, {
+      x:    field.textX,
+      y:    pdfY(field.textYTop),
+      font,
+      size: FONT_SIZE_HDR,
+      color: rgb(0, 0, 0),
+    });
+  }
 
-    /* ── Pied de page ── */
-    doc.font('Helvetica').fontSize(7).fillColor('#555')
-      .text(
-        `NINEA ${meta.ninea}  —  Période ${monthPad}/${meta.year}  —  Généré par Insta Compta`,
-        36,
-        doc.page.height - 36,
-        { width: W, align: 'center' },
-      );
+  // ── Write amounts in the Montant column ──────────────────────────────────
 
-    doc.end();
-  });
+  const lines = annex.lines;
+
+  for (const [key, yTop] of Object.entries(ROW_Y)) {
+    const line = (lines as Record<string, { amount: number; type: string }>)[key];
+    if (!line) continue;
+
+    const amountStr = fmt(line.amount);
+    const isBalance = line.type === 'balance';
+    const usedFont  = isBalance ? fontBold : font;
+    const textWidth = usedFont.widthOfTextAtSize(amountStr, FONT_SIZE);
+    const textX     = AMT_RIGHT - textWidth;
+
+    page.drawText(amountStr, {
+      x:    textX,
+      y:    pdfY(yTop),
+      font: usedFont,
+      size: FONT_SIZE,
+      color: rgb(0, 0, 0),
+    });
+  }
+
+  // ── Footer: date & NINEA ─────────────────────────────────────────────────
+
+  // Cover existing footer
+  page.drawRectangle({ x: 14, y: pdfY(835), width: 567, height: 11, color: rgb(1, 1, 1) });
+
+  const now     = new Date();
+  const nowStr  = now.toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
+  const footerL = `Imprime le ${nowStr}`;
+  const footerR = `NINEA ${meta.ninea}`;
+  const footerRW = font.widthOfTextAtSize(footerR, 7);
+
+  page.drawText(footerL, { x: 14, y: pdfY(832), font, size: 7, color: rgb(0.4, 0.4, 0.4) });
+  page.drawText(footerR, { x: 581 - footerRW, y: pdfY(832), font, size: 7, color: rgb(0.4, 0.4, 0.4) });
+
+  const pdfBytes = await pdfDoc.save();
+  return Buffer.from(pdfBytes);
 }
