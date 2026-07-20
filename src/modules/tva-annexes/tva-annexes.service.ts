@@ -110,6 +110,7 @@ export class TvaAnnexesService {
       client: {
         id: client.id,
         name: client.name,
+        ninea: client.ninea,
         useTva: client.useTva,
         countryId: client.countryId,
         countryTva: normalRate,

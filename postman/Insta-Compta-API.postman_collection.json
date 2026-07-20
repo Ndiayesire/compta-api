@@ -1701,6 +1701,30 @@
             },
             "description": "Agrège CA, exports, exonérations, suspensions, retenues, importations et achats locaux pour le mois, puis calcule L25…L115. Réponse : `payable` (L110), `creditCarryForward` (L115), `lines`."
           }
+        },
+        {
+          "name": "Compute TVA annex — PDF (DGID)",
+          "id": "t0000001-0000-4000-8000-000000000002",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tva-annexes/compute/pdf?clientId={{clientId}}&month=1&year=2025&reducedBase=0&previousCredit=0",
+              "host": ["{{baseUrl}}"],
+              "path": ["tva-annexes", "compute", "pdf"],
+              "query": [
+                { "key": "clientId", "value": "{{clientId}}" },
+                { "key": "month", "value": "1" },
+                { "key": "year", "value": "2025" },
+                { "key": "reducedBase", "value": "0", "description": "L40 — part taux réduit" },
+                { "key": "previousCredit", "value": "0", "description": "L100 — crédit N-1" },
+                { "key": "checksDdi", "value": "0", "disabled": true },
+                { "key": "selfSupplies", "value": "0", "disabled": true },
+                { "key": "reducedRate", "value": "10", "disabled": true }
+              ]
+            },
+            "description": "Même calcul que /compute (JSON) mais retourne un **PDF** téléchargeable au format déclaration DGID Sénégal (L5–L120). Content-Type: application/pdf — Content-Disposition: attachment."
+          }
         }
       ]
     },
