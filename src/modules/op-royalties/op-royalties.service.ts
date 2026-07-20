@@ -99,7 +99,10 @@ export class OpRoyaltiesService {
     });
   }
 
-  /** Import redevances depuis le modèle Excel (1ʳᵉ feuille). */
+  /** Import redevances depuis le modèle Excel (1ʳᵉ feuille).
+   *  Upsert par (tierId, code) : le numéro de facture identifie une redevance par tiers.
+   *  Met à jour date, month, year, base, rate, amount si la ligne existe déjà, crée sinon.
+   */
   async importFromExcelBuffer(buffer: Buffer, companyId: string, clientId: string) {
     await this.assertClientInCompany(clientId, companyId);
     const parsed = await parseOpRoyaltyImportWorkbook(this.prisma, clientId, buffer);
@@ -120,16 +123,18 @@ export class OpRoyaltiesService {
       try {
         const existing = await this.prisma.opRoyalty.findFirst({
           where: {
-            tierId: item.dto.tierId,
-            code: item.dto.code,
-            date: new Date(item.dto.date),
+            tierId:    item.dto.tierId,
+            code:      item.dto.code,
             deletedAt: null,
           },
         });
         if (existing) {
           const data = await this.update(existing.id, {
-            base: item.dto.base,
-            rate: item.dto.rate,
+            date:   item.dto.date,
+            month:  item.dto.month,
+            year:   item.dto.year,
+            base:   item.dto.base,
+            rate:   item.dto.rate,
             amount: item.dto.amount,
           });
           updated.push(data);

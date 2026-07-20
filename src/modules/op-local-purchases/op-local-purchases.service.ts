@@ -134,8 +134,8 @@ export class OpLocalPurchasesService {
   }
 
   /** Import achats locaux depuis le modèle Excel (1ʳᵉ feuille).
-   *  Upsert par (tierId, month, year, net, tax, taxDeduction, deductionTypeId, propertyNatureTypeId).
-   *  Met à jour total + prorata si la ligne existe déjà, crée sinon.
+   *  Upsert par (tierId, month, year, deductionTypeId, propertyNatureTypeId).
+   *  Met à jour net, tax, taxDeduction, total, prorata si la ligne existe déjà, crée sinon.
    */
   async importFromExcelBuffer(buffer: Buffer, companyId: string, clientId: string) {
     await this.assertClientBelongsToCompany(clientId, companyId);
@@ -161,13 +161,10 @@ export class OpLocalPurchasesService {
       try {
         const existing = await this.prisma.opLocalPurchase.findFirst({
           where: {
-            tierId:              item.dto.tierId,
-            month:               item.dto.month,
-            year:                item.dto.year,
-            net:                 new Prisma.Decimal(String(item.dto.net)),
-            tax:                 new Prisma.Decimal(String(item.dto.tax)),
-            taxDeduction:        new Prisma.Decimal(String(item.dto.taxDeduction)),
-            deductionTypeId:     item.dto.deductionTypeId,
+            tierId:               item.dto.tierId,
+            month:                item.dto.month,
+            year:                 item.dto.year,
+            deductionTypeId:      item.dto.deductionTypeId,
             propertyNatureTypeId: item.dto.propertyNatureTypeId,
             deletedAt: null,
           },
@@ -175,8 +172,11 @@ export class OpLocalPurchasesService {
 
         if (existing) {
           const data = await this.update(existing.id, {
-            total:   item.dto.total,
-            prorata: item.dto.prorata,
+            net:          item.dto.net,
+            tax:          item.dto.tax,
+            taxDeduction: item.dto.taxDeduction,
+            total:        item.dto.total,
+            prorata:      item.dto.prorata,
           });
           updated.push(data);
         } else {

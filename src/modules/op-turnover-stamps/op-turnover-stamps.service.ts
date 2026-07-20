@@ -177,15 +177,17 @@ export class OpTurnoverStampsService {
       }
       try {
         const opTurnoverId = item.opTurnoverId ?? undefined;
+        // Upsert par opTurnoverId seul (un stamp par turnover) — la date peut varier entre imports.
         const existing = opTurnoverId
           ? await this.prisma.opTurnoverStamp.findFirst({
-              where: { opTurnoverId, date: new Date(item.date), deletedAt: null },
+              where: { opTurnoverId, deletedAt: null },
             })
           : null;
         if (existing) {
           const data = await this.update(
             existing.id,
             {
+              date: item.date,
               net: item.net,
               tax: item.tax,
               total: item.total,
