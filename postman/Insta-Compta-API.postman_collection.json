@@ -1703,11 +1703,22 @@
           }
         },
         {
-          "name": "Compute TVA annex — PDF (DGID)",
+          "name": "Compute TVA annex — PDF fill (DGID)",
           "id": "t0000001-0000-4000-8000-000000000002",
           "request": {
-            "method": "GET",
+            "method": "POST",
             "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "",
+                  "description": "Template PDF DGID vierge (declaration TVA.pdf)"
+                }
+              ]
+            },
             "url": {
               "raw": "{{baseUrl}}/tva-annexes/compute/pdf?clientId={{clientId}}&month=1&year=2025&reducedBase=0&previousCredit=0",
               "host": ["{{baseUrl}}"],
@@ -1723,7 +1734,7 @@
                 { "key": "reducedRate", "value": "10", "disabled": true }
               ]
             },
-            "description": "Même calcul que /compute (JSON) mais retourne un **PDF** téléchargeable au format déclaration DGID Sénégal (L5–L120). Content-Type: application/pdf — Content-Disposition: attachment."
+            "description": "Envoyer le template PDF DGID vierge (multipart `file`). Seule la colonne Montant (L5-L120) est renseignée — le haut du document (NINEA, contribuable, période) est laissé intact. Retourne le PDF rempli en téléchargement."
           }
         }
       ]

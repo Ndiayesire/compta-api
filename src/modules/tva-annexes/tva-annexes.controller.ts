@@ -1,12 +1,33 @@
-import { BadRequestException, Controller, Get, Header, HttpStatus, Query, Res, UsePipes, ValidationPipe } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  BadRequestException,
+  Controller,
+  Get,
+  HttpStatus,
+  Post,
+  Query,
+  Res,
+  UploadedFile,
+  UseInterceptors,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import type { Response } from 'express';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import type { AuthUser } from '../../common/types/auth-user.type';
 import { API_ENVELOPE_SCHEMA } from '../../common/swagger/api-envelope.schema';
 import { ComputeTvaAnnexQueryDto } from './dto/compute-tva-annex.dto';
 import { TvaAnnexesService } from './tva-annexes.service';
-import { buildTvaAnnexPdf } from './tva-annex-pdf.service';
+import { fillTvaAnnexPdf } from './tva-annex-pdf.service';
 
 const SHARED_QUERIES = [
   { name: 'clientId',       required: true,  schema: { type: 'string',  format: 'uuid' } },
@@ -20,26 +41,26 @@ const SHARED_QUERIES = [
 ] as const;
 
 const DESC_COMMON = [
-  'Agrège les opérations fiscales du **client** pour `month` / `year`, puis applique les formules L5–L115.',
+  'Agr\u00e8ge les op\u00e9rations fiscales du **client** pour `month` / `year`, puis applique les formules L5\u2013L115.',
   '',
-  '**Préalable** : chaque ligne `op_*` passe par la complétion du triplet `total = net + tax` avant agrégation.',
+  '**Pr\u00e9alable** : chaque ligne `op_*` passe par la compl\u00e9tion du triplet `total = net + tax` avant agr\u00e9gation.',
   '',
   '**Sources automatiques** :',
-  '- **L5** `op_turnovers.net` (complété ; filtre `date` du mois)',
-  '- **L10** `op_exportations.net` (complété)',
+  '- **L5** `op_turnovers.net` (compl\u00e9t\u00e9 ; filtre `date` du mois)',
+  '- **L10** `op_exportations.net` (compl\u00e9t\u00e9)',
   '- **L15** `op_exemptions.amount`',
-  '- **L20** `op_suspensions.net` (complété)',
-  '- **L50 / L55 / L60** `L40×10%`, `L45×taux_pays%`, `L50+L55`',
-  '- **L70** `op_retains.amount` (ou `base×rate/100`)',
-  '- **L80** `op_importations.net` (complété)',
+  '- **L20** `op_suspensions.net` (compl\u00e9t\u00e9)',
+  '- **L50 / L55 / L60** `L40\u00d710%`, `L45\u00d7taux_pays%`, `L50+L55`',
+  '- **L70** `op_retains.amount` (ou `base\u00d7rate/100`)',
+  '- **L80** `op_importations.net` (compl\u00e9t\u00e9)',
   '- **L85** `op_importations.taxDeduction` sinon `tax`',
   '- **L90** `op_local_purchases.taxDeduction` sinon `tax`',
   '',
   '**Overrides query** : `reducedBase` (L40), `previousCredit` (L100), `checksDdi` (L75), `selfSupplies` (L30), `reducedRate`.',
   '',
-  '**Taux normal** : `client.country.tva` (ex. 18). Taux réduit défaut **10 %**.',
+  '**Taux normal** : `client.country.tva` (ex. 18). Taux r\u00e9duit d\u00e9faut **10 %**.',
   '',
-  '**Soldes** : `payable` = L110 ; `creditCarryForward` = L115 (à reporter en L100 du mois suivant).',
+  '**Soldes** : `payable` = L110 ; `creditCarryForward` = L115 (\u00e0 reporter en L100 du mois suivant).',
 ].join('\n');
 
 @ApiTags('tva-annexes')
@@ -47,6 +68,8 @@ const DESC_COMMON = [
 @Controller('tva-annexes')
 export class TvaAnnexesController {
   constructor(private readonly tvaAnnexesService: TvaAnnexesService) {}
+
+  // ── GET /tva-annexes/compute — JSON ────────────────────────────────────────
 
   @Get('compute')
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
@@ -61,49 +84,65 @@ export class TvaAnnexesController {
     const data = await this.tvaAnnexesService.compute(companyId, query);
     return {
       success: true,
-      message: `Annexe TVA ${String(query.month).padStart(2, '0')}/${query.year} calc\u00e9e`,
+      message: `Annexe TVA ${String(query.month).padStart(2, '0')}/${query.year} calcul\u00e9e`,
       data,
     };
   }
 
-  @Get('compute/pdf')
-  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
-  @Header('Content-Type', 'application/pdf')
+  // ── POST /tva-annexes/compute/pdf — PDF fill ───────────────────────────────
+
+  @Post('compute/pdf')
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
   @ApiOperation({
-    summary: 'G\u00e9n\u00e9rer la d\u00e9claration TVA au format PDF (DGID)',
-    description: DESC_COMMON + '\n\nRetourne un **PDF** au format de la d\u00e9claration DGID S\u00e9n\u00e9gal (L5\u2013L120).',
+    summary: 'Remplir le template PDF DGID avec les montants calcul\u00e9s',
+    description: [
+      DESC_COMMON,
+      '',
+      'Envoyer le template PDF DGID vierge en tant que **fichier multipart** (`file`).',
+      'Seule la **colonne Montant** (L5\u2013L120) est renseign\u00e9e \u2014 le haut du document (NINEA, contribuable, p\u00e9riode\u2026) est laiss\u00e9 intact.',
+      'Retourne le PDF rempli en t\u00e9l\u00e9chargement (`Content-Disposition: attachment`).',
+    ].join('\n'),
   })
   @ApiQuery(SHARED_QUERIES[0]) @ApiQuery(SHARED_QUERIES[1]) @ApiQuery(SHARED_QUERIES[2])
   @ApiQuery(SHARED_QUERIES[3]) @ApiQuery(SHARED_QUERIES[4]) @ApiQuery(SHARED_QUERIES[5])
   @ApiQuery(SHARED_QUERIES[6]) @ApiQuery(SHARED_QUERIES[7])
-  @ApiResponse({ status: HttpStatus.OK, description: 'Fichier PDF de la d\u00e9claration TVA', content: { 'application/pdf': {} } })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['file'],
+      properties: {
+        file: { type: 'string', format: 'binary', description: 'Template PDF DGID vierge' },
+      },
+    },
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'PDF DGID rempli avec les montants calcul\u00e9s',
+    content: { 'application/pdf': {} },
+  })
   async computePdf(
     @Query() query: ComputeTvaAnnexQueryDto,
     @CurrentUser() user: AuthUser,
+    @UploadedFile() file: Express.Multer.File,
     @Res() res: Response,
   ) {
+    if (!file) throw new BadRequestException('Un fichier PDF est requis (champ "file")');
+
     const companyId = user.companyId;
     if (!companyId) throw new BadRequestException('User must belong to a company');
 
     const data = await this.tvaAnnexesService.compute(companyId, query);
 
-    const pdf = await buildTvaAnnexPdf(
-      {
-        ninea:        data.client.ninea ?? '',
-        companyName:  data.client.name,
-        centreFiscal: '',
-        month: query.month,
-        year:  query.year,
-      },
-      {
-        rates:              data.rates,
-        lines:              data.lines,
-        payable:            data.payable,
-        creditCarryForward: data.creditCarryForward,
-      },
-    );
+    const pdf = await fillTvaAnnexPdf(file.buffer, {
+      rates:              data.rates,
+      lines:              data.lines,
+      payable:            data.payable,
+      creditCarryForward: data.creditCarryForward,
+    });
 
     const filename = `declaration-tva-${String(query.month).padStart(2, '0')}-${query.year}.pdf`;
+    res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
     res.setHeader('Content-Length', pdf.length);
     res.end(pdf);

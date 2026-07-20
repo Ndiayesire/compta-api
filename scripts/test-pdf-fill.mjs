@@ -131,15 +131,7 @@ async function main() {
     page.drawText(amountStr, { x: textX, y: pdfY(yTop), font: usedFont, size: FONT_SIZE, color: rgb(0, 0, 0) });
   }
 
-  // Footer
-  page.drawRectangle({ x: 14, y: pdfY(835), width: 567, height: 11, color: rgb(1, 1, 1) });
-  const now = new Date();
-  const nowStr = now.toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
-  const footerL = `Imprime le ${nowStr}`;
-  const footerR = `NINEA ${meta.ninea}`;
-  const footerRW = font.widthOfTextAtSize(footerR, 7);
-  page.drawText(footerL, { x: 14, y: pdfY(832), font, size: 7, color: rgb(0.4, 0.4, 0.4) });
-  page.drawText(footerR, { x: 581 - footerRW, y: pdfY(832), font, size: 7, color: rgb(0.4, 0.4, 0.4) });
+  // Pas de modification du footer — laissé intact
 
   const pdfBytes = await pdfDoc.save();
   const outPath = join('C:/Users/lenovo/Desktop', 'declaration-tva-test.pdf');
