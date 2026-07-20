@@ -93,6 +93,7 @@ export class TvaAnnexesController {
 
   @Post('compute/pdf')
   @UseInterceptors(FileInterceptor('file'))
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   @ApiConsumes('multipart/form-data')
   @ApiOperation({
     summary: 'Remplir le template PDF DGID avec les montants calcul\u00e9s',
