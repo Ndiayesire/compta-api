@@ -255,7 +255,7 @@ export async function parseOpExemptionImportWorkbook(
       const desc = cellText(sheet, r, colMap.get('motif'));
 
       if (!code) throw new Error('N° facture manquant');
-      if (amount === undefined || amount < 0) throw new Error('Montant HT invalide');
+      if (amount === undefined) throw new Error('Montant HT invalide');
       if (!desc) throw new Error('Motif manquant');
 
       const { tierId, created } = await findOrCreateTierIdByClientName(

@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsDateString, IsInt, IsNumber, IsString, IsUUID, MaxLength, Min } from 'class-validator';
+import { IsDateString, IsInt, IsNumber, IsString, IsUUID, MaxLength } from 'class-validator';
 
 export class CreateOpRetainDto {
   @ApiProperty()
@@ -26,21 +26,18 @@ export class CreateOpRetainDto {
   @IsInt()
   year: number;
 
-  @ApiProperty({ example: 1000000 })
+  @ApiProperty({ example: 1000000, description: 'Base (peut être négative)' })
   @Type(() => Number)
   @IsNumber({ maxDecimalPlaces: 2 })
-  @Min(0)
   base: number;
 
-  @ApiProperty({ example: 5 })
+  @ApiProperty({ example: 5, description: 'Taux (peut être négatif)' })
   @Type(() => Number)
   @IsNumber({ maxDecimalPlaces: 2 })
-  @Min(0)
   rate: number;
 
-  @ApiProperty({ example: 50000 })
+  @ApiProperty({ example: 50000, description: 'Montant (peut être négatif)' })
   @Type(() => Number)
   @IsNumber({ maxDecimalPlaces: 2 })
-  @Min(0)
   amount: number;
 }

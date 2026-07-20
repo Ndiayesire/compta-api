@@ -489,7 +489,7 @@ export async function parseOpExportationImportWorkbook(
       const montant = cellNumber(sheet, r, colMap.get('montant'));
 
       if (!code) throw new Error('N° facture manquant');
-      if (montant === undefined || montant < 0) throw new Error('Montant invalide');
+      if (montant === undefined) throw new Error('Montant invalide');
 
       const paysKey = normalizeLabelForMatch(paysLabel);
       let countryId = countryCache.get(paysKey);

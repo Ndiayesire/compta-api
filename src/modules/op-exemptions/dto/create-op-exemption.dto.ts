@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsInt, IsNumber, IsString, IsUUID, MaxLength, Min } from 'class-validator';
+import { IsInt, IsNumber, IsString, IsUUID, MaxLength } from 'class-validator';
 
 export class CreateOpExemptionDto {
   @ApiProperty()
@@ -22,10 +22,9 @@ export class CreateOpExemptionDto {
   @IsInt()
   year: number;
 
-  @ApiProperty({ example: 250000 })
+  @ApiProperty({ example: 250000, description: 'Montant (peut être négatif)' })
   @Type(() => Number)
   @IsNumber({ maxDecimalPlaces: 2 })
-  @Min(0)
   amount: number;
 
   @ApiProperty({ example: 'Exonération partielle sur opérations export' })

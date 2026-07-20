@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsDateString, IsInt, IsNumber, IsOptional, IsString, IsUUID, MaxLength, Min } from 'class-validator';
+import { IsDateString, IsInt, IsNumber, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
 
 export class CreateOpExportationDto {
   @ApiProperty()
@@ -30,38 +30,33 @@ export class CreateOpExportationDto {
   @IsDateString()
   date: string;
 
-  @ApiPropertyOptional({ example: 500000 })
+  @ApiPropertyOptional({ example: 500000, description: 'Montant HT (peut être négatif)' })
   @IsOptional()
   @Type(() => Number)
   @IsNumber({ maxDecimalPlaces: 2 })
-  @Min(0)
   net?: number;
 
-  @ApiPropertyOptional({ example: 90000 })
+  @ApiPropertyOptional({ example: 90000, description: 'TVA (peut être négative)' })
   @IsOptional()
   @Type(() => Number)
   @IsNumber({ maxDecimalPlaces: 2 })
-  @Min(0)
   tax?: number;
 
-  @ApiPropertyOptional({ example: 50000 })
+  @ApiPropertyOptional({ example: 50000, description: 'TVA déductible (peut être négative)' })
   @IsOptional()
   @Type(() => Number)
   @IsNumber({ maxDecimalPlaces: 2 })
-  @Min(0)
   taxDeduction?: number;
 
-  @ApiPropertyOptional({ example: 590000 })
+  @ApiPropertyOptional({ example: 590000, description: 'TTC (peut être négatif)' })
   @IsOptional()
   @Type(() => Number)
   @IsNumber({ maxDecimalPlaces: 2 })
-  @Min(0)
   total?: number;
 
-  @ApiPropertyOptional({ example: 0.75 })
+  @ApiPropertyOptional({ example: 0.75, description: 'Prorata (peut être négatif)' })
   @IsOptional()
   @Type(() => Number)
   @IsNumber({ maxDecimalPlaces: 2 })
-  @Min(0)
   prorata?: number;
 }

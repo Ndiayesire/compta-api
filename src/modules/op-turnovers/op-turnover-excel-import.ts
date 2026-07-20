@@ -147,7 +147,7 @@ function parseRequiredAmount(
   label: string,
 ): number {
   const n = cellNumber(sheet, row, col);
-  if (n === undefined || n < 0) {
+  if (n === undefined) {
     throw new Error(`${label} invalide ou manquant`);
   }
   return n;
@@ -202,7 +202,7 @@ export async function parseOpTurnoverImportWorkbook(
       const totalFromCol  = cellNumber(sheet, r, colMap.get('ttc'));
       // Utiliser la colonne TTC si cohérente avec net+tax (tolérance ±1). Sinon recalculer.
       const total =
-        totalFromCol !== undefined && totalFromCol >= 0 && Math.abs(totalFromCol - computedTotal) <= 1
+        totalFromCol !== undefined && Math.abs(totalFromCol - computedTotal) <= 1
           ? totalFromCol
           : computedTotal;
 

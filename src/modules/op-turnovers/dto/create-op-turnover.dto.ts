@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsDateString, IsNumber, IsString, IsUUID, MaxLength, Min } from 'class-validator';
+import { IsDateString, IsNumber, IsString, IsUUID, MaxLength } from 'class-validator';
 
 export class CreateOpTurnoverDto {
   @ApiProperty()
@@ -16,21 +16,18 @@ export class CreateOpTurnoverDto {
   @IsDateString()
   date: string;
 
-  @ApiProperty({ example: 1000000 })
+  @ApiProperty({ example: 1000000, description: 'Montant HT (peut être négatif)' })
   @Type(() => Number)
   @IsNumber({ maxDecimalPlaces: 2 })
-  @Min(0)
   net: number;
 
-  @ApiProperty({ example: 180000 })
+  @ApiProperty({ example: 180000, description: 'TVA (peut être négative)' })
   @Type(() => Number)
   @IsNumber({ maxDecimalPlaces: 2 })
-  @Min(0)
   tax: number;
 
-  @ApiProperty({ example: 1180000 })
+  @ApiProperty({ example: 1180000, description: 'TTC (peut être négatif)' })
   @Type(() => Number)
   @IsNumber({ maxDecimalPlaces: 2 })
-  @Min(0)
   total: number;
 }

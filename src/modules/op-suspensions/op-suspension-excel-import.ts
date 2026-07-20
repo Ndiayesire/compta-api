@@ -192,7 +192,7 @@ function parseRequiredAmount(
   label: string,
 ): number {
   const n = cellNumber(sheet, row, col);
-  if (n === undefined || n < 0) {
+  if (n === undefined) {
     throw new Error(`${label} invalide ou manquant`);
   }
   return n;

@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsDateString, IsInt, IsNumber, IsString, IsUUID, MaxLength, Min } from 'class-validator';
+import { IsDateString, IsInt, IsNumber, IsString, IsUUID, MaxLength } from 'class-validator';
 
 export class CreateOpRoyaltyDto {
   @ApiProperty()
@@ -26,21 +26,18 @@ export class CreateOpRoyaltyDto {
   @IsInt()
   year: number;
 
-  @ApiProperty({ example: 1000000 })
+  @ApiProperty({ example: 1000000, description: 'Base (peut être négative)' })
   @Type(() => Number)
   @IsNumber({ maxDecimalPlaces: 2 })
-  @Min(0)
   base: number;
 
-  @ApiProperty({ example: 10 })
+  @ApiProperty({ example: 10, description: 'Taux (peut être négatif)' })
   @Type(() => Number)
   @IsNumber({ maxDecimalPlaces: 2 })
-  @Min(0)
   rate: number;
 
-  @ApiProperty({ example: 100000 })
+  @ApiProperty({ example: 100000, description: 'Montant (peut être négatif)' })
   @Type(() => Number)
   @IsNumber({ maxDecimalPlaces: 2 })
-  @Min(0)
   amount: number;
 }

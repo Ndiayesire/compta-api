@@ -176,7 +176,7 @@ function parseRequiredAmount(
   label: string,
 ): number {
   const n = cellNumber(sheet, row, col);
-  if (n === undefined || n < 0) {
+  if (n === undefined) {
     throw new Error(`${label} invalide ou manquant`);
   }
   return n;
@@ -410,14 +410,14 @@ export async function parseOpLocalPurchaseImportWorkbook(
       const net          = parseRequiredAmount(sheet, r, colMap.get('montantHt'), 'MONTANT HT');
       const tax          = parseRequiredAmount(sheet, r, colMap.get('tva'), 'TVA');
       const taxDeduction = parseRequiredAmount(sheet, r, colMap.get('tvaDeductible'), 'TVA DEDUITE');
-      if (taxDeduction > tax + 0.01) {
-        throw new Error(`TVA déductible (${taxDeduction}) supérieure à la TVA (${tax})`);
+      if (Math.abs(taxDeduction) > Math.abs(tax) + 0.01) {
+        throw new Error(`TVA déductible (${taxDeduction}) supérieure en valeur absolue à la TVA (${tax})`);
       }
       const computedTotal = Math.round((net + tax) * 100) / 100;
       const totalFromCol  = cellNumber(sheet, r, colMap.get('ttc'));
       // Utiliser TTC si cohérent avec net+tax (tolérance ±1 FCFA). Sinon recalculer.
       const total =
-        totalFromCol !== undefined && totalFromCol >= 0 && Math.abs(totalFromCol - computedTotal) <= 1
+        totalFromCol !== undefined && Math.abs(totalFromCol - computedTotal) <= 1
           ? totalFromCol
           : computedTotal;
       const prorata = parseProrata(sheet, r, colMap.get('txProrata'));

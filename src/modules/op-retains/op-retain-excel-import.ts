@@ -155,7 +155,7 @@ function parseRequiredAmount(
   label: string,
 ): number {
   const n = cellNumber(sheet, row, col);
-  if (n === undefined || n < 0) {
+  if (n === undefined) {
     throw new Error(`${label} invalide ou manquant`);
   }
   return n;
@@ -167,12 +167,12 @@ function parseRate(sheet: ExcelJS.Worksheet, row: number, col: number | undefine
   const pct = raw.replace(/\s/g, '').replace(',', '.');
   if (pct.endsWith('%')) {
     const n = Number(pct.slice(0, -1));
-    if (!Number.isFinite(n) || n < 0) throw new Error(`TAUX invalide : « ${raw} »`);
+    if (!Number.isFinite(n)) throw new Error(`TAUX invalide : « ${raw} »`);
     return n;
   }
   const n = Number(pct);
-  if (!Number.isFinite(n) || n < 0) throw new Error(`TAUX invalide : « ${raw} »`);
-  return n > 0 && n <= 1 ? n * 100 : n;
+  if (!Number.isFinite(n)) throw new Error(`TAUX invalide : « ${raw} »`);
+  return n !== 0 && Math.abs(n) <= 1 ? n * 100 : n;
 }
 
 function isRowEmpty(

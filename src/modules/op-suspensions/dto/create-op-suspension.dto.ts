@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsDateString, IsInt, IsNumber, IsString, IsUUID, MaxLength, Min } from 'class-validator';
+import { IsDateString, IsInt, IsNumber, IsString, IsUUID, MaxLength } from 'class-validator';
 
 export class CreateOpSuspensionDto {
   @ApiProperty()
@@ -26,22 +26,19 @@ export class CreateOpSuspensionDto {
   @IsInt()
   year: number;
 
-  @ApiProperty({ example: 500000 })
+  @ApiProperty({ example: 500000, description: 'Montant HT (peut être négatif)' })
   @Type(() => Number)
   @IsNumber({ maxDecimalPlaces: 2 })
-  @Min(0)
   net: number;
 
-  @ApiProperty({ example: 90000 })
+  @ApiProperty({ example: 90000, description: 'TVA (peut être négative)' })
   @Type(() => Number)
   @IsNumber({ maxDecimalPlaces: 2 })
-  @Min(0)
   tax: number;
 
-  @ApiProperty({ example: 590000 })
+  @ApiProperty({ example: 590000, description: 'TTC (peut être négatif)' })
   @Type(() => Number)
   @IsNumber({ maxDecimalPlaces: 2 })
-  @Min(0)
   total: number;
 
   @ApiProperty({ example: '2025-04-01T00:00:00.000Z' })
