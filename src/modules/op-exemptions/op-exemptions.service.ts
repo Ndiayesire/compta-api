@@ -108,6 +108,7 @@ export class OpExemptionsService {
 
     const errors: { row: number; message: string }[] = [];
     const created: Awaited<ReturnType<OpExemptionsService['create']>>[] = [];
+    const updated: Awaited<ReturnType<OpExemptionsService['update']>>[] = [];
     let tiersCreatedCount = 0;
 
     for (const item of parsed) {
@@ -119,8 +120,25 @@ export class OpExemptionsService {
         tiersCreatedCount += 1;
       }
       try {
-        const data = await this.create(item.dto);
-        created.push(data);
+        const existing = await this.prisma.opExemption.findFirst({
+          where: {
+            tierId: item.dto.tierId,
+            code: item.dto.code,
+            month: item.dto.month,
+            year: item.dto.year,
+            deletedAt: null,
+          },
+        });
+        if (existing) {
+          const data = await this.update(existing.id, {
+            amount: item.dto.amount,
+            desc: item.dto.desc,
+          });
+          updated.push(data);
+        } else {
+          const data = await this.create(item.dto);
+          created.push(data);
+        }
       } catch (e) {
         const message = e instanceof Error ? e.message : String(e);
         errors.push({ row: item.rowNumber, message });
@@ -129,9 +147,11 @@ export class OpExemptionsService {
 
     return {
       createdCount: created.length,
+      updatedCount: updated.length,
       failedCount: errors.length,
       tiersCreatedCount,
       created,
+      updated,
       errors,
     };
   }

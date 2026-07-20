@@ -166,6 +166,7 @@ export class OpTurnoverStampsService {
 
     const errors: { row: number; message: string }[] = [];
     const created: Awaited<ReturnType<OpTurnoverStampsService['create']>>[] = [];
+    const updated: Awaited<ReturnType<OpTurnoverStampsService['update']>>[] = [];
     let linkedCount = 0;
     let unlinkedCount = 0;
 
@@ -175,19 +176,40 @@ export class OpTurnoverStampsService {
         continue;
       }
       try {
-        const data = await this.create(
-          {
-            opTurnoverId: item.opTurnoverId ?? undefined,
-            date: item.date,
-            net: item.net,
-            tax: item.tax,
-            total: item.total,
-            amount: item.amount,
-            amountDeduction: item.amountDeduction,
-          },
-          companyId,
-        );
-        created.push(data);
+        const opTurnoverId = item.opTurnoverId ?? undefined;
+        const existing = opTurnoverId
+          ? await this.prisma.opTurnoverStamp.findFirst({
+              where: { opTurnoverId, date: new Date(item.date), deletedAt: null },
+            })
+          : null;
+        if (existing) {
+          const data = await this.update(
+            existing.id,
+            {
+              net: item.net,
+              tax: item.tax,
+              total: item.total,
+              amount: item.amount,
+              amountDeduction: item.amountDeduction,
+            },
+            companyId,
+          );
+          updated.push(data);
+        } else {
+          const data = await this.create(
+            {
+              opTurnoverId,
+              date: item.date,
+              net: item.net,
+              tax: item.tax,
+              total: item.total,
+              amount: item.amount,
+              amountDeduction: item.amountDeduction,
+            },
+            companyId,
+          );
+          created.push(data);
+        }
         if (item.opTurnoverId) {
           linkedCount += 1;
         } else {
@@ -201,10 +223,12 @@ export class OpTurnoverStampsService {
 
     return {
       createdCount: created.length,
+      updatedCount: updated.length,
       failedCount: errors.length,
       linkedCount,
       unlinkedCount,
       created,
+      updated,
       errors,
     };
   }

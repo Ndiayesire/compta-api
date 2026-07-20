@@ -106,6 +106,7 @@ export class OpRoyaltiesService {
 
     const errors: { row: number; message: string }[] = [];
     const created: Awaited<ReturnType<OpRoyaltiesService['create']>>[] = [];
+    const updated: Awaited<ReturnType<OpRoyaltiesService['update']>>[] = [];
     let tiersCreatedCount = 0;
 
     for (const item of parsed) {
@@ -117,8 +118,25 @@ export class OpRoyaltiesService {
         tiersCreatedCount += 1;
       }
       try {
-        const data = await this.create(item.dto);
-        created.push(data);
+        const existing = await this.prisma.opRoyalty.findFirst({
+          where: {
+            tierId: item.dto.tierId,
+            code: item.dto.code,
+            date: new Date(item.dto.date),
+            deletedAt: null,
+          },
+        });
+        if (existing) {
+          const data = await this.update(existing.id, {
+            base: item.dto.base,
+            rate: item.dto.rate,
+            amount: item.dto.amount,
+          });
+          updated.push(data);
+        } else {
+          const data = await this.create(item.dto);
+          created.push(data);
+        }
       } catch (e) {
         const message = e instanceof Error ? e.message : String(e);
         errors.push({ row: item.rowNumber, message });
@@ -127,9 +145,11 @@ export class OpRoyaltiesService {
 
     return {
       createdCount: created.length,
+      updatedCount: updated.length,
       failedCount: errors.length,
       tiersCreatedCount,
       created,
+      updated,
       errors,
     };
   }

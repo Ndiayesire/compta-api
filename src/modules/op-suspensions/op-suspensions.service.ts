@@ -110,6 +110,7 @@ export class OpSuspensionsService {
 
     const errors: { row: number; message: string }[] = [];
     const created: Awaited<ReturnType<OpSuspensionsService['create']>>[] = [];
+    const updated: Awaited<ReturnType<OpSuspensionsService['update']>>[] = [];
     let tiersCreatedCount = 0;
     let tiersUpdatedCount = 0;
 
@@ -121,8 +122,29 @@ export class OpSuspensionsService {
       if (item.tierCreated) tiersCreatedCount += 1;
       if (item.tierUpdated) tiersUpdatedCount += 1;
       try {
-        const data = await this.create(item.dto);
-        created.push(data);
+        const existing = await this.prisma.opSuspension.findFirst({
+          where: {
+            tierId: item.dto.tierId,
+            code: item.dto.code,
+            month: item.dto.month,
+            year: item.dto.year,
+            deletedAt: null,
+          },
+        });
+        if (existing) {
+          const data = await this.update(existing.id, {
+            net: item.dto.net,
+            tax: item.dto.tax,
+            total: item.dto.total,
+            visaDate: item.dto.visaDate,
+            visaNumber: item.dto.visaNumber,
+            date: item.dto.date,
+          });
+          updated.push(data);
+        } else {
+          const data = await this.create(item.dto);
+          created.push(data);
+        }
       } catch (e) {
         const message = e instanceof Error ? e.message : String(e);
         errors.push({ row: item.rowNumber, message });
@@ -131,10 +153,12 @@ export class OpSuspensionsService {
 
     return {
       createdCount: created.length,
+      updatedCount: updated.length,
       failedCount: errors.length,
       tiersCreatedCount,
       tiersUpdatedCount,
       created,
+      updated,
       errors,
     };
   }

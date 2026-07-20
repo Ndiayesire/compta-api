@@ -161,6 +161,7 @@ export class OpImportationsService {
 
     const errors: { row: number; message: string }[] = [];
     const created: Awaited<ReturnType<OpImportationsService['create']>>[] = [];
+    const updated: Awaited<ReturnType<OpImportationsService['update']>>[] = [];
     let tiersCreatedCount = 0;
     let countriesCreatedCount = 0;
     let deductionTypesCreatedCount = 0;
@@ -176,8 +177,30 @@ export class OpImportationsService {
       if (item.deductionTypeCreated) deductionTypesCreatedCount += 1;
       if (item.propertyNatureTypeCreated) propertyNatureTypesCreatedCount += 1;
       try {
-        const data = await this.create(item.dto);
-        created.push(data);
+        const existing = await this.prisma.opImportation.findFirst({
+          where: {
+            tierId: item.dto.tierId,
+            code: item.dto.code,
+            month: item.dto.month,
+            year: item.dto.year,
+            deletedAt: null,
+          },
+        });
+        if (existing) {
+          const data = await this.update(existing.id, {
+            net: item.dto.net,
+            tax: item.dto.tax,
+            taxDeduction: item.dto.taxDeduction,
+            total: item.dto.total,
+            prorata: item.dto.prorata,
+            date: item.dto.date,
+            countryId: item.dto.countryId,
+          });
+          updated.push(data);
+        } else {
+          const data = await this.create(item.dto);
+          created.push(data);
+        }
       } catch (e) {
         const message = e instanceof Error ? e.message : String(e);
         errors.push({ row: item.rowNumber, message });
@@ -186,12 +209,14 @@ export class OpImportationsService {
 
     return {
       createdCount: created.length,
+      updatedCount: updated.length,
       failedCount: errors.length,
       tiersCreatedCount,
       countriesCreatedCount,
       deductionTypesCreatedCount,
       propertyNatureTypesCreatedCount,
       created,
+      updated,
       errors,
     };
   }
