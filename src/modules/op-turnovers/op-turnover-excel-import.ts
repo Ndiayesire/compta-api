@@ -198,8 +198,13 @@ export async function parseOpTurnoverImportWorkbook(
 
       const net = parseRequiredAmount(sheet, r, colMap.get('montantHt'), 'MONTANT HT');
       const tax = parseRequiredAmount(sheet, r, colMap.get('tva'), 'TVA');
-      const totalFromCol = cellNumber(sheet, r, colMap.get('ttc'));
-      const total = totalFromCol !== undefined && totalFromCol >= 0 ? totalFromCol : net + tax;
+      const computedTotal = Math.round((net + tax) * 100) / 100;
+      const totalFromCol  = cellNumber(sheet, r, colMap.get('ttc'));
+      // Utiliser la colonne TTC si cohérente avec net+tax (tolérance ±1). Sinon recalculer.
+      const total =
+        totalFromCol !== undefined && totalFromCol >= 0 && Math.abs(totalFromCol - computedTotal) <= 1
+          ? totalFromCol
+          : computedTotal;
 
       const dto: CreateOpTurnoverDto = {
         clientId,

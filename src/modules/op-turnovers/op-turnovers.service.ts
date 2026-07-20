@@ -92,13 +92,16 @@ export class OpTurnoversService {
     });
   }
 
-  /** Import chiffres d'affaires depuis le modèle Excel (1ʳᵉ feuille). */
+  /** Import chiffres d'affaires depuis le modèle Excel (1ʳᵉ feuille).
+   *  Upsert par (clientId, date, number) : met à jour si la facture existe déjà, crée sinon.
+   */
   async importFromExcelBuffer(buffer: Buffer, companyId: string, clientId: string) {
     await this.assertClientInCompany(clientId, companyId);
     const parsed = await parseOpTurnoverImportWorkbook(this.prisma, clientId, buffer);
 
-    const errors: { row: number; message: string }[] = [];
-    const created: Awaited<ReturnType<OpTurnoversService['create']>>[] = [];
+    const errors:   { row: number; message: string }[] = [];
+    const created:  Awaited<ReturnType<OpTurnoversService['create']>>[] = [];
+    const updated:  Awaited<ReturnType<OpTurnoversService['update']>>[] = [];
 
     for (const item of parsed) {
       if ('error' in item) {
@@ -106,8 +109,26 @@ export class OpTurnoversService {
         continue;
       }
       try {
-        const data = await this.create(item.dto, companyId);
-        created.push(data);
+        const existing = await this.prisma.opTurnover.findFirst({
+          where: {
+            clientId: item.dto.clientId,
+            number:   item.dto.number,
+            date:     new Date(item.dto.date),
+            deletedAt: null,
+          },
+        });
+
+        if (existing) {
+          const data = await this.update(
+            existing.id,
+            { net: item.dto.net, tax: item.dto.tax, total: item.dto.total },
+            companyId,
+          );
+          updated.push(data);
+        } else {
+          const data = await this.create(item.dto, companyId);
+          created.push(data);
+        }
       } catch (e) {
         const message = e instanceof Error ? e.message : String(e);
         errors.push({ row: item.rowNumber, message });
@@ -116,8 +137,10 @@ export class OpTurnoversService {
 
     return {
       createdCount: created.length,
-      failedCount: errors.length,
+      updatedCount: updated.length,
+      failedCount:  errors.length,
       created,
+      updated,
       errors,
     };
   }

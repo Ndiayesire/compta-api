@@ -407,11 +407,19 @@ export async function parseOpLocalPurchaseImportWorkbook(
       const adresse = cellText(sheet, r, colMap.get('adresse'));
       const typeDeduction = cellText(sheet, r, colMap.get('typeDeduction'));
       const natureBien = cellText(sheet, r, colMap.get('natureBienService'));
-      const net = parseRequiredAmount(sheet, r, colMap.get('montantHt'), 'MONTANT HT');
-      const tax = parseRequiredAmount(sheet, r, colMap.get('tva'), 'TVA');
+      const net          = parseRequiredAmount(sheet, r, colMap.get('montantHt'), 'MONTANT HT');
+      const tax          = parseRequiredAmount(sheet, r, colMap.get('tva'), 'TVA');
       const taxDeduction = parseRequiredAmount(sheet, r, colMap.get('tvaDeductible'), 'TVA DEDUITE');
-      const totalFromCol = cellNumber(sheet, r, colMap.get('ttc'));
-      const total = totalFromCol !== undefined && totalFromCol >= 0 ? totalFromCol : net + tax - taxDeduction;
+      if (taxDeduction > tax + 0.01) {
+        throw new Error(`TVA déductible (${taxDeduction}) supérieure à la TVA (${tax})`);
+      }
+      const computedTotal = Math.round((net + tax) * 100) / 100;
+      const totalFromCol  = cellNumber(sheet, r, colMap.get('ttc'));
+      // Utiliser TTC si cohérent avec net+tax (tolérance ±1 FCFA). Sinon recalculer.
+      const total =
+        totalFromCol !== undefined && totalFromCol >= 0 && Math.abs(totalFromCol - computedTotal) <= 1
+          ? totalFromCol
+          : computedTotal;
       const prorata = parseProrata(sheet, r, colMap.get('txProrata'));
 
       const tierResolved = await resolveSupplierTierForPurchaseImport(

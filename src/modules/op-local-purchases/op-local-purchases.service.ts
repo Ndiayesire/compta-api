@@ -133,13 +133,17 @@ export class OpLocalPurchasesService {
     });
   }
 
-  /** Import achats locaux depuis le modèle Excel (1ʳᵉ feuille). */
+  /** Import achats locaux depuis le modèle Excel (1ʳᵉ feuille).
+   *  Upsert par (tierId, month, year, net, tax, taxDeduction, deductionTypeId, propertyNatureTypeId).
+   *  Met à jour total + prorata si la ligne existe déjà, crée sinon.
+   */
   async importFromExcelBuffer(buffer: Buffer, companyId: string, clientId: string) {
     await this.assertClientBelongsToCompany(clientId, companyId);
     const parsed = await parseOpLocalPurchaseImportWorkbook(this.prisma, clientId, buffer);
 
-    const errors: { row: number; message: string }[] = [];
+    const errors:  { row: number; message: string }[] = [];
     const created: Awaited<ReturnType<OpLocalPurchasesService['create']>>[] = [];
+    const updated: Awaited<ReturnType<OpLocalPurchasesService['update']>>[] = [];
     let tiersCreatedCount = 0;
     let tiersUpdatedCount = 0;
     let deductionTypesCreatedCount = 0;
@@ -155,8 +159,30 @@ export class OpLocalPurchasesService {
       if (item.deductionTypeCreated) deductionTypesCreatedCount += 1;
       if (item.propertyNatureTypeCreated) propertyNatureTypesCreatedCount += 1;
       try {
-        const data = await this.create(item.dto);
-        created.push(data);
+        const existing = await this.prisma.opLocalPurchase.findFirst({
+          where: {
+            tierId:              item.dto.tierId,
+            month:               item.dto.month,
+            year:                item.dto.year,
+            net:                 new Prisma.Decimal(String(item.dto.net)),
+            tax:                 new Prisma.Decimal(String(item.dto.tax)),
+            taxDeduction:        new Prisma.Decimal(String(item.dto.taxDeduction)),
+            deductionTypeId:     item.dto.deductionTypeId,
+            propertyNatureTypeId: item.dto.propertyNatureTypeId,
+            deletedAt: null,
+          },
+        });
+
+        if (existing) {
+          const data = await this.update(existing.id, {
+            total:   item.dto.total,
+            prorata: item.dto.prorata,
+          });
+          updated.push(data);
+        } else {
+          const data = await this.create(item.dto);
+          created.push(data);
+        }
       } catch (e) {
         const message = e instanceof Error ? e.message : String(e);
         errors.push({ row: item.rowNumber, message });
@@ -165,12 +191,14 @@ export class OpLocalPurchasesService {
 
     return {
       createdCount: created.length,
-      failedCount: errors.length,
+      updatedCount: updated.length,
+      failedCount:  errors.length,
       tiersCreatedCount,
       tiersUpdatedCount,
       deductionTypesCreatedCount,
       propertyNatureTypesCreatedCount,
       created,
+      updated,
       errors,
     };
   }
