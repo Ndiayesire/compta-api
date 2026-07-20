@@ -8,8 +8,8 @@ const PAGE_H = 842;
 /** Convert viewport-top y (pdfjs baseline coords) → pdf-lib bottom-origin y. */
 const pdfY = (yTop: number) => PAGE_H - yTop;
 
-/** Right edge of the "Montant" column (extracted from the DGID template). */
-const AMT_RIGHT = 578;
+/** Right edge of the "Montant" column (calibrated from the DGID template: header text x=467 w=44). */
+const AMT_RIGHT = 511;
 
 const FONT_SIZE = 8;
 

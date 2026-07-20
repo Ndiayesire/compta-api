@@ -165,7 +165,7 @@ async function main() {
   // 4. Remplir le PDF
   const PAGE_H   = 842;
   const pdfY     = yTop => PAGE_H - yTop;
-  const AMT_RIGHT = 578;
+  const AMT_RIGHT = 511;
   const FONT_SIZE = 8;
   const fmt = n => new Intl.NumberFormat('fr-FR').format(n).replace(/\u202f/g, ' ');
 
