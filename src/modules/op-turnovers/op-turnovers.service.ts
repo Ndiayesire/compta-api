@@ -93,7 +93,8 @@ export class OpTurnoversService {
   }
 
   /** Import chiffres d'affaires depuis le modèle Excel (1ʳᵉ feuille).
-   *  Upsert par (clientId, date, number) : met à jour si la facture existe déjà, crée sinon.
+   *  Upsert par (clientId, number) : le numéro de facture identifie de façon unique une ligne par client.
+   *  Met à jour date, net, tax, total si la facture existe déjà, crée sinon.
    */
   async importFromExcelBuffer(buffer: Buffer, companyId: string, clientId: string) {
     await this.assertClientInCompany(clientId, companyId);
@@ -111,9 +112,8 @@ export class OpTurnoversService {
       try {
         const existing = await this.prisma.opTurnover.findFirst({
           where: {
-            clientId: item.dto.clientId,
-            number:   item.dto.number,
-            date:     new Date(item.dto.date),
+            clientId:  item.dto.clientId,
+            number:    item.dto.number,
             deletedAt: null,
           },
         });
@@ -121,7 +121,7 @@ export class OpTurnoversService {
         if (existing) {
           const data = await this.update(
             existing.id,
-            { net: item.dto.net, tax: item.dto.tax, total: item.dto.total },
+            { date: item.dto.date, net: item.dto.net, tax: item.dto.tax, total: item.dto.total },
             companyId,
           );
           updated.push(data);
